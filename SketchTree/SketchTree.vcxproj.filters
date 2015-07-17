@@ -36,6 +36,9 @@
     <Filter Include="Source Files\codebase">
       <UniqueIdentifier>{8a9e1048-2df6-4cfb-8323-c7f9441c7722}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\shaders">
+      <UniqueIdentifier>{b3fd43cd-5c75-4423-82de-1027164bcf95}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -71,6 +74,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_GLWidget3D.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="ShadowMapping.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.h">
@@ -102,5 +108,16 @@
     <ClInclude Include="..\..\codebase\GLUtils.h">
       <Filter>Source Files\codebase</Filter>
     </ClInclude>
+    <ClInclude Include="ShadowMapping.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\shaders\fragment.glsl">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="..\shaders\vertex.glsl">
+      <Filter>Source Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
