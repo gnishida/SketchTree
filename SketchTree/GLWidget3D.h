@@ -2,45 +2,37 @@
 #define GLWIDGET_H
 
 #include <glew.h>
-#include <QBrush>
-#include <QImage>
+#include "Shader.h"
+#include "Vertex.h"
 #include <QPen>
 #include <QGLWidget>
 #include <QtGui>
-
-class QPaintEvent;
-class QWidget;
+#include "ShadowMapping.h"
+#include "Camera.h"
 
 class GLWidget3D : public QGLWidget {
 	Q_OBJECT
 
+private:
+	Camera camera;
+	GLuint vao;
+	GLuint program;
+	std::vector<Vertex> vertices;
+	glm::vec3 light_dir;
+	ShadowMapping shadow;
+
 public:
 	GLWidget3D(QWidget *parent = 0);
 
-     int xRotation() const { return xRot; }
-     int yRotation() const { return yRot; }
-     int zRotation() const { return zRot; }
+	void drawScene(int drawMode);
+	void createVAO();
 
- public slots:
-     void setXRotation(int angle);
-     void setYRotation(int angle);
-     void setZRotation(int angle);
+protected:
+	void resizeGL(int width, int height);
+	void mousePressEvent(QMouseEvent *event);
+	void mouseMoveEvent(QMouseEvent *event);
+	void initializeGL();
+	void paintEvent(QPaintEvent *event);
+};
 
- protected:
-     void initializeGL();
-     void paintEvent(QPaintEvent *event);
-     void resizeGL(int width, int height);
-     void mousePressEvent(QMouseEvent *event);
-     void mouseMoveEvent(QMouseEvent *event);
-
- private:
-     void setupViewport(int width, int height);
-
-     GLuint object;
-     int xRot;
-     int yRot;
-     int zRot;
-     QPoint lastPos;
- };
-
- #endif
+#endif
