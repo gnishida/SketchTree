@@ -474,13 +474,9 @@ void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices)
 			p = modelMat * p;
 			// 線を描画する
 			std::vector<Vertex> new_vertices;
-			//glutils::drawSphere(glm::vec3(0, 0, 0), radius1, glm::vec3(1, 1, 1), modelMat, vertices);
-			//glutils::drawCylinder(glm::vec3(0, 0, 0), length, radius1, glm::vec3(1, 1, 1), modelMat, vertices);
 			glutils::drawCone(glm::vec3(0, 0, 0), length, radius1, radius2, glm::vec3(1, 1, 1), modelMat, vertices);
 
 			modelMat = glm::translate(modelMat, glm::vec3(0, 0, length));
-		} else if (model[i].name == "X") {
-		} else {
 		}
 	}
 	this->axiom = axiom;
@@ -552,14 +548,10 @@ void ParametricLSystem::computeIndicator(const String& model, float scale, const
 			int u2 = p2.x + size * 0.5;
 			int v2 = p2.z;
 
-			//if (radius > 0.1f) {
-				int thickness = max(1.0, radius);
-				cv::line(indicator, cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), thickness);
-			//}
+			int thickness = max(1.0, radius);
+			cv::line(indicator, cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), thickness);
 
 			modelMat = glm::translate(modelMat, glm::vec3(0, 0, length));
-		} else if (model[i].name == "X") {
-		} else {
 		}
 	}
 }
