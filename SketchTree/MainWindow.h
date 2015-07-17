@@ -19,7 +19,7 @@ public:
 public slots:
 	void onSaveImage();
 	//void onGreedyInverse();
-
+	void onModeUpdate();
 };
 
 #endif // MAINWINDOW_H

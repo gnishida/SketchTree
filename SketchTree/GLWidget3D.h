@@ -13,7 +13,10 @@
 class GLWidget3D : public QGLWidget {
 	Q_OBJECT
 
-private:
+public:
+	static enum { MODE_SKETCH = 0, MODE_3DVIEW };
+
+public:
 	Camera camera;
 	GLuint vao;
 	GLuint program;
@@ -21,16 +24,25 @@ private:
 	glm::vec3 light_dir;
 	ShadowMapping shadow;
 
+	int mode;	// 0 -- sketch / 1 -- 3D view
+	bool dragging;
+	QPoint lastPoint;
+	QImage sketch;
+	QColor color;
+	int penWidth;
+
 public:
 	GLWidget3D(QWidget *parent = 0);
 
 	void drawScene(int drawMode);
 	void createVAO();
+	void GLWidget3D::drawLineTo(const QPoint &endPoint);
 
 protected:
 	void resizeGL(int width, int height);
 	void mousePressEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
+	void mouseReleaseEvent(QMouseEvent *e);
 	void initializeGL();
 	void paintEvent(QPaintEvent *event);
 };

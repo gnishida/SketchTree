@@ -7,9 +7,19 @@
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flags) {
 	ui.setupUi(this);
 
+	QActionGroup* group = new QActionGroup(this);
+	ui.actionModeSketch->setCheckable(true);
+	ui.actionMode3DView->setCheckable(true);
+	ui.actionModeSketch->setActionGroup(group);
+	ui.actionMode3DView->setActionGroup(group);
+
+
 	connect(ui.actionSaveImage, SIGNAL(triggered()), this, SLOT(onSaveImage()));
 	connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
 	//connect(ui.actionGreedyInverse, SIGNAL(triggered()), this, SLOT(onGreedyInverse()));
+
+	connect(ui.actionModeSketch, SIGNAL(triggered()), this, SLOT(onModeUpdate()));
+	connect(ui.actionMode3DView, SIGNAL(triggered()), this, SLOT(onModeUpdate()));
 
 	glWidget = new GLWidget3D(this);
 	setCentralWidget(glWidget);
@@ -53,3 +63,11 @@ void MainWindow::onSaveImage() {
 	glWidget->updateGL();
 }
 */
+
+void MainWindow::onModeUpdate() {
+	if (ui.actionModeSketch->isChecked()) {
+		glWidget->mode = GLWidget3D::MODE_SKETCH;
+	} else {
+		glWidget->mode = GLWidget3D::MODE_3DVIEW;
+	}
+}

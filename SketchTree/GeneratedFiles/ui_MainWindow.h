@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created: Fri Jul 17 13:47:56 2015
+** Created: Fri Jul 17 14:02:57 2015
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -31,10 +31,13 @@ public:
     QAction *actionRandomGeneration;
     QAction *actionGreedyInverse;
     QAction *actionSaveImage;
+    QAction *actionModeSketch;
+    QAction *actionMode3DView;
     QWidget *centralWidget;
     QMenuBar *menuBar;
     QMenu *menuFile;
     QMenu *menuL_System;
+    QMenu *menuMode;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
 
@@ -51,6 +54,13 @@ public:
         actionGreedyInverse->setObjectName(QString::fromUtf8("actionGreedyInverse"));
         actionSaveImage = new QAction(MainWindowClass);
         actionSaveImage->setObjectName(QString::fromUtf8("actionSaveImage"));
+        actionModeSketch = new QAction(MainWindowClass);
+        actionModeSketch->setObjectName(QString::fromUtf8("actionModeSketch"));
+        actionModeSketch->setCheckable(true);
+        actionModeSketch->setChecked(true);
+        actionMode3DView = new QAction(MainWindowClass);
+        actionMode3DView->setObjectName(QString::fromUtf8("actionMode3DView"));
+        actionMode3DView->setCheckable(true);
         centralWidget = new QWidget(MainWindowClass);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         MainWindowClass->setCentralWidget(centralWidget);
@@ -61,6 +71,8 @@ public:
         menuFile->setObjectName(QString::fromUtf8("menuFile"));
         menuL_System = new QMenu(menuBar);
         menuL_System->setObjectName(QString::fromUtf8("menuL_System"));
+        menuMode = new QMenu(menuBar);
+        menuMode->setObjectName(QString::fromUtf8("menuMode"));
         MainWindowClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindowClass);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -71,10 +83,13 @@ public:
 
         menuBar->addAction(menuFile->menuAction());
         menuBar->addAction(menuL_System->menuAction());
+        menuBar->addAction(menuMode->menuAction());
         menuFile->addAction(actionSaveImage);
         menuFile->addSeparator();
         menuFile->addAction(actionExit);
         menuL_System->addAction(actionGreedyInverse);
+        menuMode->addAction(actionModeSketch);
+        menuMode->addAction(actionMode3DView);
 
         retranslateUi(MainWindowClass);
 
@@ -88,8 +103,11 @@ public:
         actionRandomGeneration->setText(QApplication::translate("MainWindowClass", "Random Generation", 0, QApplication::UnicodeUTF8));
         actionGreedyInverse->setText(QApplication::translate("MainWindowClass", "Greedy Inverse", 0, QApplication::UnicodeUTF8));
         actionSaveImage->setText(QApplication::translate("MainWindowClass", "Save Image", 0, QApplication::UnicodeUTF8));
+        actionModeSketch->setText(QApplication::translate("MainWindowClass", "Sketch", 0, QApplication::UnicodeUTF8));
+        actionMode3DView->setText(QApplication::translate("MainWindowClass", "3D View", 0, QApplication::UnicodeUTF8));
         menuFile->setTitle(QApplication::translate("MainWindowClass", "File", 0, QApplication::UnicodeUTF8));
         menuL_System->setTitle(QApplication::translate("MainWindowClass", "L-System", 0, QApplication::UnicodeUTF8));
+        menuMode->setTitle(QApplication::translate("MainWindowClass", "Mode", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };

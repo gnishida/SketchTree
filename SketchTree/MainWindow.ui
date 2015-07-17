@@ -37,8 +37,16 @@
     </property>
     <addaction name="actionGreedyInverse"/>
    </widget>
+   <widget class="QMenu" name="menuMode">
+    <property name="title">
+     <string>Mode</string>
+    </property>
+    <addaction name="actionModeSketch"/>
+    <addaction name="actionMode3DView"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuL_System"/>
+   <addaction name="menuMode"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -67,6 +75,25 @@
   <action name="actionSaveImage">
    <property name="text">
     <string>Save Image</string>
+   </property>
+  </action>
+  <action name="actionModeSketch">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Sketch</string>
+   </property>
+  </action>
+  <action name="actionMode3DView">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>3D View</string>
    </property>
   </action>
  </widget>
