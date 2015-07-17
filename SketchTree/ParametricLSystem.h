@@ -158,6 +158,5 @@ private:
 };
 
 float deg2rad(float deg);
-vector<string> split(const string& str, char delim);
 
 }
