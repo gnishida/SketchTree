@@ -5,7 +5,7 @@
 GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent), lsystem(300, 1, parametriclsystem::Literal("X", 0, 36.0f, 9.0f)) {
 	mode = MODE_SKETCH;
 	dragging = false;
-	color = QColor(0, 0, 0, 255);
+	color = QColor(128, 0, 0, 255);
 	penWidth = 20;
 	
 	// これがないと、QPainterによって、OpenGLによる描画がクリアされてしまう
