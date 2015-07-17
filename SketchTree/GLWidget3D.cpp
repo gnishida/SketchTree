@@ -82,7 +82,9 @@ void GLWidget3D::resizeGL(int width, int height) {
 	QImage newImage(width, height, QImage::Format_ARGB32);
 	newImage.fill(qRgba(255, 255, 255, 0));
 	QPainter painter(&newImage);
-	painter.drawImage(QPoint(0, 0), sketch);
+	int offset_x = (width - sketch.size().width()) * 0.5;
+	int offset_y = (height - sketch.size().height()) * 0.5;
+	painter.drawImage(QPoint(offset_x, offset_y), sketch);
 	sketch = newImage;
 
 	// OpenGLの設定を更新
