@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\codebase\GLUtils.cpp" />
+    <ClCompile Include="..\..\codebase\MLUtils.cpp" />
     <ClCompile Include="..\..\codebase\Shader.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_GLWidget3D.cpp">
@@ -159,6 +160,7 @@
     <ClCompile Include="GLWidget3D.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="ParametricLSystem.cpp" />
     <ClCompile Include="ShadowMapping.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -204,10 +206,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\codebase\GLUtils.h" />
+    <ClInclude Include="..\..\codebase\MLUtils.h" />
     <ClInclude Include="..\..\codebase\Shader.h" />
     <ClInclude Include="..\..\codebase\Vertex.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="GeneratedFiles\ui_MainWindow.h" />
+    <ClInclude Include="ParametricLSystem.h" />
     <ClInclude Include="ShadowMapping.h" />
     <CustomBuild Include="GLWidget3D.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

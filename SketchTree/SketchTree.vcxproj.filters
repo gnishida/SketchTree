@@ -77,6 +77,12 @@
     <ClCompile Include="ShadowMapping.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ParametricLSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\codebase\MLUtils.cpp">
+      <Filter>Source Files\codebase</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.h">
@@ -108,8 +114,14 @@
     <ClInclude Include="..\..\codebase\GLUtils.h">
       <Filter>Source Files\codebase</Filter>
     </ClInclude>
+    <ClInclude Include="ParametricLSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="ShadowMapping.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\codebase\MLUtils.h">
+      <Filter>Source Files\codebase</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

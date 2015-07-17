@@ -35,6 +35,7 @@
     <property name="title">
      <string>L-System</string>
     </property>
+    <addaction name="actionRandomGeneration"/>
     <addaction name="actionGreedyInverse"/>
    </widget>
    <widget class="QMenu" name="menuMode">
@@ -60,11 +61,6 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
-   </property>
-  </action>
-  <action name="actionRandomGeneration">
-   <property name="text">
-    <string>Random Generation</string>
    </property>
   </action>
   <action name="actionGreedyInverse">
@@ -94,6 +90,16 @@
    </property>
    <property name="text">
     <string>3D View</string>
+   </property>
+  </action>
+  <action name="actionRandomGeneration_2">
+   <property name="text">
+    <string>Random Generation</string>
+   </property>
+  </action>
+  <action name="actionRandomGeneration">
+   <property name="text">
+    <string>Random Generation</string>
    </property>
   </action>
  </widget>

@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 
 	connect(ui.actionSaveImage, SIGNAL(triggered()), this, SLOT(onSaveImage()));
 	connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
+	connect(ui.actionRandomGeneration, SIGNAL(triggered()), this, SLOT(onRandomGeneration()));
 	//connect(ui.actionGreedyInverse, SIGNAL(triggered()), this, SLOT(onGreedyInverse()));
 
 	connect(ui.actionModeSketch, SIGNAL(triggered()), this, SLOT(onModeUpdate()));
@@ -30,6 +31,17 @@ void MainWindow::onSaveImage() {
 	QString fileName = "screenshots/" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("HHmmss") + ".png";
 	glWidget->grabFrameBuffer().save(fileName);
 	printf("Save %s\n",fileName.toAscii().constData());
+}
+
+void MainWindow::onRandomGeneration() {
+	//glWidget->model = glWidget->lsystem.derive(12345);
+	glWidget->model = glWidget->lsystem.derive(time(NULL));
+
+	cout << glWidget->model << endl;
+
+	glWidget->lsystem.draw(glWidget->model, glWidget->vertices);
+	glWidget->createVAO();
+	glWidget->update();
 }
 
 /*void MainWindow::onGreedyInverse() {
@@ -60,7 +72,7 @@ void MainWindow::onSaveImage() {
 
 	glWidget->lsystem.draw(glWidget->model, glWidget->vertices);
 	glWidget->createVAO();
-	glWidget->updateGL();
+	glWidget->update();
 }
 */
 

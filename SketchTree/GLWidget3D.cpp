@@ -2,7 +2,7 @@
 #include <iostream>
 #include "GLUtils.h"
 
-GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent) {
+GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent), lsystem(300, 1, parametriclsystem::Literal("X", 0, 36.0f, 9.0f)) {
 	mode = MODE_SKETCH;
 	dragging = false;
 	color = QColor(0, 0, 0);
@@ -143,7 +143,7 @@ void GLWidget3D::initializeGL() {
 	// set the clear color for the screen
 	qglClearColor(QColor(224, 224, 224));
 
-	glutils::drawSphere(glm::vec3(0, 0, 0), 1, glm::vec3(1, 1, 1), glm::mat4(), vertices);
+	glutils::drawSphere(glm::vec3(0, 0, 0), 10, glm::vec3(1, 1, 1), glm::mat4(), vertices);
 	createVAO();
 }
 

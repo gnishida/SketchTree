@@ -7,6 +7,7 @@
 #include <QPen>
 #include <QGLWidget>
 #include <QtGui>
+#include "ParametricLSystem.h"
 #include "ShadowMapping.h"
 #include "Camera.h"
 
@@ -23,6 +24,9 @@ public:
 	std::vector<Vertex> vertices;
 	glm::vec3 light_dir;
 	ShadowMapping shadow;
+
+	parametriclsystem::ParametricLSystem lsystem;
+	parametriclsystem::String model;
 
 	int mode;	// 0 -- sketch / 1 -- 3D view
 	bool dragging;
