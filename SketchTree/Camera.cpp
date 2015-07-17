@@ -92,7 +92,7 @@ void Camera::resetCamera() {
 	xrot = -90.0f;
 	yrot = 0.0;
 	zrot = 0.0f;
-	pos = glm::vec3(0, 0, 300);
+	pos = glm::vec3(0, 150, 350);
 	updateMVPMatrix();
 }
 

@@ -19,7 +19,7 @@ public:
 public slots:
 	void onSaveImage();
 	void onRandomGeneration();
-	//void onGreedyInverse();
+	void onGreedyInverse();
 	void onModeUpdate();
 };
 

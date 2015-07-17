@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	connect(ui.actionSaveImage, SIGNAL(triggered()), this, SLOT(onSaveImage()));
 	connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
 	connect(ui.actionRandomGeneration, SIGNAL(triggered()), this, SLOT(onRandomGeneration()));
-	//connect(ui.actionGreedyInverse, SIGNAL(triggered()), this, SLOT(onGreedyInverse()));
+	connect(ui.actionGreedyInverse, SIGNAL(triggered()), this, SLOT(onGreedyInverse()));
 
 	connect(ui.actionModeSketch, SIGNAL(triggered()), this, SLOT(onModeUpdate()));
 	connect(ui.actionMode3DView, SIGNAL(triggered()), this, SLOT(onModeUpdate()));
@@ -44,17 +44,38 @@ void MainWindow::onRandomGeneration() {
 	glWidget->update();
 }
 
-/*void MainWindow::onGreedyInverse() {
-	QString filename = QFileDialog::getOpenFileName(this, tr("Open target file..."), "", tr("Indicator Files (*.png)"));
-	if (filename.isEmpty()) return;
+void MainWindow::onGreedyInverse() {
+	// スケッチをRGBカラーに変換する
+	QImage tmp = glWidget->sketch.convertToFormat(QImage::Format_RGB888);
 
-	// ターゲットindicatorを読み込む
-	cv::Mat target = cv::imread(filename.toUtf8().data(), 0);
+	// スケッチを、cv::Matに変換する
+	cv::Mat target(tmp.height(), tmp.width(), CV_8UC3, const_cast<uchar*>(tmp.bits()), tmp.bytesPerLine());
+	//QImage img2 = glWidget->sketch.rgbSwapped();
+	//cv::Mat target(glWidget->sketch.height(), glWidget->sketch.width(), CV_8UC3, const_cast<uchar*>(glWidget->sketch.bits()), glWidget->sketch.bytesPerLine());
+	//cv::Mat target(img2.height(), img2.width(), CV_8UC4, const_cast<uchar*>(img2.bits()), img2.bytesPerLine());
+
+	//QImage img = glWidget->sketch.rgbSwapped();
+	//cv::Mat target(img.height(), img.width(), CV_8UC3, const_cast<uchar*>(img.bits()), img.bytesPerLine());
+	//cv::Mat target(glWidget->sketch.height(), glWidget->sketch.width(), CV_8UC1, const_cast<uchar*>(glWidget->sketch.bits()), glWidget->sketch.bytesPerLine());
+
+	// グレースケールに変換する
+	cv::cvtColor(target, target, CV_RGB2GRAY);
+
+	// 300x300に変換する
+	cv::resize(target, target, cv::Size(300, 300));
+
+	// float型 [0, 1]に変換する
 	target.convertTo(target, CV_32F, 1.0/255.0);
+
+	// 上下反転させる
 	cv::flip(target, target, 0);
 
 	// 白黒を反転させる
 	target = 1 - target;
+
+	ml::mat_save("target.png", target);
+
+	return;
 
 	// ターゲットに近いモデルを生成する
 	time_t start = clock();
@@ -74,7 +95,6 @@ void MainWindow::onRandomGeneration() {
 	glWidget->createVAO();
 	glWidget->update();
 }
-*/
 
 void MainWindow::onModeUpdate() {
 	if (ui.actionModeSketch->isChecked()) {

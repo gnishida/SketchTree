@@ -398,8 +398,8 @@ ParametricLSystem::ParametricLSystem(int grid_size, float scale, const String& a
 String ParametricLSystem::derive(int random_seed) {
 	std::vector<int> derivation_history;
 
-	ml::initRand(random_seed);
 	String result_model;
+	ml::initRand(random_seed);
 	while (true) {
 		result_model = derive(axiom, MAX_ITERATIONS, derivation_history);
 		if (result_model.length() > 0) break;

@@ -5,7 +5,7 @@
 GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent), lsystem(300, 1, parametriclsystem::Literal("X", 0, 36.0f, 9.0f)) {
 	mode = MODE_SKETCH;
 	dragging = false;
-	color = QColor(0, 0, 0);
+	color = QColor(0, 0, 0, 255);
 	penWidth = 20;
 	
 	// これがないと、QPainterによって、OpenGLによる描画がクリアされてしまう
@@ -143,6 +143,7 @@ void GLWidget3D::initializeGL() {
 	// set the clear color for the screen
 	qglClearColor(QColor(224, 224, 224));
 
+	//glutils::drawCylinder(glm::vec3(0, 0, 0), 300, 150, glm::vec3(1, 1, 1), glm::mat4(), vertices);
 	glutils::drawSphere(glm::vec3(0, 0, 0), 10, glm::vec3(1, 1, 1), glm::mat4(), vertices);
 	createVAO();
 }

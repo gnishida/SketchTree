@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>400</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,7 +25,7 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionSaveImage"/>
     <addaction name="separator"/>
@@ -33,14 +33,14 @@
    </widget>
    <widget class="QMenu" name="menuL_System">
     <property name="title">
-     <string>L-System</string>
+     <string>&amp;L-System</string>
     </property>
     <addaction name="actionRandomGeneration"/>
     <addaction name="actionGreedyInverse"/>
    </widget>
    <widget class="QMenu" name="menuMode">
     <property name="title">
-     <string>Mode</string>
+     <string>&amp;Mode</string>
     </property>
     <addaction name="actionModeSketch"/>
     <addaction name="actionMode3DView"/>
@@ -62,15 +62,24 @@
    <property name="text">
     <string>Exit</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
   </action>
   <action name="actionGreedyInverse">
    <property name="text">
     <string>Greedy Inverse</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
   </action>
   <action name="actionSaveImage">
    <property name="text">
     <string>Save Image</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionModeSketch">
@@ -100,6 +109,9 @@
   <action name="actionRandomGeneration">
    <property name="text">
     <string>Random Generation</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
  </widget>
