@@ -17,6 +17,9 @@ public:
 	MainWindow(QWidget *parent = 0, Qt::WFlags flags = 0);
 
 public slots:
+	void onNewSketch();
+	void onLoadSketch();
+	void onSaveSketch();
 	void onSaveImage();
 	void onRandomGeneration();
 	void onGreedyInverse();

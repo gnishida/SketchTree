@@ -17,8 +17,8 @@
 #define PARAM_EXPLORATION_VARIANCE			0.1//10
 
 #define LENGTH_ATTENUATION					0.95
-#define SIZE_ATTENUATION					0.034 //0.04
-#define MASK_RADIUS							36
+#define SIZE_ATTENUATION					0.03 //0.04
+#define MASK_RADIUS							34
 
 //#define DEBUG		1
 
@@ -684,7 +684,7 @@ String ParametricLSystem::UCT(const String& current_model, const cv::Mat& target
 		/////// デバッグ ///////
 		/*
 		char filename[256];
-		sprintf(filename, "images/indicator_%d_%d_%d_%lf.png", derivation_step, iter, action_index, sc);
+		sprintf(filename, "images/indicator_%d_%d_%d_%lf.png", derivation_step, iter, sc);
 		cv::Mat img = indicator + target * 0.4;
 		img = ml::mat_mask(img, mask, 0.7);
 

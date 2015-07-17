@@ -27,6 +27,10 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <addaction name="actionNewSketch"/>
+    <addaction name="actionLoadSketch"/>
+    <addaction name="actionSaveSketch"/>
+    <addaction name="separator"/>
     <addaction name="actionSaveImage"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
@@ -78,9 +82,6 @@
    <property name="text">
     <string>Save Image</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
-   </property>
   </action>
   <action name="actionModeSketch">
    <property name="checkable">
@@ -112,6 +113,27 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionLoadSketch">
+   <property name="text">
+    <string>Load Sketch</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSaveSketch">
+   <property name="text">
+    <string>Save Sketch</string>
+   </property>
+  </action>
+  <action name="actionNewSketch">
+   <property name="text">
+    <string>New Sketch</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
  </widget>

@@ -7,23 +7,47 @@
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flags) {
 	ui.setupUi(this);
 
+	// UI設定
 	QActionGroup* group = new QActionGroup(this);
 	ui.actionModeSketch->setCheckable(true);
 	ui.actionMode3DView->setCheckable(true);
 	ui.actionModeSketch->setActionGroup(group);
 	ui.actionMode3DView->setActionGroup(group);
 
-
+	// メニューハンドラ
+	connect(ui.actionNewSketch, SIGNAL(triggered()), this, SLOT(onNewSketch()));
+	connect(ui.actionLoadSketch, SIGNAL(triggered()), this, SLOT(onLoadSketch()));
+	connect(ui.actionSaveSketch, SIGNAL(triggered()), this, SLOT(onSaveSketch()));
 	connect(ui.actionSaveImage, SIGNAL(triggered()), this, SLOT(onSaveImage()));
 	connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
 	connect(ui.actionRandomGeneration, SIGNAL(triggered()), this, SLOT(onRandomGeneration()));
 	connect(ui.actionGreedyInverse, SIGNAL(triggered()), this, SLOT(onGreedyInverse()));
-
 	connect(ui.actionModeSketch, SIGNAL(triggered()), this, SLOT(onModeUpdate()));
 	connect(ui.actionMode3DView, SIGNAL(triggered()), this, SLOT(onModeUpdate()));
 
 	glWidget = new GLWidget3D(this);
 	setCentralWidget(glWidget);
+}
+
+void MainWindow::onNewSketch() {
+	glWidget->sketch.fill(qRgba(255, 255, 255, 0));
+	glWidget->update();
+}
+
+void MainWindow::onLoadSketch() {
+	QString filename = QFileDialog::getOpenFileName(this, tr("Open sketch file..."), "", tr("sketch Files (*.png)"));
+	if (filename.isEmpty()) return;
+
+	glWidget->sketch.load(filename);
+
+	glWidget->update();
+}
+
+void MainWindow::onSaveSketch() {
+	QString filename = QFileDialog::getSaveFileName(this, tr("Save sketch file..."), "", tr("Sketch Files (*.png)"));
+	if (filename.isEmpty()) return;
+
+	glWidget->sketch.save(filename);
 }
 
 void MainWindow::onSaveImage() {
