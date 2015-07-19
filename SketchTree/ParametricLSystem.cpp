@@ -17,7 +17,8 @@
 #define PARAM_EXPLORATION_VARIANCE			0.1//10
 
 #define LENGTH_ATTENUATION					0.95
-#define SIZE_ATTENUATION					0.03 //0.04
+#define INITIAL_SIZE						5.0
+#define SIZE_ATTENUATION					0.016//0.03 //0.04
 #define MASK_RADIUS							34
 
 //#define DEBUG		1
@@ -465,8 +466,8 @@ void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices)
 			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_values[0], 0));
 		} else if (model[i].name == "F" && model[i].param_defined) {
 			double length = model[i].param_values[0];
-			double radius1 = model[i].param_values[1];
-			double radius2 = model[i].param_values[1] -  model[i].param_values[0] * SIZE_ATTENUATION;
+			double radius1 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * model[i].param_values[1]);
+			double radius2 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * (model[i].param_values[1] + model[i].param_values[0]));
 			
 			// 線を描画する
 			glutils::drawCylinder(radius1, radius2, length, glm::vec3(0.9, 0.3, 0.3), glm::rotate(modelMat, deg2rad(-90), glm::vec3(1, 0, 0)), vertices);
@@ -474,12 +475,12 @@ void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices)
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
 		} else if (model[i].name == "C" && model[i].param_defined) {
 			double length = model[i].param_values[0];
-			double radius = model[i].param_values[1] * 3;
+			double radius = model[i].param_values[1];
 			
-			glm::mat4 mat = glm::translate(modelMat, glm::vec3(0, length * 0.5, 0));
+			glm::mat4 mat = glm::translate(modelMat, glm::vec3(0, length, 0));
 
 			// 円を描画する
-			glutils::drawCircle(radius, length * 0.5, glm::vec3(0.3, 1, 0.3), mat, vertices);
+			glutils::drawCircle(radius, length, glm::vec3(0.3, 1, 0.3), mat, vertices);
 		}
 	}
 	this->axiom = axiom;
@@ -550,8 +551,8 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_values[0], 0));
 		} else if (model[i].name == "F" && model[i].param_defined) {
 			double length = model[i].param_values[0];
-			double radius1 = model[i].param_values[1];
-			double radius2 = model[i].param_values[1] -  model[i].param_values[0] * SIZE_ATTENUATION;
+			double radius1 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * model[i].param_values[1]);
+			double radius2 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * (model[i].param_values[1] + model[i].param_values[0]));
 			double radius = (radius1 + radius2) * 0.5f;
 
 			// 線を描画する代わりに、indicatorを更新する
@@ -572,20 +573,23 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 			double length = model[i].param_values[0];
 			double radius = model[i].param_values[1];
 
-			glm::mat4 mat = glm::translate(modelMat, glm::vec3(0, length * 0.5, 0));
-
 			// 描画する代わりに、indicatorを更新する
-			glm::vec4 p1(0, 0, 0, 1);
-			glm::vec4 p2(0, length, 0, 1);
-			p1 = mvpMat * mat * p1;
-			p2 = mvpMat * mat * p2;
+			glm::vec4 p1(0, length, 0, 1);
+			glm::vec4 p2(radius, length, 0, 1);
+			glm::vec4 p3(0, length * 2.0, 0, 1);
+			p1 = mvpMat * modelMat * p1;
+			p2 = mvpMat * modelMat * p2;
+			p3 = mvpMat * modelMat * p3;
 			int u1 = p1.x + grid_size * 0.5;
 			int v1 = p1.y + grid_size * 0.5;
-			int u2 = p2.x + grid_size * 0.5;
-			int v2 = p2.y + grid_size * 0.5;
+			int u2 = p3.x + grid_size * 0.5;
+			int v2 = p3.y + grid_size * 0.5;
+			int r1 = sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
+			int r2 = sqrt((p3.x - p1.x) * (p3.x - p1.x) + (p3.y - p1.y) * (p3.y - p1.y));
+			float angle = atan2(p2.y - p1.y, p2.x - p1.x) / M_PI * 180.0;
 
-			int thickness = max(1.0, radius);
-			cv::line(indicator[1], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), thickness);
+			cv::ellipse(indicator[1], cv::Point(u1, v1), cv::Size(r1, r2), angle, 0, 360, cv::Scalar(1), -1);
+			//cv::line(indicator[1], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), 3);
 		}
 	}
 }
@@ -865,41 +869,39 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 		String rule;
 		actions.push_back(Action(actions.size(), i, rule));
 
-		if (model[i].param_values[1] >= 0.01f) {
+		if (model[i].param_values[1] < 300.0f) {
 			String rule = Literal("F", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1])
 				+ Literal("#", model[i].depth + 1)
 				+ Literal("\\", model[i].depth + 1, 40.0)
-				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] - model[i].param_values[0] * SIZE_ATTENUATION);
+				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
 			actions.push_back(Action(actions.size(), i, rule));
 
 			rule = Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1])
 				+ Literal("[", model[i].depth + 1, true)
 				+ Literal("+", model[i].depth + 1)
-				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] * LENGTH_ATTENUATION)
+				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0] * 0.5f)
 				+ Literal("]", model[i].depth + 1, true)
-				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1] - model[i].param_values[0] * SIZE_ATTENUATION * 0.5f)
+				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1] + model[i].param_values[0] * 0.5f)
 				+ Literal("#", model[i].depth + 1)
 				+ Literal("\\", model[i].depth + 1, 40.0)
-				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] - model[i].param_values[0] * SIZE_ATTENUATION);
+				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
 			actions.push_back(Action(actions.size(), i, rule));
 		}
 
-		if (model[i].param_values[1] < 1.0f) {
+		if (model[i].param_values[1] >= 30.0f) {
 			String rule = Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1])
 				+ Literal("[", model[i].depth + 1, true)
 				+ Literal("+", model[i].depth + 1, 60.0)
-				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] * LENGTH_ATTENUATION)
-				+ Literal("C", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] * LENGTH_ATTENUATION)
+				+ Literal("C", model[i].depth + 1, 3.0f, 2.0f)
 				+ Literal("]", model[i].depth + 1, true)
 				+ Literal("[", model[i].depth + 1, true)
 				+ Literal("-", model[i].depth + 1, 60.0)
-				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] * LENGTH_ATTENUATION)
-				+ Literal("C", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] * LENGTH_ATTENUATION)
+				+ Literal("C", model[i].depth + 1, 3.0f, 2.0f)
 				+ Literal("]", model[i].depth + 1, true)
-				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1] - model[i].param_values[0] * SIZE_ATTENUATION * 0.5f)
+				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1] + model[i].param_values[0] * 0.5f)
 				+ Literal("#", model[i].depth + 1)
 				+ Literal("\\", model[i].depth + 1, 40.0)
-				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] - model[i].param_values[0] * SIZE_ATTENUATION);
+				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
 			actions.push_back(Action(actions.size(), i, rule));
 		}
 	} else if (model[i].name == "-" || model[i].name == "+") {

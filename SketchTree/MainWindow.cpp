@@ -99,7 +99,11 @@ void MainWindow::onRandomGeneration() {
 
 	std::vector<cv::Mat> indicator;
 	glWidget->lsystem.computeIndicator(glWidget->model, glWidget->camera.mvpMatrix, indicator);
-	ml::mat_save("indicator.png", indicator[0]);
+	for (int i = 0; i < indicator.size(); ++i) {
+		char filename[256];
+		sprintf(filename, "indicator%d.png", i);
+		ml::mat_save(filename, indicator[i]);
+	}
 
 	glWidget->lsystem.draw(glWidget->model, glWidget->vertices);
 	glWidget->createVAO();

@@ -19,7 +19,7 @@ void Pen::setType(int type) {
 	}
 }
 
-GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent), lsystem(300, parametriclsystem::Literal("X", 0, 18.0f, 4.5f)) {
+GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent), lsystem(300, parametriclsystem::Literal("X", 0, 18.0f, 0.0f)) {
 	mode = MODE_SKETCH;
 	dragging = false;
 	pen.setType(Pen::TYPE_BRANCH);
@@ -163,6 +163,7 @@ void GLWidget3D::initializeGL() {
 
 	//glutils::drawCylinder(glm::vec3(0, 0, 0), 300, 150, glm::vec3(1, 1, 1), glm::mat4(), vertices);
 	glutils::drawSphere(10, glm::vec3(1, 1, 1), glm::mat4(), vertices);
+	//glutils::drawCircle(10, 10, glm::vec3(1, 1, 1), glm::mat4(), vertices);
 	createVAO();
 }
 
