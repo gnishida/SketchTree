@@ -162,7 +162,7 @@ void GLWidget3D::initializeGL() {
 	qglClearColor(QColor(224, 224, 224));
 
 	//glutils::drawCylinder(glm::vec3(0, 0, 0), 300, 150, glm::vec3(1, 1, 1), glm::mat4(), vertices);
-	glutils::drawSphere(glm::vec3(0, 0, 0), 10, glm::vec3(1, 1, 1), glm::mat4(), vertices);
+	glutils::drawSphere(10, glm::vec3(1, 1, 1), glm::mat4(), vertices);
 	createVAO();
 }
 

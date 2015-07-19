@@ -143,7 +143,11 @@ void MainWindow::onGreedyInverse() {
 	// 生成したモデルの画像を保存する
 	std::vector<cv::Mat> indicator;
 	glWidget->lsystem.computeIndicator(glWidget->model, glWidget->camera.mvpMatrix, indicator);
-	ml::mat_save("result.png", indicator[0] + target[0] * 0.4);
+	for (int i = 0; i < target.size(); ++i) {
+		char filename[256];
+		sprintf(filename, "result%d.png", i);
+		ml::mat_save(filename, indicator[i] + target[i] * 0.4);
+	}
 
 	glWidget->lsystem.draw(glWidget->model, glWidget->vertices);
 	glWidget->createVAO();

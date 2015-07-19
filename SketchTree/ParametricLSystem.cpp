@@ -90,7 +90,7 @@ String Literal::operator+(const Literal& l) const {
 }
 
 int Literal::type() {
-	if (name == "F" || name == "f" || name == "[" || name == "]" || name == "+" || name == "-" || name == "\\" || name == "/" || name == "&" || name == "^" || name == "#") {
+	if (name == "F" || name == "f" || name == "C" || name == "[" || name == "]" || name == "+" || name == "-" || name == "\\" || name == "/" || name == "&" || name == "^" || name == "#") {
 		return TYPE_TERMINAL;
 	} else {
 		return TYPE_NONTERMINAL;
@@ -468,13 +468,18 @@ void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices)
 			double radius1 = model[i].param_values[1];
 			double radius2 = model[i].param_values[1] -  model[i].param_values[0] * SIZE_ATTENUATION;
 			
-			glm::vec4 p(0, 0, 0, 1);
-			p = modelMat * p;
 			// 線を描画する
-			std::vector<Vertex> new_vertices;
-			glutils::drawCone(glm::vec3(0, 0, 0), length, radius1, radius2, glm::vec3(1, 1, 1), glm::rotate(modelMat, deg2rad(-90), glm::vec3(1, 0, 0)), vertices);
+			glutils::drawCylinder(radius1, radius2, length, glm::vec3(0.9, 0.3, 0.3), glm::rotate(modelMat, deg2rad(-90), glm::vec3(1, 0, 0)), vertices);
 
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
+		} else if (model[i].name == "C" && model[i].param_defined) {
+			double length = model[i].param_values[0];
+			double radius = model[i].param_values[1] * 3;
+			
+			glm::mat4 mat = glm::translate(modelMat, glm::vec3(0, length * 0.5, 0));
+
+			// 円を描画する
+			glutils::drawCircle(radius, length * 0.5, glm::vec3(0.3, 1, 0.3), mat, vertices);
 		}
 	}
 	this->axiom = axiom;
@@ -563,6 +568,24 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 			cv::line(indicator[0], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), thickness);
 
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
+		} else if (model[i].name == "C" && model[i].param_defined) {
+			double length = model[i].param_values[0];
+			double radius = model[i].param_values[1];
+
+			glm::mat4 mat = glm::translate(modelMat, glm::vec3(0, length * 0.5, 0));
+
+			// 描画する代わりに、indicatorを更新する
+			glm::vec4 p1(0, 0, 0, 1);
+			glm::vec4 p2(0, length, 0, 1);
+			p1 = mvpMat * mat * p1;
+			p2 = mvpMat * mat * p2;
+			int u1 = p1.x + grid_size * 0.5;
+			int v1 = p1.y + grid_size * 0.5;
+			int u2 = p2.x + grid_size * 0.5;
+			int v2 = p2.y + grid_size * 0.5;
+
+			int thickness = max(1.0, radius);
+			cv::line(indicator[1], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), thickness);
 		}
 	}
 }
@@ -840,14 +863,14 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 
 	if (model[i].name == "X") {
 		String rule;
-		actions.push_back(Action(0, i, rule));
+		actions.push_back(Action(actions.size(), i, rule));
 
 		if (model[i].param_values[1] >= 0.01f) {
 			String rule = Literal("F", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1])
 				+ Literal("#", model[i].depth + 1)
 				+ Literal("\\", model[i].depth + 1, 40.0)
 				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] - model[i].param_values[0] * SIZE_ATTENUATION);
-			actions.push_back(Action(1, i, rule));
+			actions.push_back(Action(actions.size(), i, rule));
 
 			rule = Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1])
 				+ Literal("[", model[i].depth + 1, true)
@@ -858,24 +881,40 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 				+ Literal("#", model[i].depth + 1)
 				+ Literal("\\", model[i].depth + 1, 40.0)
 				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] - model[i].param_values[0] * SIZE_ATTENUATION);
-			actions.push_back(Action(2, i, rule));
+			actions.push_back(Action(actions.size(), i, rule));
+		}
+
+		if (model[i].param_values[1] < 1.0f) {
+			String rule = Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1])
+				+ Literal("[", model[i].depth + 1, true)
+				+ Literal("+", model[i].depth + 1, 60.0)
+				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] * LENGTH_ATTENUATION)
+				+ Literal("C", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] * LENGTH_ATTENUATION)
+				+ Literal("]", model[i].depth + 1, true)
+				+ Literal("[", model[i].depth + 1, true)
+				+ Literal("-", model[i].depth + 1, 60.0)
+				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] * LENGTH_ATTENUATION)
+				+ Literal("C", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] * LENGTH_ATTENUATION)
+				+ Literal("]", model[i].depth + 1, true)
+				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1] - model[i].param_values[0] * SIZE_ATTENUATION * 0.5f)
+				+ Literal("#", model[i].depth + 1)
+				+ Literal("\\", model[i].depth + 1, 40.0)
+				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] - model[i].param_values[0] * SIZE_ATTENUATION);
+			actions.push_back(Action(actions.size(), i, rule));
 		}
 	} else if (model[i].name == "-" || model[i].name == "+") {
-		int count = 0;
-		for (int k = -80; k <= 80; k += 20, ++count) {
+		for (int k = -80; k <= 80; k += 20) {
 			if (k == 0) continue;
-			actions.push_back(Action(count, i, k));
+			actions.push_back(Action(actions.size(), i, k));
 		}
 	} else if (model[i].name == "#") {
-		int count = 0;
-		for (int k = -20; k <= 20; k += 10, ++count) {
-			actions.push_back(Action(count, i, k));
+		for (int k = -20; k <= 20; k += 10) {
+			actions.push_back(Action(actions.size(), i, k));
 		}
 	} else if (model[i].name == "\\") {
-		int count = 0;
 		//actions.push_back(Action(count, i, 180));
-		for (int k = 0; k <= 180; k += 30, ++count) {
-			actions.push_back(Action(count, i, k));
+		for (int k = 0; k <= 180; k += 30) {
+			actions.push_back(Action(actions.size(), i, k));
 		}
 	}
 
