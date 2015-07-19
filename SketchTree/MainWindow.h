@@ -24,6 +24,8 @@ public slots:
 	void onRandomGeneration();
 	void onGreedyInverse();
 	void onModeUpdate();
+	void onPenColorUpdate();
+	void onPenWidthUpdate();
 };
 
 #endif // MAINWINDOW_H

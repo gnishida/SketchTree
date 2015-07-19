@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created: Fri Jul 17 18:03:23 2015
+** Created: Sun Jul 19 13:45:27 2015
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -37,11 +37,19 @@ public:
     QAction *actionLoadSketch;
     QAction *actionSaveSketch;
     QAction *actionNewSketch;
+    QAction *actionPenColorBranch;
+    QAction *actionPenColorLeaf;
+    QAction *actionPenWidth20;
+    QAction *actionPenWidth10;
+    QAction *actionPenWidth5;
     QWidget *centralWidget;
     QMenuBar *menuBar;
     QMenu *menuFile;
     QMenu *menuL_System;
     QMenu *menuMode;
+    QMenu *menuPen;
+    QMenu *menuColor;
+    QMenu *menuWidth;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
 
@@ -73,6 +81,21 @@ public:
         actionSaveSketch->setObjectName(QString::fromUtf8("actionSaveSketch"));
         actionNewSketch = new QAction(MainWindowClass);
         actionNewSketch->setObjectName(QString::fromUtf8("actionNewSketch"));
+        actionPenColorBranch = new QAction(MainWindowClass);
+        actionPenColorBranch->setObjectName(QString::fromUtf8("actionPenColorBranch"));
+        actionPenColorBranch->setCheckable(true);
+        actionPenColorLeaf = new QAction(MainWindowClass);
+        actionPenColorLeaf->setObjectName(QString::fromUtf8("actionPenColorLeaf"));
+        actionPenColorLeaf->setCheckable(true);
+        actionPenWidth20 = new QAction(MainWindowClass);
+        actionPenWidth20->setObjectName(QString::fromUtf8("actionPenWidth20"));
+        actionPenWidth20->setCheckable(true);
+        actionPenWidth10 = new QAction(MainWindowClass);
+        actionPenWidth10->setObjectName(QString::fromUtf8("actionPenWidth10"));
+        actionPenWidth10->setCheckable(true);
+        actionPenWidth5 = new QAction(MainWindowClass);
+        actionPenWidth5->setObjectName(QString::fromUtf8("actionPenWidth5"));
+        actionPenWidth5->setCheckable(true);
         centralWidget = new QWidget(MainWindowClass);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         MainWindowClass->setCentralWidget(centralWidget);
@@ -85,6 +108,12 @@ public:
         menuL_System->setObjectName(QString::fromUtf8("menuL_System"));
         menuMode = new QMenu(menuBar);
         menuMode->setObjectName(QString::fromUtf8("menuMode"));
+        menuPen = new QMenu(menuBar);
+        menuPen->setObjectName(QString::fromUtf8("menuPen"));
+        menuColor = new QMenu(menuPen);
+        menuColor->setObjectName(QString::fromUtf8("menuColor"));
+        menuWidth = new QMenu(menuPen);
+        menuWidth->setObjectName(QString::fromUtf8("menuWidth"));
         MainWindowClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindowClass);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -96,6 +125,7 @@ public:
         menuBar->addAction(menuFile->menuAction());
         menuBar->addAction(menuL_System->menuAction());
         menuBar->addAction(menuMode->menuAction());
+        menuBar->addAction(menuPen->menuAction());
         menuFile->addAction(actionNewSketch);
         menuFile->addAction(actionLoadSketch);
         menuFile->addAction(actionSaveSketch);
@@ -107,6 +137,13 @@ public:
         menuL_System->addAction(actionGreedyInverse);
         menuMode->addAction(actionModeSketch);
         menuMode->addAction(actionMode3DView);
+        menuPen->addAction(menuColor->menuAction());
+        menuPen->addAction(menuWidth->menuAction());
+        menuColor->addAction(actionPenColorBranch);
+        menuColor->addAction(actionPenColorLeaf);
+        menuWidth->addAction(actionPenWidth20);
+        menuWidth->addAction(actionPenWidth10);
+        menuWidth->addAction(actionPenWidth5);
 
         retranslateUi(MainWindowClass);
 
@@ -129,11 +166,20 @@ public:
         actionLoadSketch->setText(QApplication::translate("MainWindowClass", "Load Sketch", 0, QApplication::UnicodeUTF8));
         actionLoadSketch->setShortcut(QApplication::translate("MainWindowClass", "Ctrl+O", 0, QApplication::UnicodeUTF8));
         actionSaveSketch->setText(QApplication::translate("MainWindowClass", "Save Sketch", 0, QApplication::UnicodeUTF8));
+        actionSaveSketch->setShortcut(QApplication::translate("MainWindowClass", "Ctrl+S", 0, QApplication::UnicodeUTF8));
         actionNewSketch->setText(QApplication::translate("MainWindowClass", "New Sketch", 0, QApplication::UnicodeUTF8));
         actionNewSketch->setShortcut(QApplication::translate("MainWindowClass", "Ctrl+N", 0, QApplication::UnicodeUTF8));
+        actionPenColorBranch->setText(QApplication::translate("MainWindowClass", "Branch", 0, QApplication::UnicodeUTF8));
+        actionPenColorLeaf->setText(QApplication::translate("MainWindowClass", "Leaf", 0, QApplication::UnicodeUTF8));
+        actionPenWidth20->setText(QApplication::translate("MainWindowClass", "20", 0, QApplication::UnicodeUTF8));
+        actionPenWidth10->setText(QApplication::translate("MainWindowClass", "10", 0, QApplication::UnicodeUTF8));
+        actionPenWidth5->setText(QApplication::translate("MainWindowClass", "5", 0, QApplication::UnicodeUTF8));
         menuFile->setTitle(QApplication::translate("MainWindowClass", "&File", 0, QApplication::UnicodeUTF8));
         menuL_System->setTitle(QApplication::translate("MainWindowClass", "&L-System", 0, QApplication::UnicodeUTF8));
         menuMode->setTitle(QApplication::translate("MainWindowClass", "&Mode", 0, QApplication::UnicodeUTF8));
+        menuPen->setTitle(QApplication::translate("MainWindowClass", "Pen", 0, QApplication::UnicodeUTF8));
+        menuColor->setTitle(QApplication::translate("MainWindowClass", "Color", 0, QApplication::UnicodeUTF8));
+        menuWidth->setTitle(QApplication::translate("MainWindowClass", "Width", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };

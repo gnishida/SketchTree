@@ -2,11 +2,26 @@
 #include <iostream>
 #include "GLUtils.h"
 
+Pen::Pen() {
+	this->setType(COLOR_BRANCH);
+	this->setWidth(20);
+	this->setStyle(Qt::SolidLine);
+	this->setCapStyle(Qt::RoundCap);
+	this->setJoinStyle(Qt::RoundJoin);
+}
+
+void Pen::setType(int type) {
+	if (type == COLOR_BRANCH) {
+		this->setColor(QColor(128, 0, 0, 255));
+	} else if (type == COLOR_LEAF) {
+		this->setColor(QColor(0, 255, 0, 255));
+	}
+}
+
 GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent), lsystem(300, parametriclsystem::Literal("X", 0, 18.0f, 4.5f)) {
 	mode = MODE_SKETCH;
 	dragging = false;
-	color = QColor(128, 0, 0, 255);
-	penWidth = 20;
+	pen.setType(Pen::COLOR_BRANCH);
 	
 	// これがないと、QPainterによって、OpenGLによる描画がクリアされてしまう
 	setAutoFillBackground(false);
@@ -68,7 +83,7 @@ void GLWidget3D::drawLineTo(const QPoint &endPoint) {
 	QPoint pt2(endPoint.x(), endPoint.y());
 
 	QPainter painter(&sketch);
-	painter.setPen(QPen(color, penWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+	painter.setPen(pen);
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.setRenderHint(QPainter::HighQualityAntialiasing);
 

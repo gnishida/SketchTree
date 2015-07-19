@@ -11,6 +11,16 @@
 #include "ShadowMapping.h"
 #include "Camera.h"
 
+class Pen : public QPen {
+public:
+	static enum { COLOR_BRANCH = 0, COLOR_LEAF };
+
+public:
+	Pen();
+
+	void setType(int type);
+};
+
 class GLWidget3D : public QGLWidget {
 	Q_OBJECT
 
@@ -32,8 +42,7 @@ public:
 	bool dragging;
 	QPoint lastPoint;
 	QImage sketch;
-	QColor color;
-	int penWidth;
+	Pen pen;
 
 public:
 	GLWidget3D(QWidget *parent = 0);

@@ -8,11 +8,28 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	ui.setupUi(this);
 
 	// UI設定
-	QActionGroup* group = new QActionGroup(this);
+	QActionGroup* groupMode = new QActionGroup(this);
 	ui.actionModeSketch->setCheckable(true);
 	ui.actionMode3DView->setCheckable(true);
-	ui.actionModeSketch->setActionGroup(group);
-	ui.actionMode3DView->setActionGroup(group);
+	ui.actionModeSketch->setActionGroup(groupMode);
+	ui.actionMode3DView->setActionGroup(groupMode);
+	ui.actionModeSketch->setChecked(true);
+
+	QActionGroup* groupPenColor = new QActionGroup(this);
+	ui.actionPenColorBranch->setCheckable(true);
+	ui.actionPenColorLeaf->setCheckable(true);
+	ui.actionPenColorBranch->setActionGroup(groupPenColor);
+	ui.actionPenColorLeaf->setActionGroup(groupPenColor);
+	ui.actionPenColorBranch->setChecked(true);
+
+	QActionGroup* groupPenWidth = new QActionGroup(this);
+	ui.actionPenWidth20->setCheckable(true);
+	ui.actionPenWidth10->setCheckable(true);
+	ui.actionPenWidth5->setCheckable(true);
+	ui.actionPenWidth20->setActionGroup(groupPenWidth);
+	ui.actionPenWidth10->setActionGroup(groupPenWidth);
+	ui.actionPenWidth5->setActionGroup(groupPenWidth);
+	ui.actionPenWidth20->setChecked(true);
 
 	// メニューハンドラ
 	connect(ui.actionNewSketch, SIGNAL(triggered()), this, SLOT(onNewSketch()));
@@ -24,6 +41,11 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	connect(ui.actionGreedyInverse, SIGNAL(triggered()), this, SLOT(onGreedyInverse()));
 	connect(ui.actionModeSketch, SIGNAL(triggered()), this, SLOT(onModeUpdate()));
 	connect(ui.actionMode3DView, SIGNAL(triggered()), this, SLOT(onModeUpdate()));
+	connect(ui.actionPenColorBranch, SIGNAL(triggered()), this, SLOT(onPenColorUpdate()));
+	connect(ui.actionPenColorLeaf, SIGNAL(triggered()), this, SLOT(onPenColorUpdate()));
+	connect(ui.actionPenWidth20, SIGNAL(triggered()), this, SLOT(onPenWidthUpdate()));
+	connect(ui.actionPenWidth10, SIGNAL(triggered()), this, SLOT(onPenWidthUpdate()));
+	connect(ui.actionPenWidth5, SIGNAL(triggered()), this, SLOT(onPenWidthUpdate()));
 
 	glWidget = new GLWidget3D(this);
 	setCentralWidget(glWidget);
@@ -118,5 +140,23 @@ void MainWindow::onModeUpdate() {
 		glWidget->mode = GLWidget3D::MODE_SKETCH;
 	} else {
 		glWidget->mode = GLWidget3D::MODE_3DVIEW;
+	}
+}
+
+void MainWindow::onPenColorUpdate() {
+	if (ui.actionPenColorBranch->isChecked()) {
+		glWidget->pen.setType(Pen::COLOR_BRANCH);
+	} else {
+		glWidget->pen.setType(Pen::COLOR_LEAF);
+	}
+}
+
+void MainWindow::onPenWidthUpdate() {
+	if (ui.actionPenWidth20->isChecked()) {
+		glWidget->pen.setWidth(20);
+	} else if (ui.actionPenWidth10->isChecked()) {
+		glWidget->pen.setWidth(10);
+	} else {
+		glWidget->pen.setWidth(5);
 	}
 }
