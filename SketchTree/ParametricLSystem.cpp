@@ -487,8 +487,11 @@ void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices)
  * @param scale				grid_size * scaleのサイズでindicatorを計算する
  * @param indicator [OUT]	indicator
  */
-void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, cv::Mat& indicator) {
-	indicator = cv::Mat::zeros(grid_size, grid_size, CV_32F);
+void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, std::vector<cv::Mat>& indicator) {
+	indicator.resize(2);
+	for (int i = 0; i < 2; ++i) {
+		indicator[i] = cv::Mat::zeros(grid_size, grid_size, CV_32F);
+	}
 
 	std::list<glm::mat4> stack;
 
@@ -545,7 +548,7 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 			int v2 = p2.y + grid_size * 0.5;
 
 			int thickness = max(1.0, radius);
-			cv::line(indicator, cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), thickness);
+			cv::line(indicator[0], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), thickness);
 
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
 		}
@@ -559,16 +562,16 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
  * @param indicator [OUT]	生成されたモデルのindicator
  * @return					生成されたモデル
  */
-String ParametricLSystem::inverse(const cv::Mat& target, const glm::mat4& mvpMat) {
+String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm::mat4& mvpMat) {
 	// UCTを使って探索木を構築していく
 	String model = axiom;
 
 	for (int l = 0; l < MAX_ITERATIONS; ++l) {
 		model = UCT(model, target, mvpMat, l);
 
-		cv::Mat indicator;
+		std::vector<cv::Mat> indicator;
 		computeIndicator(model, mvpMat, glm::mat4(), indicator);
-		double sc = score(indicator, target, cv::Mat::ones(target.size(), CV_8U));
+		double sc = score(indicator, target, cv::Mat::ones(target[0].size(), CV_8U));
 
 		/////// デバッグ ///////
 		/*
@@ -588,9 +591,9 @@ String ParametricLSystem::inverse(const cv::Mat& target, const glm::mat4& mvpMat
 	}
 
 	// スコア表示
-	cv::Mat indicator;
+	std::vector<cv::Mat> indicator;
 	computeIndicator(model, mvpMat, glm::mat4(), indicator);
-	cout << score(indicator, target, cv::Mat::ones(target.size(), CV_8U)) << endl;
+	cout << score(indicator, target, cv::Mat::ones(target[0].size(), CV_8U)) << endl;
 	
 	return model;
 }
@@ -602,7 +605,7 @@ String ParametricLSystem::inverse(const cv::Mat& target, const glm::mat4& mvpMat
  * @param target	ターゲット
  * @return			最善のoption
  */
-String ParametricLSystem::UCT(const String& current_model, const cv::Mat& target, const glm::mat4& mvpMat, int derivation_step) {
+String ParametricLSystem::UCT(const String& current_model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step) {
 	// これ以上、derivationできなら、終了
 	int index = current_model.cursor;
 	if (index < 0) return current_model;
@@ -618,25 +621,15 @@ String ParametricLSystem::UCT(const String& current_model, const cv::Mat& target
 	glm::vec2 curPt = computeCurrentPoint(current_model, mvpMat, baseModelMat);
 
 	// マスク画像を作成
-	cv::Mat mask = ml::create_mask(target.rows, target.cols, CV_8U, cv::Point(curPt.x, curPt.y), MASK_RADIUS);
-	/*
-	char fi[256];
-	sprintf(fi, "mask_%d.png", derivation_step);
-	ml::mat_save(fi, mask);
-	*/
+	cv::Mat mask = ml::create_mask(grid_size, grid_size, CV_8U, cv::Point(curPt.x, curPt.y), MASK_RADIUS);
 
 	// ルートノードを作成
 	Node* current_node = new Node(model);
 	current_node->setActions(getActions(model));
 
 	// ベースとなるindicatorを計算
-	cv::Mat baseIndicator;
+	std::vector<cv::Mat> baseIndicator;
 	computeIndicator(current_model, mvpMat, glm::mat4(), baseIndicator);
-	/*
-	char f2[256];
-	sprintf(f2, "base_indicator_%d.png", derivation_step);
-	ml::mat_save(f2, baseIndicator);
-	*/
 
 	for (int iter = 0; iter < NUM_MONTE_CARLO_SAMPLING; ++iter) {
 		// もしノードがリーフノードなら、終了
@@ -667,9 +660,11 @@ String ParametricLSystem::UCT(const String& current_model, const cv::Mat& target
 		String result_model = derive(node->model, MAX_ITERATIONS_FOR_MC, derivation_history);
 
 		// indicatorを計算する
-		cv::Mat indicator;
+		std::vector<cv::Mat> indicator;
 		computeIndicator(result_model, mvpMat, baseModelMat, indicator);
-		indicator += baseIndicator;
+		for (int i = 0; i < 2; ++i) {
+			indicator[i] += baseIndicator[i];
+		}
 
 		// スコアを計算する
 		double sc = score(indicator, target, mask);
@@ -778,17 +773,22 @@ String ParametricLSystem::UCT(const String& current_model, const cv::Mat& target
  * @param target		ターゲットindicator
  * @return				距離
  */
-double ParametricLSystem::score(const cv::Mat& indicator, const cv::Mat& target, const cv::Mat& mask) {
-	cv::Mat result;
-	cv::subtract(indicator, target, result, mask);
-	double count = ml::mat_squared_sum(result);
+double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target, const cv::Mat& mask) {
+	double count = 0;
+	double total = 0;
 
-	cv::Mat result2;
-	cv::subtract(target, cv::Mat::zeros(target.size(), target.type()), result2, mask);
-	double base = ml::mat_squared_sum(result2);
+	for (int i = 0; i < indicator.size(); ++i) {
+		cv::Mat result;
+		cv::subtract(indicator[i], target[i], result, mask);
+		count += ml::mat_squared_sum(result);
 
-	if (base > 0.0) {
-		return 1.0 - count / base;
+		cv::Mat result2;
+		cv::subtract(target[i], cv::Mat::zeros(target[i].size(), target[i].type()), result2, mask);
+		total += ml::mat_squared_sum(result2);
+	}
+
+	if (total > 0.0) {
+		return 1.0 - count / total;
 	} else {
 		if (count > 0.0) {
 			return -1.0;

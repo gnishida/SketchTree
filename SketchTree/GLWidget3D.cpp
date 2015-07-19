@@ -3,7 +3,7 @@
 #include "GLUtils.h"
 
 Pen::Pen() {
-	this->setType(COLOR_BRANCH);
+	this->setType(TYPE_BRANCH);
 	this->setWidth(20);
 	this->setStyle(Qt::SolidLine);
 	this->setCapStyle(Qt::RoundCap);
@@ -11,9 +11,10 @@ Pen::Pen() {
 }
 
 void Pen::setType(int type) {
-	if (type == COLOR_BRANCH) {
+	this->type = type;
+	if (type == TYPE_BRANCH) {
 		this->setColor(QColor(128, 0, 0, 255));
-	} else if (type == COLOR_LEAF) {
+	} else if (type == TYPE_LEAF) {
 		this->setColor(QColor(0, 255, 0, 255));
 	}
 }
@@ -21,7 +22,7 @@ void Pen::setType(int type) {
 GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent), lsystem(300, parametriclsystem::Literal("X", 0, 18.0f, 4.5f)) {
 	mode = MODE_SKETCH;
 	dragging = false;
-	pen.setType(Pen::COLOR_BRANCH);
+	pen.setType(Pen::TYPE_BRANCH);
 	
 	// これがないと、QPainterによって、OpenGLによる描画がクリアされてしまう
 	setAutoFillBackground(false);
@@ -82,7 +83,7 @@ void GLWidget3D::drawLineTo(const QPoint &endPoint) {
 	QPoint pt1(lastPoint.x(), lastPoint.y());
 	QPoint pt2(endPoint.x(), endPoint.y());
 
-	QPainter painter(&sketch);
+	QPainter painter(&sketch[pen.type]);
 	painter.setPen(pen);
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.setRenderHint(QPainter::HighQualityAntialiasing);
@@ -94,13 +95,15 @@ void GLWidget3D::drawLineTo(const QPoint &endPoint) {
 
 void GLWidget3D::resizeGL(int width, int height) {
 	// sketch imageを更新
-	QImage newImage(width, height, QImage::Format_ARGB32);
-	newImage.fill(qRgba(255, 255, 255, 0));
-	QPainter painter(&newImage);
-	int offset_x = (width - sketch.size().width()) * 0.5;
-	int offset_y = (height - sketch.size().height()) * 0.5;
-	painter.drawImage(QPoint(offset_x, offset_y), sketch);
-	sketch = newImage;
+	for (int i = 0; i < 2; ++i) {
+		QImage newImage(width, height, QImage::Format_ARGB32);
+		newImage.fill(qRgba(255, 255, 255, 0));
+		QPainter painter(&newImage);
+		int offset_x = (width - sketch[i].size().width()) * 0.5;
+		int offset_y = (height - sketch[i].size().height()) * 0.5;
+		painter.drawImage(QPoint(offset_x, offset_y), sketch[i]);
+		sketch[i] = newImage;
+	}
 
 	// OpenGLの設定を更新
 	height = height ? height : 1;
@@ -196,10 +199,9 @@ void GLWidget3D::paintEvent(QPaintEvent *event) {
 
 	// QPainterで描画
 	QPainter painter(this);
-	/*painter.setRenderHint(QPainter::Antialiasing);
-	painter.setPen(QColor(255, 32, 0));
-	painter.drawRect(30, 30, 100, 100);
-	*/
-	painter.drawImage(0, 0, sketch);
+	painter.setOpacity(0.5);
+	for (int i = 0; i < 2; ++i) {
+		painter.drawImage(0, 0, sketch[i]);
+	}
 	painter.end();
 }

@@ -13,7 +13,10 @@
 
 class Pen : public QPen {
 public:
-	static enum { COLOR_BRANCH = 0, COLOR_LEAF };
+	static enum { TYPE_BRANCH = 0, TYPE_LEAF };
+
+public:
+	int type;
 
 public:
 	Pen();
@@ -41,7 +44,7 @@ public:
 	int mode;	// 0 -- sketch / 1 -- 3D view
 	bool dragging;
 	QPoint lastPoint;
-	QImage sketch;
+	QImage sketch[2];
 	Pen pen;
 
 public:
@@ -49,7 +52,7 @@ public:
 
 	void drawScene(int drawMode);
 	void createVAO();
-	void GLWidget3D::drawLineTo(const QPoint &endPoint);
+	void drawLineTo(const QPoint &endPoint);
 
 protected:
 	void resizeGL(int width, int height);
