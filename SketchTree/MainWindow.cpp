@@ -63,6 +63,10 @@ void MainWindow::onRandomGeneration() {
 
 	cout << glWidget->model << endl;
 
+	cv::Mat indicator;
+	glWidget->lsystem.computeIndicator(glWidget->model, glWidget->camera.mvpMatrix, glm::mat4(), indicator);
+	ml::mat_save("indicator.png", indicator);
+
 	glWidget->lsystem.draw(glWidget->model, glWidget->vertices);
 	glWidget->createVAO();
 	glWidget->update();
@@ -92,7 +96,7 @@ void MainWindow::onGreedyInverse() {
 
 	// ターゲットに近いモデルを生成する
 	time_t start = clock();
-	glWidget->model = glWidget->lsystem.inverse(target);
+	glWidget->model = glWidget->lsystem.inverse(target, glWidget->camera.mvpMatrix);
 	time_t end = clock();
 
 	cout << glWidget->model << endl;
@@ -101,7 +105,7 @@ void MainWindow::onGreedyInverse() {
 
 	// 生成したモデルの画像を保存する
 	cv::Mat img;
-	glWidget->lsystem.computeIndicator(glWidget->model, 1.0f, glm::mat4(), img);
+	glWidget->lsystem.computeIndicator(glWidget->model, glWidget->camera.mvpMatrix, glm::mat4(), img);
 	ml::mat_save("result.png", img + target * 0.4);
 
 	glWidget->lsystem.draw(glWidget->model, glWidget->vertices);

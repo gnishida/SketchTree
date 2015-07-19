@@ -134,26 +134,24 @@ public:
 class ParametricLSystem {
 public:
 	int grid_size;
-	int indicator_data_type;
-	float scale;
 	int num_nodes;
 
 	String axiom;
 	map<char, vector<string> > rules;
 
 public:
-	ParametricLSystem(int grid_size, float scale, const String& axiom);
+	ParametricLSystem(int grid_size, const String& axiom);
 	String derive(int random_seed);
 	String derive(const String& start_model, int max_iterations, std::vector<int>& derivation_history);
 	void draw(const String& model, std::vector<Vertex>& vertices);
-	void computeIndicator(const String& model, float scale, const glm::mat4& baseModelMat, cv::Mat& indicator);
-	String inverse(const cv::Mat& target);
-	String UCT(const String& model, const cv::Mat& target, int derivation_step);
+	void computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, cv::Mat& indicator);
+	String inverse(const cv::Mat& target, const glm::mat4& mvpMat);
+	String UCT(const String& model, const cv::Mat& target, const glm::mat4& mvpMat, int derivation_step);
 	double score(const cv::Mat& indicator, const cv::Mat& target, const cv::Mat& mask);
 
 private:
 	std::vector<Action> getActions(const String& model);
-	glm::vec2 computeCurrentPoint(const String& model, float scale, glm::mat4& modelMmat);
+	glm::vec2 computeCurrentPoint(const String& model, const glm::mat4& mvpMat, glm::mat4& modelMmat);
 	void releaseNodeMemory(Node* node);
 };
 

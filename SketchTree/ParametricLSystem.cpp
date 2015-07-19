@@ -383,9 +383,8 @@ Node* Node::bestChild() {
 	return best_child;
 }
 
-ParametricLSystem::ParametricLSystem(int grid_size, float scale, const String& axiom) {
+ParametricLSystem::ParametricLSystem(int grid_size, const String& axiom) {
 	this->grid_size = grid_size;
-	this->scale = scale;
 	this->axiom = axiom;
 }
 
@@ -438,8 +437,6 @@ void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices)
 
 	glm::mat4 modelMat;
 
-	modelMat = glm::translate(modelMat, glm::vec3(0, -150, 0));
-
 	std::list<glm::mat4> stack;
 
 	for (int i = 0; i < model.length(); ++i) {
@@ -465,11 +462,11 @@ void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices)
 		} else if (model[i].name == "^" && model[i].param_defined) {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(1, 0, 0));
 		} else if (model[i].name == "f" && model[i].param_defined) {
-			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_values[0] * scale, 0));
+			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_values[0], 0));
 		} else if (model[i].name == "F" && model[i].param_defined) {
-			double length = model[i].param_values[0] * scale;
-			double radius1 = model[i].param_values[1] * scale;
-			double radius2 = (model[i].param_values[1] -  model[i].param_values[0] * SIZE_ATTENUATION) * scale;
+			double length = model[i].param_values[0];
+			double radius1 = model[i].param_values[1];
+			double radius2 = model[i].param_values[1] -  model[i].param_values[0] * SIZE_ATTENUATION;
 			
 			glm::vec4 p(0, 0, 0, 1);
 			p = modelMat * p;
@@ -490,10 +487,8 @@ void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices)
  * @param scale				grid_size * scaleのサイズでindicatorを計算する
  * @param indicator [OUT]	indicator
  */
-void ParametricLSystem::computeIndicator(const String& model, float scale, const glm::mat4& baseModelMat, cv::Mat& indicator) {
-	int size = grid_size * scale;
-
-	indicator = cv::Mat::zeros(size, size, CV_32F);
+void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, cv::Mat& indicator) {
+	indicator = cv::Mat::zeros(grid_size, grid_size, CV_32F);
 
 	std::list<glm::mat4> stack;
 
@@ -532,22 +527,22 @@ void ParametricLSystem::computeIndicator(const String& model, float scale, const
 		} else if (model[i].name == "^" && model[i].param_defined) {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(1, 0, 0));
 		} else if (model[i].name == "f" && model[i].param_defined) {
-			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_values[0] * scale, 0));
+			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_values[0], 0));
 		} else if (model[i].name == "F" && model[i].param_defined) {
-			double length = model[i].param_values[0] * scale;
-			double radius1 = model[i].param_values[1] * scale;
-			double radius2 = (model[i].param_values[1] -  model[i].param_values[0] * SIZE_ATTENUATION) * scale;
+			double length = model[i].param_values[0];
+			double radius1 = model[i].param_values[1];
+			double radius2 = model[i].param_values[1] -  model[i].param_values[0] * SIZE_ATTENUATION;
 			double radius = (radius1 + radius2) * 0.5f;
 
 			// 線を描画する代わりに、indicatorを更新する
 			glm::vec4 p1(0, 0, 0, 1);
 			glm::vec4 p2(0, length, 0, 1);
-			p1 = modelMat * p1;
-			p2 = modelMat * p2;
-			int u1 = p1.x + size * 0.5;
-			int v1 = p1.y;
-			int u2 = p2.x + size * 0.5;
-			int v2 = p2.y;
+			p1 = mvpMat * modelMat * p1;
+			p2 = mvpMat * modelMat * p2;
+			int u1 = p1.x + grid_size * 0.5;
+			int v1 = p1.y + grid_size * 0.5;
+			int u2 = p2.x + grid_size * 0.5;
+			int v2 = p2.y + grid_size * 0.5;
 
 			int thickness = max(1.0, radius);
 			cv::line(indicator, cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), thickness);
@@ -564,32 +559,29 @@ void ParametricLSystem::computeIndicator(const String& model, float scale, const
  * @param indicator [OUT]	生成されたモデルのindicator
  * @return					生成されたモデル
  */
-String ParametricLSystem::inverse(const cv::Mat& target) {
+String ParametricLSystem::inverse(const cv::Mat& target, const glm::mat4& mvpMat) {
 	// UCTを使って探索木を構築していく
 	String model = axiom;
 
 	for (int l = 0; l < MAX_ITERATIONS; ++l) {
-		model = UCT(model, target, l);
+		model = UCT(model, target, mvpMat, l);
 
 		cv::Mat indicator;
-		computeIndicator(model, scale, glm::mat4(), indicator);
+		computeIndicator(model, mvpMat, glm::mat4(), indicator);
 		double sc = score(indicator, target, cv::Mat::ones(target.size(), CV_8U));
 
 		/////// デバッグ ///////
 		/*
 		char filename[256];
 		sprintf(filename, "indicator_%d.png", l);
-		computeIndicator(model, 4, glm::mat4(), indicator);
+		computeIndicator(model, mvpMat, glm::mat4(), indicator);
 
-		cv::Mat target2;
-		cv::resize(target, target2, cv::Size(400, 400));
-
-		ml::mat_save(filename, indicator + target2 * 0.4);
+		ml::mat_save(filename, indicator + target * 0.4);
 		*/
 		/////// デバッグ ///////
 
 		//cout << l << ": " << "Best score=" << sc << " : " << model << endl;
-		cout << l << ": " << "Best score=" << sc << " : " << endl;
+		cout << l << ": " << "Best score=" << sc << endl;
 
 		// これ以上、derivationできなら、終了
 		if (model.cursor < 0) break;
@@ -597,7 +589,7 @@ String ParametricLSystem::inverse(const cv::Mat& target) {
 
 	// スコア表示
 	cv::Mat indicator;
-	computeIndicator(model, scale, glm::mat4(), indicator);
+	computeIndicator(model, mvpMat, glm::mat4(), indicator);
 	cout << score(indicator, target, cv::Mat::ones(target.size(), CV_8U)) << endl;
 	
 	return model;
@@ -610,7 +602,7 @@ String ParametricLSystem::inverse(const cv::Mat& target) {
  * @param target	ターゲット
  * @return			最善のoption
  */
-String ParametricLSystem::UCT(const String& current_model, const cv::Mat& target, int derivation_step) {
+String ParametricLSystem::UCT(const String& current_model, const cv::Mat& target, const glm::mat4& mvpMat, int derivation_step) {
 	// これ以上、derivationできなら、終了
 	int index = current_model.cursor;
 	if (index < 0) return current_model;
@@ -623,18 +615,28 @@ String ParametricLSystem::UCT(const String& current_model, const cv::Mat& target
 
 	// 現在の座標を計算
 	glm::mat4 baseModelMat;
-	glm::vec2 curPt = computeCurrentPoint(current_model, scale, baseModelMat);
+	glm::vec2 curPt = computeCurrentPoint(current_model, mvpMat, baseModelMat);
 
 	// マスク画像を作成
 	cv::Mat mask = ml::create_mask(target.rows, target.cols, CV_8U, cv::Point(curPt.x, curPt.y), MASK_RADIUS);
-	
+	/*
+	char fi[256];
+	sprintf(fi, "mask_%d.png", derivation_step);
+	ml::mat_save(fi, mask);
+	*/
+
 	// ルートノードを作成
 	Node* current_node = new Node(model);
 	current_node->setActions(getActions(model));
 
 	// ベースとなるindicatorを計算
 	cv::Mat baseIndicator;
-	computeIndicator(current_model, scale, glm::mat4(), baseIndicator);
+	computeIndicator(current_model, mvpMat, glm::mat4(), baseIndicator);
+	/*
+	char f2[256];
+	sprintf(f2, "base_indicator_%d.png", derivation_step);
+	ml::mat_save(f2, baseIndicator);
+	*/
 
 	for (int iter = 0; iter < NUM_MONTE_CARLO_SAMPLING; ++iter) {
 		// もしノードがリーフノードなら、終了
@@ -666,7 +668,7 @@ String ParametricLSystem::UCT(const String& current_model, const cv::Mat& target
 
 		// indicatorを計算する
 		cv::Mat indicator;
-		computeIndicator(result_model, scale, baseModelMat, indicator);
+		computeIndicator(result_model, mvpMat, baseModelMat, indicator);
 		indicator += baseIndicator;
 
 		// スコアを計算する
@@ -677,7 +679,7 @@ String ParametricLSystem::UCT(const String& current_model, const cv::Mat& target
 		/////// デバッグ ///////
 		/*
 		char filename[256];
-		sprintf(filename, "images/indicator_%d_%d_%d_%lf.png", derivation_step, iter, sc);
+		sprintf(filename, "images/indicator_%d_%d_%lf.png", derivation_step, iter, sc);
 		cv::Mat img = indicator + target * 0.4;
 		img = ml::mat_mask(img, mask, 0.7);
 
@@ -856,8 +858,11 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 	return actions;
 }
 
-glm::vec2 ParametricLSystem::computeCurrentPoint(const String& model, float scale, glm::mat4& modelMat) {
-	int size = grid_size * scale;
+/**
+ * 現在の座標を計算して返却する。
+ */
+glm::vec2 ParametricLSystem::computeCurrentPoint(const String& model, const glm::mat4& mvpMat, glm::mat4& modelMat) {
+	//int size = grid_size * scale;
 
 	std::list<glm::mat4> stack;
 
@@ -882,18 +887,18 @@ glm::vec2 ParametricLSystem::computeCurrentPoint(const String& model, float scal
 		} else if (model[i].name == "^" && model[i].param_defined) {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(1, 0, 0));
 		} else if (model[i].name == "f" && model[i].param_defined) {
-			double length = model[i].param_values[0] * scale;
+			double length = model[i].param_values[0];
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
 		} else if (model[i].name == "F" && model[i].param_defined) {
-			double length = model[i].param_values[0] * scale;
+			double length = model[i].param_values[0];
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
 		}
 	}
 
 	glm::vec4 p(0, 0, 0, 1);
-	p = modelMat * p;
+	p = mvpMat * modelMat * p;
 
-	return glm::vec2(p.x + grid_size * 0.5, p.y);
+	return glm::vec2(p.x + grid_size * 0.5, p.y + grid_size * 0.5);
 }
 
 /**

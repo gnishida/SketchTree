@@ -2,7 +2,7 @@
 #include <iostream>
 #include "GLUtils.h"
 
-GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent), lsystem(300, 1, parametriclsystem::Literal("X", 0, 36.0f, 9.0f)) {
+GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent), lsystem(300, parametriclsystem::Literal("X", 0, 18.0f, 4.5f)) {
 	mode = MODE_SKETCH;
 	dragging = false;
 	color = QColor(128, 0, 0, 255);
@@ -131,7 +131,7 @@ void GLWidget3D::initializeGL() {
 
 	// 光源位置をセット
 	// ShadowMappingは平行光源を使っている。この位置から原点方向を平行光源の方向とする。
-	light_dir = glm::normalize(glm::vec3(-0.1, 1, -0.2));
+	light_dir = glm::normalize(glm::vec3(-0.1, -0.2, -1));
 
 	// load shaders
 	Shader shader;
