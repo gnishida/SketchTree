@@ -144,9 +144,11 @@ public:
 	String derive(int random_seed);
 	String derive(const String& start_model, int max_iterations, std::vector<int>& derivation_history);
 	void draw(const String& model, std::vector<Vertex>& vertices);
+	void computeIndicator(const String& model, const glm::mat4& mvpMat, std::vector<cv::Mat>& indicator);
 	void computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, std::vector<cv::Mat>& indicator);
 	String inverse(const std::vector<cv::Mat>& target, const glm::mat4& mvpMat);
 	String UCT(const String& model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step);
+	double score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target);
 	double score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target, const cv::Mat& mask);
 
 private:

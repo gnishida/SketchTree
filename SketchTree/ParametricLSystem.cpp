@@ -483,8 +483,20 @@ void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices)
 /**
  * 指定された文字列に基づいてモデルを生成し、indicatorを計算して返却する。
  * 
- * @param rule				モデルを表す文字列
- * @param scale				grid_size * scaleのサイズでindicatorを計算する
+ * @param model				モデルを表す文字列
+ * @param mvpMat			カメラ視点への射影行列
+ * @param indicator [OUT]	indicator
+ */
+void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, std::vector<cv::Mat>& indicator) {
+	computeIndicator(model, mvpMat, glm::mat4(), indicator);
+}
+
+/**
+ * 指定された文字列に基づいてモデルを生成し、indicatorを計算して返却する。
+ * 
+ * @param model				モデルを表す文字列
+ * @param mvpMat			カメラ視点への射影行列
+ * @param baseModelMat		モデルのベース変換行列
  * @param indicator [OUT]	indicator
  */
 void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, std::vector<cv::Mat>& indicator) {
@@ -570,14 +582,14 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 		model = UCT(model, target, mvpMat, l);
 
 		std::vector<cv::Mat> indicator;
-		computeIndicator(model, mvpMat, glm::mat4(), indicator);
-		double sc = score(indicator, target, cv::Mat::ones(target[0].size(), CV_8U));
+		computeIndicator(model, mvpMat, indicator);
+		double sc = score(indicator, target);
 
 		/////// デバッグ ///////
 		/*
 		char filename[256];
 		sprintf(filename, "indicator_%d.png", l);
-		computeIndicator(model, mvpMat, glm::mat4(), indicator);
+		computeIndicator(model, mvpMat, indicator);
 
 		ml::mat_save(filename, indicator + target * 0.4);
 		*/
@@ -592,8 +604,8 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 
 	// スコア表示
 	std::vector<cv::Mat> indicator;
-	computeIndicator(model, mvpMat, glm::mat4(), indicator);
-	cout << score(indicator, target, cv::Mat::ones(target[0].size(), CV_8U)) << endl;
+	computeIndicator(model, mvpMat, indicator);
+	cout << score(indicator, target) << endl;
 	
 	return model;
 }
@@ -629,7 +641,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 
 	// ベースとなるindicatorを計算
 	std::vector<cv::Mat> baseIndicator;
-	computeIndicator(current_model, mvpMat, glm::mat4(), baseIndicator);
+	computeIndicator(current_model, mvpMat, baseIndicator);
 
 	for (int iter = 0; iter < NUM_MONTE_CARLO_SAMPLING; ++iter) {
 		// もしノードがリーフノードなら、終了
@@ -746,7 +758,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 	/////// デバッグ ///////
 	/*
 	char filename[256];
-	computeIndicator(best_model, 4, glm::mat4(), bestIndicator);
+	computeIndicator(best_model, 4, bestIndicator);
 	sprintf(filename, "images/indicator_%d.png", derivation_step);
 
 	cv::Mat target2;
@@ -771,7 +783,19 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
  *
  * @param indicator		indicator
  * @param target		ターゲットindicator
- * @return				距離
+ * @return				スコア
+ */
+double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target) {
+	return score(indicator, target, cv::Mat::ones(target[0].size(), CV_8U));
+}
+
+/**
+ * indicatorのスコアを計算して返却する。
+ *
+ * @param indicator		indicator
+ * @param target		ターゲットindicator
+ * @param mask			マスク
+ * @return				スコア
  */
 double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target, const cv::Mat& mask) {
 	double count = 0;

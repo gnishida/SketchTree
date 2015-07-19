@@ -98,7 +98,7 @@ void MainWindow::onRandomGeneration() {
 	cout << glWidget->model << endl;
 
 	std::vector<cv::Mat> indicator;
-	glWidget->lsystem.computeIndicator(glWidget->model, glWidget->camera.mvpMatrix, glm::mat4(), indicator);
+	glWidget->lsystem.computeIndicator(glWidget->model, glWidget->camera.mvpMatrix, indicator);
 	ml::mat_save("indicator.png", indicator[0]);
 
 	glWidget->lsystem.draw(glWidget->model, glWidget->vertices);
@@ -142,7 +142,7 @@ void MainWindow::onGreedyInverse() {
 
 	// 生成したモデルの画像を保存する
 	std::vector<cv::Mat> indicator;
-	glWidget->lsystem.computeIndicator(glWidget->model, glWidget->camera.mvpMatrix, glm::mat4(), indicator);
+	glWidget->lsystem.computeIndicator(glWidget->model, glWidget->camera.mvpMatrix, indicator);
 	ml::mat_save("result.png", indicator[0] + target[0] * 0.4);
 
 	glWidget->lsystem.draw(glWidget->model, glWidget->vertices);
