@@ -3,7 +3,7 @@
 #include "GLUtils.h"
 
 Pen::Pen() {
-	this->setType(TYPE_BRANCH);
+	this->setType(TYPE_WALL);
 	this->setWidth(20);
 	this->setStyle(Qt::SolidLine);
 	this->setCapStyle(Qt::RoundCap);
@@ -12,17 +12,19 @@ Pen::Pen() {
 
 void Pen::setType(int type) {
 	this->type = type;
-	if (type == TYPE_BRANCH) {
-		this->setColor(QColor(128, 0, 0, 255));
-	} else if (type == TYPE_LEAF) {
-		this->setColor(QColor(0, 255, 0, 255));
+	if (type == TYPE_WALL) {
+		this->setColor(QColor(128, 128, 128, 255));
+	} else if (type == TYPE_DOOR) {
+		this->setColor(QColor(255, 0, 0, 255));
+	} else if (type == TYPE_WINDOW) {
+		this->setColor(QColor(0, 0, 255, 255));
 	}
 }
 
-GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent), lsystem(300, parametriclsystem::Literal("X", 0, 24.0f, 0.0f)) {
+GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent), lsystem(300, parametriclsystem::Literal("X", 0, -75, 0, 150)) {
 	mode = MODE_SKETCH;
 	dragging = false;
-	pen.setType(Pen::TYPE_BRANCH);
+	pen.setType(Pen::TYPE_WALL);
 	
 	// これがないと、QPainterによって、OpenGLによる描画がクリアされてしまう
 	setAutoFillBackground(false);
@@ -111,7 +113,7 @@ void GLWidget3D::drawCircle(const QPoint &point) {
 
 void GLWidget3D::resizeGL(int width, int height) {
 	// sketch imageを更新
-	for (int i = 0; i < 2; ++i) {
+	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
 		QImage newImage(width, height, QImage::Format_ARGB32);
 		newImage.fill(qRgba(255, 255, 255, 0));
 		QPainter painter(&newImage);
@@ -220,7 +222,7 @@ void GLWidget3D::paintEvent(QPaintEvent *event) {
 	// QPainterで描画
 	QPainter painter(this);
 	painter.setOpacity(0.5);
-	for (int i = 0; i < 2; ++i) {
+	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
 		painter.drawImage(0, 0, sketch[i]);
 	}
 	painter.end();

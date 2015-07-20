@@ -57,8 +57,9 @@
      <property name="title">
       <string>&amp;Color</string>
      </property>
-     <addaction name="actionPenColorBranch"/>
-     <addaction name="actionPenColorLeaf"/>
+     <addaction name="actionPenColorWall"/>
+     <addaction name="actionPenColorDoor"/>
+     <addaction name="actionPenColorWindow"/>
     </widget>
     <widget class="QMenu" name="menuWidth">
      <property name="title">
@@ -162,20 +163,20 @@
     <string>Ctrl+N</string>
    </property>
   </action>
-  <action name="actionPenColorBranch">
+  <action name="actionPenColorWall">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Branch</string>
+    <string>Wall</string>
    </property>
   </action>
-  <action name="actionPenColorLeaf">
+  <action name="actionPenColorDoor">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Leaf</string>
+    <string>Door</string>
    </property>
   </action>
   <action name="actionPenWidth20">
@@ -200,6 +201,11 @@
    </property>
    <property name="text">
     <string>5</string>
+   </property>
+  </action>
+  <action name="actionPenColorWindow">
+   <property name="text">
+    <string>Window</string>
    </property>
   </action>
  </widget>

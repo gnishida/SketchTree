@@ -9,9 +9,9 @@
 #define SQR(x)	((x) * (x))
 
 
-#define MAX_ITERATIONS						1000//400//1400//200
+#define MAX_ITERATIONS						20//400//1400//200
 #define MAX_ITERATIONS_FOR_MC				15
-#define NUM_MONTE_CARLO_SAMPLING			100
+#define NUM_MONTE_CARLO_SAMPLING			1000//300
 
 #define PARAM_EXPLORATION					0.3 //1
 #define PARAM_EXPLORATION_VARIANCE			0.1//10
@@ -19,7 +19,9 @@
 #define LENGTH_ATTENUATION					0.9
 #define INITIAL_SIZE						6.0
 #define SIZE_ATTENUATION					0.02//0.03 //0.04
-#define MASK_RADIUS							40//34
+#define MASK_RADIUS							100//40//34
+
+#define FLOOR_HEIGHT						40.0
 
 //#define DEBUG		1
 
@@ -91,7 +93,7 @@ String Literal::operator+(const Literal& l) const {
 }
 
 int Literal::type() {
-	if (name == "F" || name == "f" || name == "C" || name == "[" || name == "]" || name == "+" || name == "-" || name == "\\" || name == "/" || name == "&" || name == "^" || name == "#") {
+	if (name == "Door" || name == "Window" || name == "Wall") {
 		return TYPE_TERMINAL;
 	} else {
 		return TYPE_NONTERMINAL;
@@ -213,6 +215,14 @@ ostream& operator<<(ostream& os, const String& str) {
 	os << setprecision(1);
 	for (int i = 0; i < str.length(); ++i) {
 		os << str[i].name;
+		if (str[i].param_defined) {
+			os << "(";
+			for (int j = 0; j < str[i].param_values.size(); ++j) {
+				if (j > 0) os << ",";
+				os << str[i].param_values[j];
+			}
+			os << ")";
+		}
 	}
 
     return os;
@@ -436,51 +446,51 @@ String ParametricLSystem::derive(const String& start_model, int max_iterations, 
 void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices) {
 	vertices.clear();
 
-	glm::mat4 modelMat;
-
-	std::list<glm::mat4> stack;
-
 	for (int i = 0; i < model.length(); ++i) {
-		if (model[i].name == "[") {
-			stack.push_back(modelMat);
-		} else if (model[i].name == "]") {
-			if (!stack.empty()) {
-				modelMat = stack.back();
-				stack.pop_back();
-			}
-		} else if (model[i].name == "+" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "-" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "#" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "\\" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "/" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "&" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "^" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "f" && model[i].param_defined) {
-			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_values[0], 0));
-		} else if (model[i].name == "F" && model[i].param_defined) {
-			double length = model[i].param_values[0];
-			double radius1 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * model[i].param_values[1]);
-			double radius2 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * (model[i].param_values[1] + model[i].param_values[0]));
-			
-			// 線を描画する
-			glutils::drawCylinder(radius1, radius2, length, glm::vec3(0.9, 0.3, 0.3), glm::rotate(modelMat, deg2rad(-90), glm::vec3(1, 0, 0)), vertices);
+		if (!model[i].param_defined) continue;
 
-			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
-		} else if (model[i].name == "C" && model[i].param_defined) {
-			double length = model[i].param_values[0];
-			double radius = model[i].param_values[1];
+		if (model[i].name == "Door") {
+			double x = model[i].param_values[0];
+			double y = model[i].param_values[1];
+			double w = model[i].param_values[2];
+			double h = FLOOR_HEIGHT;
 			
-			glm::mat4 mat = glm::translate(modelMat, glm::vec3(0, length, 0));
+			// 上の壁を描画
+			glm::mat4 mat;
+			mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.875, 0.0));
+			glutils::drawQuad(w, h * 0.25, glm::vec3(0.5, 0.5, 0.5), mat, vertices);
 
-			// 円を描画する
-			glutils::drawCircle(radius, length, glm::vec3(0.3, 1, 0.3), mat, vertices);
+			// ドアを描画
+			mat = glm::mat4();
+			mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.375, 0.0));
+			glutils::drawQuad(w, h * 0.75, glm::vec3(1, 0, 0), mat, vertices);
+		} else if (model[i].name == "Window") {
+			double x = model[i].param_values[0];
+			double y = model[i].param_values[1];
+			double w = model[i].param_values[2];
+			double h = FLOOR_HEIGHT;
+			
+			// 上下の壁を描画
+			glm::mat4 mat;
+			mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.125, 0.0));
+			glutils::drawQuad(w, h * 0.25, glm::vec3(0.5, 0.5, 0.5), mat, vertices);
+			mat = glm::translate(mat, glm::vec3(0.0, h * 0.75, 0.0));
+			glutils::drawQuad(w, h * 0.25, glm::vec3(0.5, 0.5, 0.5), mat, vertices);
+
+			// 窓を描画
+			mat = glm::mat4();
+			mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.5, 0.0));
+			glutils::drawQuad(w, h * 0.5, glm::vec3(0, 0, 1), mat, vertices);
+		} else if (model[i].name == "Wall" || model[i].name == "W") {
+			double x = model[i].param_values[0];
+			double y = model[i].param_values[1];
+			double w = model[i].param_values[2];
+			double h = FLOOR_HEIGHT;
+			
+			glm::mat4 mat;
+			mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.5, 0.0));
+
+			glutils::drawQuad(w, h, glm::vec3(0.5, 0.5, 0.5), mat, vertices);
 		}
 	}
 	this->axiom = axiom;
@@ -506,8 +516,8 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
  * @param indicator [OUT]	indicator
  */
 void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, std::vector<cv::Mat>& indicator) {
-	indicator.resize(2);
-	for (int i = 0; i < 2; ++i) {
+	indicator.resize(NUM_LAYERS);
+	for (int i = 0; i < NUM_LAYERS; ++i) {
 		indicator[i] = cv::Mat::zeros(grid_size, grid_size, CV_32F);
 	}
 
@@ -517,79 +527,58 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 
 	int undefined = 0;
 	for (int i = 0; i < model.length(); ++i) {
-		if (undefined == 0 && !model[i].param_defined) {
-			undefined = 1;
-			continue;
-		}
+		if (!model[i].param_defined) break;
 
-		if (model[i].name == "[") {
-			stack.push_back(modelMat);
-			if (undefined > 0) undefined++;
-		} else if (model[i].name == "]") {
-			if (!stack.empty()) {
-				modelMat = stack.back();
-				stack.pop_back();
-				if (undefined > 0) undefined--;
-			}
-		} else if (undefined > 0) {
-			continue;
-		} else if (model[i].name == "+" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "-" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "#" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "\\" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "/" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "&" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "^" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "f" && model[i].param_defined) {
-			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_values[0], 0));
-		} else if (model[i].name == "F" && model[i].param_defined) {
-			double length = model[i].param_values[0];
-			double radius1 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * model[i].param_values[1]);
-			double radius2 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * (model[i].param_values[1] + model[i].param_values[0]));
-			double radius = (radius1 + radius2) * 0.5f;
+		if (model[i].name == "Door") {
+			double x = model[i].param_values[0];
+			double y = model[i].param_values[1];
+			double w = model[i].param_values[2];
+			double h = FLOOR_HEIGHT;
+			
+			// 壁を描画
+			glm::vec4 p1(x, y, 0, 1);
+			glm::vec4 p2(x + w, y + h, 0, 1);
+			p1 = mvpMat * p1;
+			p2 = mvpMat * p2;
+			cv::rectangle(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), -1);
 
-			// 線を描画する代わりに、indicatorを更新する
-			glm::vec4 p1(0, 0, 0, 1);
-			glm::vec4 p2(0, length, 0, 1);
-			p1 = mvpMat * modelMat * p1;
-			p2 = mvpMat * modelMat * p2;
-			int u1 = p1.x + grid_size * 0.5;
-			int v1 = p1.y + grid_size * 0.5;
-			int u2 = p2.x + grid_size * 0.5;
-			int v2 = p2.y + grid_size * 0.5;
+			// ドアを描画
+			p1 = glm::vec4(x, y, 0, 1);
+			p2 = glm::vec4(x + w, y + h * 0.75, 0, 1);
+			p1 = mvpMat * p1;
+			p2 = mvpMat * p2;
+			cv::rectangle(indicator[1], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), -1);
+		} else if (model[i].name == "Window") {
+			double x = model[i].param_values[0];
+			double y = model[i].param_values[1];
+			double w = model[i].param_values[2];
+			double h = FLOOR_HEIGHT;
+			
+			// 壁を描画
+			glm::vec4 p1(x, y, 0, 1);
+			glm::vec4 p2(x + w, y + h, 0, 1);
+			p1 = mvpMat * p1;
+			p2 = mvpMat * p2;
+			cv::rectangle(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), -1);
 
-			int thickness = max(1.0, radius);
-			cv::line(indicator[0], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), thickness);
-
-			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
-		} else if (model[i].name == "C" && model[i].param_defined) {
-			double length = model[i].param_values[0];
-			double radius = model[i].param_values[1];
-
-			// 描画する代わりに、indicatorを更新する
-			glm::vec4 p1(0, length, 0, 1);
-			glm::vec4 p2(radius, length, 0, 1);
-			glm::vec4 p3(0, length * 2.0, 0, 1);
-			p1 = mvpMat * modelMat * p1;
-			p2 = mvpMat * modelMat * p2;
-			p3 = mvpMat * modelMat * p3;
-			int u1 = p1.x + grid_size * 0.5;
-			int v1 = p1.y + grid_size * 0.5;
-			int u2 = p3.x + grid_size * 0.5;
-			int v2 = p3.y + grid_size * 0.5;
-			int r1 = sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
-			int r2 = sqrt((p3.x - p1.x) * (p3.x - p1.x) + (p3.y - p1.y) * (p3.y - p1.y));
-			float angle = atan2(p2.y - p1.y, p2.x - p1.x) / M_PI * 180.0;
-
-			cv::ellipse(indicator[1], cv::Point(u1, v1), cv::Size(r1, r2), angle, 0, 360, cv::Scalar(1), -1);
-			//cv::line(indicator[1], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), 3);
+			// 窓を描画
+			p1 = glm::vec4(x, y + h * 0.25, 0, 1);
+			p2 = glm::vec4(x + w, y + h * 0.75, 0, 1);
+			p1 = mvpMat * p1;
+			p2 = mvpMat * p2;
+			cv::rectangle(indicator[2], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), -1);
+		} else if (model[i].name == "Wall" || model[i].name == "W") {
+			double x = model[i].param_values[0];
+			double y = model[i].param_values[1];
+			double w = model[i].param_values[2];
+			double h = FLOOR_HEIGHT;
+			
+			// 壁を描画
+			glm::vec4 p1(x, y, 0, 1);
+			glm::vec4 p2(x + w, y + h, 0, 1);
+			p1 = mvpMat * p1;
+			p2 = mvpMat * p2;
+			cv::rectangle(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), -1);
 		}
 	}
 }
@@ -701,7 +690,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		// indicatorを計算する
 		std::vector<cv::Mat> indicator;
 		computeIndicator(result_model, mvpMat, baseModelMat, indicator);
-		for (int i = 0; i < 2; ++i) {
+		for (int i = 0; i < NUM_LAYERS; ++i) {
 			indicator[i] += baseIndicator[i];
 		}
 
@@ -851,7 +840,7 @@ double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std
 
 /**
  * 指定されたモデルの、次のderivationの候補を返却する。
- * Hardcoding: 各literalは、4つのパラメータを持つ (このセグメントの長さ、このセグメントの最初の半径)
+ * Hardcoding: 各literalは、4つのパラメータを持つ (X座標、Y座標、幅)
  *
  * @param model		モデル
  * @return			次のderivationの候補リスト
@@ -866,77 +855,43 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 	if (i == -1) return actions;
 
 	if (model[i].name == "X") {
-		if (model[i].param_values[1] > 40.0) {
-			String rule;
-			actions.push_back(Action(actions.size(), i, rule));
-		}
-
-		if (model[i].param_values[1] < 200.0) {
-			String rule = Literal("F", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1])
-				+ Literal("#", model[i].depth + 1)
-				+ Literal("\\", model[i].depth + 1, 50.0)
-				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
-			actions.push_back(Action(actions.size(), i, rule));
-
-			rule = Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1])
-				+ Literal("[", model[i].depth + 1, true)
-				+ Literal("+", model[i].depth + 1)
-				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0] * 0.5f)
-				+ Literal("]", model[i].depth + 1, true)
-				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1] + model[i].param_values[0] * 0.5f)
-				+ Literal("#", model[i].depth + 1)
-				+ Literal("\\", model[i].depth + 1, 50.0)
-				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
-			actions.push_back(Action(actions.size(), i, rule));
-		}
-
-		if (model[i].param_values[1] > 40.0) {
-			String rule = Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1])
-				+ Literal("[", model[i].depth + 1, true)
-				+ Literal("+", model[i].depth + 1)
-				+ Literal("Y", model[i].depth + 1, 3.0, 100.0)
-				+ Literal("]", model[i].depth + 1, true)
-				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1] + model[i].param_values[0] * 0.5f)
-				+ Literal("#", model[i].depth + 1)
-				+ Literal("\\", model[i].depth + 1, 50.0)
-				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
-			actions.push_back(Action(actions.size(), i, rule));
-		}
-	} else if (model[i].name == "Y") {
-		String rule;
+		String rule = Literal("Floor", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1], model[i].param_values[2]);
 		actions.push_back(Action(actions.size(), i, rule));
-		
-		rule = Literal("F", model[i].depth + 1, 2.0, 250.0)
-			+ Literal("[", model[i].depth + 1, true)
-			+ Literal("+", model[i].depth + 1, 60.0)
-			+ Literal("F", model[i].depth + 1, 1.0, 250.0)
-			+ Literal("\\", model[i].depth + 1, 70.0)
-			+ Literal("C", model[i].depth + 1, 3.0, 2.0)
-			+ Literal("]", model[i].depth + 1, true)
-			+ Literal("[", model[i].depth + 1, true)
-			+ Literal("-", model[i].depth + 1, 60.0)
-			+ Literal("F", model[i].depth + 1, 1.0, 250.0)
-			+ Literal("\\", model[i].depth + 1, -70.0)
-			+ Literal("C", model[i].depth + 1, 3.0, 2.0)
-			+ Literal("]", model[i].depth + 1, true)
-			+ Literal("F", model[i].depth + 1, 2.0, 250.0)
-			+ Literal("#", model[i].depth + 1)
-			+ Literal("\\", model[i].depth + 1, 50.0)
-			+ Literal("Y", model[i].depth + 1, 4.0, 250.0);
+
+		rule = Literal("Floor", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1], model[i].param_values[2])
+			+ Literal("X", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1] + FLOOR_HEIGHT, model[i].param_values[2]);
 		actions.push_back(Action(actions.size(), i, rule));
-	} else if (model[i].name == "-" || model[i].name == "+") {
-		for (int k = -80; k <= 80; k += 20) {
-			if (k == 0) continue;
-			actions.push_back(Action(actions.size(), i, k));
+	} else if (model[i].name == "Floor") {
+		String rule = Literal("W", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1], model[i].param_values[2]);
+		actions.push_back(Action(actions.size(), i, rule));
+
+		for (double k = 0.2; k < 0.8; k += 0.1) {
+			for (double l = 0.1; l < 0.3; l += 0.1) {
+				if (model[i].param_values[2] * k < 10.0) continue;
+				if (model[i].param_values[2] * l < 10.0) continue;
+				if (model[i].param_values[2] * (1.0 - k - l) < 10.0) continue;
+				
+				String rule = Literal("W", model[i].depth + 1,  model[i].param_values[0], model[i].param_values[1], model[i].param_values[2] * k)
+					+ Literal("Door", model[i].depth + 1, model[i].param_values[0] + model[i].param_values[2] * k, model[i].param_values[1], model[i].param_values[2] * l)
+					+ Literal("W", model[i].depth + 1, model[i].param_values[0] + model[i].param_values[2] * (k + l), model[i].param_values[1], model[i].param_values[2] * (1.0 - k - l));
+				actions.push_back(Action(actions.size(), i, rule));
+			}
 		}
-	} else if (model[i].name == "#") {
-		for (int k = -20; k <= 20; k += 10) {
-			actions.push_back(Action(actions.size(), i, k));
-		}
-	} else if (model[i].name == "\\") {
-		//actions.push_back(Action(count, i, 180));
-		for (int k = 0; k <= 180; k += 30) {
-			actions.push_back(Action(actions.size(), i, k));
+	} else if (model[i].name == "W") {
+		String rule = Literal("Wall", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1], model[i].param_values[2]);
+		actions.push_back(Action(actions.size(), i, rule));
+
+		for (double k = 0.2; k < 0.8; k += 0.1) {
+			for (double l = 0.1; l < 0.3; l += 0.1) {
+				if (model[i].param_values[2] * k < 10.0) continue;
+				if (model[i].param_values[2] * l < 10.0) continue;
+				if (model[i].param_values[2] * (1.0 - k - l) < 10.0) continue;
+
+				String rule = Literal("Wall", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1], model[i].param_values[2] * k)
+					+ Literal("Window", model[i].depth + 1, model[i].param_values[0] + model[i].param_values[2] * k, model[i].param_values[1], model[i].param_values[2] * l)
+					+ Literal("Wall", model[i].depth + 1, model[i].param_values[0] + model[i].param_values[2] * (k + l), model[i].param_values[1], model[i].param_values[2] * (1.0 - k - l));
+				actions.push_back(Action(actions.size(), i, rule));
+			}
 		}
 	}
 
@@ -947,8 +902,7 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
  * 現在の座標を計算して返却する。
  */
 glm::vec2 ParametricLSystem::computeCurrentPoint(const String& model, const glm::mat4& mvpMat, glm::mat4& modelMat) {
-	//int size = grid_size * scale;
-
+	/*
 	std::list<glm::mat4> stack;
 
 	for (int i = 0; i < model.cursor; ++i) {
@@ -984,6 +938,14 @@ glm::vec2 ParametricLSystem::computeCurrentPoint(const String& model, const glm:
 	p = mvpMat * modelMat * p;
 
 	return glm::vec2(p.x + grid_size * 0.5, p.y + grid_size * 0.5);
+	*/
+
+	double x = model[model.cursor].param_values[0];
+	double y = model[model.cursor].param_values[1];
+	double w = model[model.cursor].param_values[2];
+	double h = FLOOR_HEIGHT;
+
+	return glm::vec2(x + w * 0.5, y * h * 0.5);
 }
 
 /**
