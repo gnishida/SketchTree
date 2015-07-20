@@ -95,7 +95,7 @@
       <Filter>Resource Files</Filter>
     </CustomBuild>
     <CustomBuild Include="GLWidget3D.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -103,12 +103,6 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ParametricLSystem.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ShadowMapping.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\codebase\GLUtils.h">
@@ -122,6 +116,12 @@
     </ClInclude>
     <ClInclude Include="..\..\codebase\Vertex.h">
       <Filter>Source Files\codebase</Filter>
+    </ClInclude>
+    <ClInclude Include="ParametricLSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowMapping.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

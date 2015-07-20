@@ -11,7 +11,7 @@
 
 #define MAX_ITERATIONS						20//400//1400//200
 #define MAX_ITERATIONS_FOR_MC				15
-#define NUM_MONTE_CARLO_SAMPLING			1000//300
+#define NUM_MONTE_CARLO_SAMPLING			300
 
 #define PARAM_EXPLORATION					0.3 //1
 #define PARAM_EXPLORATION_VARIANCE			0.1//10
@@ -567,7 +567,7 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 			p1 = mvpMat * p1;
 			p2 = mvpMat * p2;
 			cv::rectangle(indicator[2], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), -1);
-		} else if (model[i].name == "Wall" || model[i].name == "W") {
+		} else if (model[i].name == "Wall" || model[i].name == "W" || model[i].name == "X") {
 			double x = model[i].param_values[0];
 			double y = model[i].param_values[1];
 			double w = model[i].param_values[2];
@@ -644,12 +644,8 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 	// 現在のカーソルのdepthを取得
 	int depth = current_model[current_model.cursor].depth;
 
-	// 現在の座標を計算
-	glm::mat4 baseModelMat;
-	glm::vec2 curPt = computeCurrentPoint(current_model, mvpMat, baseModelMat);
-
 	// マスク画像を作成
-	cv::Mat mask = ml::create_mask(grid_size, grid_size, CV_8U, cv::Point(curPt.x, curPt.y), MASK_RADIUS);
+	cv::Mat mask = createMask(current_model, mvpMat);
 
 	// ルートノードを作成
 	Node* current_node = new Node(model);
@@ -689,7 +685,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 
 		// indicatorを計算する
 		std::vector<cv::Mat> indicator;
-		computeIndicator(result_model, mvpMat, baseModelMat, indicator);
+		computeIndicator(result_model, mvpMat, glm::mat4(), indicator);
 		for (int i = 0; i < NUM_LAYERS; ++i) {
 			indicator[i] += baseIndicator[i];
 		}
@@ -703,7 +699,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		/*
 		char filename[256];
 		sprintf(filename, "images/indicator_%d_%d_%lf.png", derivation_step, iter, sc);
-		cv::Mat img = indicator + target * 0.4;
+		cv::Mat img = indicator[1] + target[1] * 0.4;
 		img = ml::mat_mask(img, mask, 0.7);
 
 		ml::mat_save(filename, img);
@@ -865,8 +861,8 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 		String rule = Literal("W", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1], model[i].param_values[2]);
 		actions.push_back(Action(actions.size(), i, rule));
 
-		for (double k = 0.2; k < 0.8; k += 0.1) {
-			for (double l = 0.1; l < 0.3; l += 0.1) {
+		for (double k = 0.2; k <= 0.8; k += 0.1) {
+			for (double l = 0.1; l <= 0.3; l += 0.1) {
 				if (model[i].param_values[2] * k < 10.0) continue;
 				if (model[i].param_values[2] * l < 10.0) continue;
 				if (model[i].param_values[2] * (1.0 - k - l) < 10.0) continue;
@@ -881,8 +877,8 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 		String rule = Literal("Wall", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1], model[i].param_values[2]);
 		actions.push_back(Action(actions.size(), i, rule));
 
-		for (double k = 0.2; k < 0.8; k += 0.1) {
-			for (double l = 0.1; l < 0.3; l += 0.1) {
+		for (double k = 0.2; k <= 0.8; k += 0.1) {
+			for (double l = 0.1; l <= 0.6; l += 0.1) {
 				if (model[i].param_values[2] * k < 10.0) continue;
 				if (model[i].param_values[2] * l < 10.0) continue;
 				if (model[i].param_values[2] * (1.0 - k - l) < 10.0) continue;
@@ -901,51 +897,20 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 /**
  * 現在の座標を計算して返却する。
  */
-glm::vec2 ParametricLSystem::computeCurrentPoint(const String& model, const glm::mat4& mvpMat, glm::mat4& modelMat) {
-	/*
-	std::list<glm::mat4> stack;
-
-	for (int i = 0; i < model.cursor; ++i) {
-		if (model[i].name == "[") {
-			stack.push_back(modelMat);
-		} else if (model[i].name == "]") {
-			modelMat = stack.back();
-			stack.pop_back();
-		} else if (model[i].name == "+" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "-" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "#" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "\\" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "/" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "&" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "^" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "f" && model[i].param_defined) {
-			double length = model[i].param_values[0];
-			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
-		} else if (model[i].name == "F" && model[i].param_defined) {
-			double length = model[i].param_values[0];
-			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
-		}
-	}
-
-	glm::vec4 p(0, 0, 0, 1);
-	p = mvpMat * modelMat * p;
-
-	return glm::vec2(p.x + grid_size * 0.5, p.y + grid_size * 0.5);
-	*/
-
+cv::Mat ParametricLSystem::createMask(const String& model, const glm::mat4& mvpMat) {
 	double x = model[model.cursor].param_values[0];
 	double y = model[model.cursor].param_values[1];
 	double w = model[model.cursor].param_values[2];
 	double h = FLOOR_HEIGHT;
 
-	return glm::vec2(x + w * 0.5 + grid_size * 0.5, y * h * 0.5 + grid_size * 0.5);
+	glm::vec4 p1(x, y, 0, 1);
+	glm::vec4 p2(x + w, y + h, 0, 1);
+	p1 = mvpMat * p1;
+	p2 = mvpMat * p2;
+	
+	cv::Mat mask = cv::Mat::zeros(grid_size, grid_size, CV_8U);
+	cv::rectangle(mask, cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), -1);
+	return mask;
 }
 
 /**

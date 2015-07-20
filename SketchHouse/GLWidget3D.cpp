@@ -98,13 +98,35 @@ void GLWidget3D::drawLineTo(const QPoint &endPoint) {
 void GLWidget3D::drawCircle(const QPoint &point) {
 	QPoint p(point.x(), point.y());
 
-	Pen tempP;
-	tempP.setWidth(1);
-	tempP.setType(pen.type);
+	QPainter painter(&sketch[pen.type]);
+	painter.setPen(QPen(QBrush(pen.color()), 1));
+	painter.setBrush(QBrush(pen.color()));
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setRenderHint(QPainter::HighQualityAntialiasing);
+
+	painter.drawEllipse(p, (int)(pen.width() * 0.5), (int)(pen.width() * 0.5));
+}
+
+void GLWidget3D::eraseLineTo(const QPoint &endPoint) {
+	QPoint pt1(lastPoint.x(), lastPoint.y());
+	QPoint pt2(endPoint.x(), endPoint.y());
 
 	QPainter painter(&sketch[pen.type]);
-	painter.setPen(tempP);
-	painter.setBrush(QBrush(pen.color(), Qt::SolidPattern));
+	painter.setPen(QPen(QBrush(QColor(255, 255, 255, 255)), pen.width()));
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setRenderHint(QPainter::HighQualityAntialiasing);
+
+	painter.drawLine(pt1, pt2);
+
+	lastPoint = endPoint;
+}
+
+void GLWidget3D::eraseCircle(const QPoint &point) {
+	QPoint p(point.x(), point.y());
+
+	QPainter painter(&sketch[pen.type]);
+	painter.setPen(QPen(QBrush(QColor(255, 255, 255, 0)), 1));
+	painter.setBrush(QBrush(QColor(255, 255, 255, 0)));
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
@@ -132,7 +154,11 @@ void GLWidget3D::resizeGL(int width, int height) {
 void GLWidget3D::mousePressEvent(QMouseEvent *e) {
 	if (mode == MODE_SKETCH) {
 		lastPoint = e->pos();
-		drawCircle(e->pos());
+		if (e->buttons() & Qt::LeftButton) {
+			drawCircle(e->pos());
+		} else if (e->buttons() & Qt::RightButton) {
+			eraseCircle(e->pos());
+		}
 		dragging = true;
 	} else {
 		camera.mousePress(e->x(), e->y());
@@ -147,7 +173,11 @@ void GLWidget3D::mouseReleaseEvent(QMouseEvent *e) {
 
 void GLWidget3D::mouseMoveEvent(QMouseEvent *e) {
 	if (mode == MODE_SKETCH) {
-		drawLineTo(e->pos());
+		if (e->buttons() & Qt::LeftButton) {
+			drawLineTo(e->pos());
+		} else if (e->buttons() & Qt::RightButton) {
+			eraseLineTo(e->pos());
+		}
 	} else {
 		if (e->buttons() & Qt::LeftButton) { // Rotate
 			camera.rotate(e->x(), e->y());

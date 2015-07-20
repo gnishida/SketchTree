@@ -96,13 +96,9 @@ void GLWidget3D::drawLineTo(const QPoint &endPoint) {
 void GLWidget3D::drawCircle(const QPoint &point) {
 	QPoint p(point.x(), point.y());
 
-	Pen tempP;
-	tempP.setWidth(1);
-	tempP.setType(pen.type);
-
 	QPainter painter(&sketch[pen.type]);
-	painter.setPen(tempP);
-	painter.setBrush(QBrush(pen.color(), Qt::SolidPattern));
+	painter.setPen(QPen(pen.color(), 1));
+	painter.setBrush(QBrush(pen.color()));
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.setRenderHint(QPainter::HighQualityAntialiasing);
 

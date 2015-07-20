@@ -155,7 +155,8 @@ public:
 
 private:
 	std::vector<Action> getActions(const String& model);
-	glm::vec2 computeCurrentPoint(const String& model, const glm::mat4& mvpMat, glm::mat4& modelMmat);
+	//glm::vec2 computeCurrentPoint(const String& model, const glm::mat4& mvpMat, glm::mat4& modelMmat);
+	cv::Mat createMask(const String& model, const glm::mat4& mvpMat);
 	void releaseNodeMemory(Node* node);
 };
 

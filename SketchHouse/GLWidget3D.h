@@ -54,6 +54,8 @@ public:
 	void createVAO();
 	void drawLineTo(const QPoint &endPoint);
 	void drawCircle(const QPoint &point);
+	void eraseLineTo(const QPoint &endPoint);
+	void eraseCircle(const QPoint &point);
 
 protected:
 	void resizeGL(int width, int height);
