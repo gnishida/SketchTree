@@ -19,7 +19,7 @@ void Pen::setType(int type) {
 	}
 }
 
-GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent), lsystem(300, parametriclsystem::Literal("X", 0, 18.0f, 0.0f)) {
+GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent), lsystem(300, parametriclsystem::Literal("X", 0, 21.0f, 0.0f)) {
 	mode = MODE_SKETCH;
 	dragging = false;
 	pen.setType(Pen::TYPE_BRANCH);
