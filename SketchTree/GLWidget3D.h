@@ -44,7 +44,7 @@ public:
 	int mode;	// 0 -- sketch / 1 -- 3D view
 	bool dragging;
 	QPoint lastPoint;
-	QImage sketch[2];
+	QImage sketch[parametriclsystem::NUM_LAYERS];
 	Pen pen;
 
 public:

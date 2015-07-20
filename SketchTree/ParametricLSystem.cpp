@@ -506,8 +506,8 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
  * @param indicator [OUT]	indicator
  */
 void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, std::vector<cv::Mat>& indicator) {
-	indicator.resize(2);
-	for (int i = 0; i < 2; ++i) {
+	indicator.resize(NUM_LAYERS);
+	for (int i = 0; i < NUM_LAYERS; ++i) {
 		indicator[i] = cv::Mat::zeros(grid_size, grid_size, CV_32F);
 	}
 

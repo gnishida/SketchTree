@@ -13,6 +13,8 @@ using namespace std;
 
 namespace parametriclsystem {
 
+const int NUM_LAYERS = 2;
+
 class State {
 public:
 	double diameter;

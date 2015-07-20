@@ -52,20 +52,20 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 }
 
 void MainWindow::onNewSketch() {
-	for (int i = 0; i < 2; ++i) {
+	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
 		glWidget->sketch[i].fill(qRgba(255, 255, 255, 0));
 	}
 	glWidget->update();
 }
 
 void MainWindow::onLoadSketch() {
-	QString filename[2];
-	for (int i = 0; i < 2; ++i) {
+	QString filename[parametriclsystem::NUM_LAYERS];
+	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
 		filename[i] = QFileDialog::getOpenFileName(this, tr("Open sketch file..."), "", tr("sketch Files (*.png)"));
 		if (filename[i].isEmpty()) return;
 	}
 
-	for (int i = 0; i < 2; ++i) {
+	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
 		glWidget->sketch[i].load(filename[i]);
 	}
 
@@ -73,13 +73,13 @@ void MainWindow::onLoadSketch() {
 }
 
 void MainWindow::onSaveSketch() {
-	QString filename[2];
-	for (int i = 0; i < 2; ++i) {
+	QString filename[parametriclsystem::NUM_LAYERS];
+	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
 		filename[i] = QFileDialog::getSaveFileName(this, tr("Save sketch file..."), "", tr("Sketch Files (*.png)"));
 		if (filename[i].isEmpty()) return;
 	}
 
-	for (int i = 0; i < 2; ++i) {
+	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
 		glWidget->sketch[i].save(filename[i]);
 	}
 }
@@ -113,7 +113,7 @@ void MainWindow::onRandomGeneration() {
 void MainWindow::onGreedyInverse() {
 	std::vector<cv::Mat> target;
 	target.resize(2);
-	for (int i = 0; i < 2; ++i) {
+	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
 		// スケッチ[BGRA]を、cv::Matに変換する
 		target[i] = cv::Mat(glWidget->sketch[i].height(), glWidget->sketch[i].width(), CV_8UC4, const_cast<uchar*>(glWidget->sketch[i].bits()), glWidget->sketch[i].bytesPerLine());
 

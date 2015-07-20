@@ -945,7 +945,7 @@ glm::vec2 ParametricLSystem::computeCurrentPoint(const String& model, const glm:
 	double w = model[model.cursor].param_values[2];
 	double h = FLOOR_HEIGHT;
 
-	return glm::vec2(x + w * 0.5, y * h * 0.5);
+	return glm::vec2(x + w * 0.5 + grid_size * 0.5, y * h * 0.5 + grid_size * 0.5);
 }
 
 /**
