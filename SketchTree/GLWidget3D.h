@@ -53,6 +53,7 @@ public:
 	void drawScene(int drawMode);
 	void createVAO();
 	void drawLineTo(const QPoint &endPoint);
+	void drawCircle(const QPoint &point);
 
 protected:
 	void resizeGL(int width, int height);

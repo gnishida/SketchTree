@@ -9,16 +9,16 @@
 #define SQR(x)	((x) * (x))
 
 
-#define MAX_ITERATIONS						400//1400//200
+#define MAX_ITERATIONS						1400//400//1400//200
 #define MAX_ITERATIONS_FOR_MC				15
 #define NUM_MONTE_CARLO_SAMPLING			100
 
 #define PARAM_EXPLORATION					0.3 //1
 #define PARAM_EXPLORATION_VARIANCE			0.1//10
 
-#define LENGTH_ATTENUATION					0.95
-#define INITIAL_SIZE						5.0
-#define SIZE_ATTENUATION					0.016//0.03 //0.04
+#define LENGTH_ATTENUATION					0.92
+#define INITIAL_SIZE						6.0
+#define SIZE_ATTENUATION					0.023//0.03 //0.04
 #define MASK_RADIUS							34
 
 //#define DEBUG		1
@@ -869,10 +869,10 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 		String rule;
 		actions.push_back(Action(actions.size(), i, rule));
 
-		if (model[i].param_values[1] < 300.0f) {
+		if (model[i].param_values[1] < 800.0f) {
 			String rule = Literal("F", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1])
 				+ Literal("#", model[i].depth + 1)
-				+ Literal("\\", model[i].depth + 1, 40.0)
+				+ Literal("\\", model[i].depth + 1, 50.0)
 				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
 			actions.push_back(Action(actions.size(), i, rule));
 
@@ -883,27 +883,46 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 				+ Literal("]", model[i].depth + 1, true)
 				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1] + model[i].param_values[0] * 0.5f)
 				+ Literal("#", model[i].depth + 1)
-				+ Literal("\\", model[i].depth + 1, 40.0)
+				+ Literal("\\", model[i].depth + 1, 50.0)
 				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
 			actions.push_back(Action(actions.size(), i, rule));
 		}
 
-		if (model[i].param_values[1] >= 30.0f) {
-			String rule = Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1])
+		if (model[i].param_values[1] >= 40.0f) {
+			rule = Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1])
 				+ Literal("[", model[i].depth + 1, true)
-				+ Literal("+", model[i].depth + 1, 60.0)
-				+ Literal("C", model[i].depth + 1, 3.0f, 2.0f)
-				+ Literal("]", model[i].depth + 1, true)
-				+ Literal("[", model[i].depth + 1, true)
-				+ Literal("-", model[i].depth + 1, 60.0)
-				+ Literal("C", model[i].depth + 1, 3.0f, 2.0f)
+				+ Literal("+", model[i].depth + 1)
+				+ Literal("Y", model[i].depth + 1, 3.0, 100.0)
 				+ Literal("]", model[i].depth + 1, true)
 				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1] + model[i].param_values[0] * 0.5f)
 				+ Literal("#", model[i].depth + 1)
-				+ Literal("\\", model[i].depth + 1, 40.0)
+				+ Literal("\\", model[i].depth + 1, 50.0)
 				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
 			actions.push_back(Action(actions.size(), i, rule));
+			actions.push_back(Action(actions.size(), i, rule));
 		}
+	} else if (model[i].name == "Y") {
+		String rule;
+		actions.push_back(Action(actions.size(), i, rule));
+		
+		rule = Literal("F", model[i].depth + 1, 3.0f, 100.0f)
+			+ Literal("[", model[i].depth + 1, true)
+			+ Literal("+", model[i].depth + 1, 60.0)
+			+ Literal("F", model[i].depth + 1, 1.0f, 100.0f)
+			+ Literal("\\", model[i].depth + 1, 70.0)
+			+ Literal("C", model[i].depth + 1, 3.0f, 2.0f)
+			+ Literal("]", model[i].depth + 1, true)
+			+ Literal("[", model[i].depth + 1, true)
+			+ Literal("-", model[i].depth + 1, 60.0)
+			+ Literal("F", model[i].depth + 1, 1.0f, 100.0f)
+			+ Literal("\\", model[i].depth + 1, -70.0)
+			+ Literal("C", model[i].depth + 1, 3.0f, 2.0f)
+			+ Literal("]", model[i].depth + 1, true)
+			+ Literal("F", model[i].depth + 1, 3.0f, 100.0f)
+			+ Literal("#", model[i].depth + 1)
+			+ Literal("\\", model[i].depth + 1, 50.0)
+			+ Literal("Y", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
+		actions.push_back(Action(actions.size(), i, rule));
 	} else if (model[i].name == "-" || model[i].name == "+") {
 		for (int k = -80; k <= 80; k += 20) {
 			if (k == 0) continue;

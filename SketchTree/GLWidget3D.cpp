@@ -93,6 +93,22 @@ void GLWidget3D::drawLineTo(const QPoint &endPoint) {
 	lastPoint = endPoint;
 }
 
+void GLWidget3D::drawCircle(const QPoint &point) {
+	QPoint p(point.x(), point.y());
+
+	Pen tempP;
+	tempP.setWidth(1);
+	tempP.setType(pen.type);
+
+	QPainter painter(&sketch[pen.type]);
+	painter.setPen(tempP);
+	painter.setBrush(QBrush(pen.color(), Qt::SolidPattern));
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setRenderHint(QPainter::HighQualityAntialiasing);
+
+	painter.drawEllipse(p, (int)(pen.width() * 0.5), (int)(pen.width() * 0.5));
+}
+
 void GLWidget3D::resizeGL(int width, int height) {
 	// sketch imageを更新
 	for (int i = 0; i < 2; ++i) {
@@ -114,10 +130,13 @@ void GLWidget3D::resizeGL(int width, int height) {
 void GLWidget3D::mousePressEvent(QMouseEvent *e) {
 	if (mode == MODE_SKETCH) {
 		lastPoint = e->pos();
+		drawCircle(e->pos());
 		dragging = true;
 	} else {
 		camera.mousePress(e->x(), e->y());
 	}
+
+	update();
 }
 
 void GLWidget3D::mouseReleaseEvent(QMouseEvent *e) {
