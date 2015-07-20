@@ -112,7 +112,7 @@ void MainWindow::onRandomGeneration() {
 
 void MainWindow::onGreedyInverse() {
 	std::vector<cv::Mat> target;
-	target.resize(2);
+	target.resize(parametriclsystem::NUM_LAYERS);
 	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
 		// スケッチ[BGRA]を、cv::Matに変換する
 		target[i] = cv::Mat(glWidget->sketch[i].height(), glWidget->sketch[i].width(), CV_8UC4, const_cast<uchar*>(glWidget->sketch[i].bits()), glWidget->sketch[i].bytesPerLine());
@@ -129,6 +129,9 @@ void MainWindow::onGreedyInverse() {
 
 		// 上下反転させる
 		cv::flip(target[i], target[i], 0);
+
+		// clamp
+		cv::threshold(target[i], target[i], 0.0, 1.0, cv::THRESH_BINARY);
 
 		char filename[256];
 		sprintf(filename, "target%d.png", i);

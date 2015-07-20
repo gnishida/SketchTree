@@ -133,6 +133,9 @@ void MainWindow::onGreedyInverse() {
 		// 上下反転させる
 		cv::flip(target[i], target[i], 0);
 
+		// clamp
+		cv::threshold(target[i], target[i], 0.0, 1.0, cv::THRESH_BINARY);
+
 		char filename[256];
 		sprintf(filename, "target%d.png", i);
 		ml::mat_save(filename, target[i]);

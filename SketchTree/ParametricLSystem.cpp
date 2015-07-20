@@ -701,8 +701,11 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		// indicatorを計算する
 		std::vector<cv::Mat> indicator;
 		computeIndicator(result_model, mvpMat, baseModelMat, indicator);
-		for (int i = 0; i < 2; ++i) {
+		for (int i = 0; i < NUM_LAYERS; ++i) {
 			indicator[i] += baseIndicator[i];
+
+			// clamp
+			cv::threshold(indicator[i], indicator[i], 0.0, 1.0, cv::THRESH_BINARY);
 		}
 
 		// スコアを計算する

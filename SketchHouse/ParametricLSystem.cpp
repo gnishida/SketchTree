@@ -688,6 +688,9 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		computeIndicator(result_model, mvpMat, glm::mat4(), indicator);
 		for (int i = 0; i < NUM_LAYERS; ++i) {
 			indicator[i] += baseIndicator[i];
+
+			// clamp
+			cv::threshold(indicator[i], indicator[i], 0.0, 1.0, cv::THRESH_BINARY);
 		}
 
 		// スコアを計算する
@@ -696,16 +699,18 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 
 
 		/////// デバッグ ///////
-		/*
-		char filename[256];
-		sprintf(filename, "images/indicator_%d_%d_%lf.png", derivation_step, iter, sc);
-		cv::Mat img = indicator[1] + target[1] * 0.4;
-		img = ml::mat_mask(img, mask, 0.7);
+		/*{
+			for (int i = 0; i < NUM_LAYERS; ++i) {
+				char filename[256];
+				sprintf(filename, "images/indicator_%d_%d_%d.png", derivation_step, iter, i);
+				cv::Mat img = indicator[i] * 0.7 + target[i] * 0.4;
+				img = ml::mat_mask(img, mask, 0.7);
 
-		ml::mat_save(filename, img);
+				ml::mat_save(filename, img);
 
-		cout << "   " << filename << " : " << result_model << endl;
-		*/
+				cout << "   " << filename << " : " << result_model << endl;
+			}
+		}*/
 		/////// デバッグ ///////
 
 
@@ -827,7 +832,7 @@ double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std
 		return 1.0 - count / total;
 	} else {
 		if (count > 0.0) {
-			return -1.0;
+			return -10000.0;
 		} else {
 			return 1.0;
 		}
