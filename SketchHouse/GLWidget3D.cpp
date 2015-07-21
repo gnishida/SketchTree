@@ -40,10 +40,7 @@ void GLWidget3D::drawScene(int drawMode) {
 		glUniform1i(glGetUniformLocation(renderManager.program,"shadowState"), 2);
 	}
 
-	renderManager.render("object");
-	renderManager.render("object2");
-	renderManager.render("object3");
-	renderManager.render("object4");
+	renderManager.renderAll();
 }
 
 void GLWidget3D::drawLineTo(const QPoint &endPoint) {
