@@ -443,7 +443,8 @@ String ParametricLSystem::derive(const String& start_model, int max_iterations, 
 
 void ParametricLSystem::draw(const String& model, RenderManager* renderManager) {
 	std::vector<Vertex> vertices;
-	std::vector<Vertex> vertices2;
+	std::vector<Vertex> windowVertices;
+	std::vector<Vertex> doorVertices;
 
 	const double door_depth = 20.0;
 	const double window_depth = 4.0;
@@ -492,7 +493,7 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 			{
 				glm::mat4 mat;
 				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.375, -door_depth));
-				glutils::drawQuad(w, h * 0.75, glm::vec3(0.8, 0.5, 0.3), mat, vertices);
+				glutils::drawQuad(w, h * 0.75, glm::vec3(0.8, 0.5, 0.3), mat, doorVertices);
 			}
 		} else if (model[i].name == "Window") {
 			double x = model[i].param_values[0];
@@ -581,7 +582,7 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 			{
 				glm::mat4 mat;
 				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.5, -window_depth));
-				glutils::drawQuad(w, h * 0.5, glm::vec3(1, 1, 1), mat, vertices2);
+				glutils::drawQuad(w, h * 0.5, glm::vec3(1, 1, 1), mat, windowVertices);
 			}
 		} else if (model[i].name == "Wall" || model[i].name == "W") {
 			double x = model[i].param_values[0];
@@ -598,8 +599,10 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 
 	renderManager->removeObject("object");
 	renderManager->removeObject("object2");
+	renderManager->removeObject("object3");
 	renderManager->addObject("object", "", vertices);
-	renderManager->addObject("object2", "textures/window.jpg", vertices2);
+	renderManager->addObject("object2", "textures/window.jpg", windowVertices);
+	renderManager->addObject("object3", "textures/door.jpg", doorVertices);
 }
 
 /**

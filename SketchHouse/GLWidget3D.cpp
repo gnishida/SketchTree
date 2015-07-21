@@ -42,6 +42,7 @@ void GLWidget3D::drawScene(int drawMode) {
 
 	renderManager.render("object");
 	renderManager.render("object2");
+	renderManager.render("object3");
 }
 
 void GLWidget3D::drawLineTo(const QPoint &endPoint) {
