@@ -105,8 +105,8 @@ void MainWindow::onRandomGeneration() {
 		ml::mat_save(filename, indicator[i]);
 	}
 
-	glWidget->lsystem.draw(glWidget->model, glWidget->vertices);
-	glWidget->createVAO();
+	glWidget->lsystem.draw(glWidget->model, &glWidget->renderManager);
+	glWidget->renderManager.updateShadowMap(glWidget, glWidget->light_dir);
 	glWidget->update();
 }
 
@@ -156,8 +156,8 @@ void MainWindow::onGreedyInverse() {
 		ml::mat_save(filename, indicator[i] + target[i] * 0.4);
 	}
 
-	glWidget->lsystem.draw(glWidget->model, glWidget->vertices);
-	glWidget->createVAO();
+	glWidget->lsystem.draw(glWidget->model, &glWidget->renderManager);
+	glWidget->renderManager.updateShadowMap(glWidget, glWidget->light_dir);
 	glWidget->update();
 }
 

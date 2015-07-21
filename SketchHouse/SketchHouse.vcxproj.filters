@@ -83,6 +83,9 @@
     <ClCompile Include="..\..\codebase\Shader.cpp">
       <Filter>Source Files\codebase</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\codebase\RenderManager.cpp">
+      <Filter>Source Files\codebase</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.h">
@@ -122,6 +125,9 @@
     </ClInclude>
     <ClInclude Include="ShadowMapping.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\codebase\RenderManager.h">
+      <Filter>Source Files\codebase</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

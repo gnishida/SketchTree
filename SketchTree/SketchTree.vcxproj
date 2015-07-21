@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\codebase\GLUtils.cpp" />
     <ClCompile Include="..\..\codebase\MLUtils.cpp" />
+    <ClCompile Include="..\..\codebase\RenderManager.cpp" />
     <ClCompile Include="..\..\codebase\Shader.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_GLWidget3D.cpp">
@@ -207,6 +208,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\codebase\GLUtils.h" />
     <ClInclude Include="..\..\codebase\MLUtils.h" />
+    <ClInclude Include="..\..\codebase\RenderManager.h" />
     <ClInclude Include="..\..\codebase\Shader.h" />
     <ClInclude Include="..\..\codebase\Vertex.h" />
     <ClInclude Include="Camera.h" />

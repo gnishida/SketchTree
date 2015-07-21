@@ -1,14 +1,11 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#include <glew.h>
-#include "Shader.h"
-#include "Vertex.h"
+#include "RenderManager.h"
 #include <QPen>
 #include <QGLWidget>
 #include <QtGui>
 #include "ParametricLSystem.h"
-#include "ShadowMapping.h"
 #include "Camera.h"
 
 class Pen : public QPen {
@@ -32,11 +29,8 @@ public:
 
 public:
 	Camera camera;
-	GLuint vao;
-	GLuint program;
-	std::vector<Vertex> vertices;
 	glm::vec3 light_dir;
-	ShadowMapping shadow;
+	RenderManager renderManager;
 
 	parametriclsystem::ParametricLSystem lsystem;
 	parametriclsystem::String model;
@@ -51,7 +45,6 @@ public:
 	GLWidget3D(QWidget *parent = 0);
 
 	void drawScene(int drawMode);
-	void createVAO();
 	void drawLineTo(const QPoint &endPoint);
 	void drawCircle(const QPoint &point);
 

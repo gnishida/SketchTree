@@ -441,8 +441,9 @@ String ParametricLSystem::derive(const String& start_model, int max_iterations, 
 	return model;
 }
 
-void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices) {
-	vertices.clear();
+void ParametricLSystem::draw(const String& model, RenderManager* renderManager) {
+	std::vector<Vertex> vertices;
+	std::vector<Vertex> vertices2;
 
 	const double door_depth = 20.0;
 	const double window_depth = 4.0;
@@ -499,13 +500,18 @@ void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices)
 			double w = model[i].param_values[2];
 			double h = model[i].param_values[3];
 			
-			// 上下の壁を描画
+			// 上の壁を描画
 			{
 				glm::mat4 mat;
-				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.125, 0.0));
+				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.875, 0.0));
 				glutils::drawQuad(w, h * 0.25, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
-				mat = glm::translate(mat, glm::vec3(0.0, h * 0.75, 0.0));
-				glutils::drawQuad(w, h * 0.25, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+			}
+
+			// 下の壁を描画
+			{
+				glm::mat4 mat;
+				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.105, 0.0));
+				glutils::drawQuad(w, h * 0.21, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
 			}
 
 			// 左側の横壁
@@ -575,7 +581,7 @@ void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices)
 			{
 				glm::mat4 mat;
 				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.5, -window_depth));
-				glutils::drawQuad(w, h * 0.5, glm::vec3(0, 0, 1), mat, vertices);
+				glutils::drawQuad(w, h * 0.5, glm::vec3(1, 1, 1), mat, vertices2);
 			}
 		} else if (model[i].name == "Wall" || model[i].name == "W") {
 			double x = model[i].param_values[0];
@@ -589,7 +595,11 @@ void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices)
 			glutils::drawQuad(w, h, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
 		}
 	}
-	this->axiom = axiom;
+
+	renderManager->removeObject("object");
+	renderManager->removeObject("object2");
+	renderManager->addObject("object", "", vertices);
+	renderManager->addObject("object2", "textures/window.jpg", vertices2);
 }
 
 /**

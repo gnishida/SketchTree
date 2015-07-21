@@ -83,6 +83,9 @@
     <ClCompile Include="..\..\codebase\MLUtils.cpp">
       <Filter>Source Files\codebase</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\codebase\RenderManager.cpp">
+      <Filter>Source Files\codebase</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.h">
@@ -121,6 +124,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\codebase\MLUtils.h">
+      <Filter>Source Files\codebase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\codebase\RenderManager.h">
       <Filter>Source Files\codebase</Filter>
     </ClInclude>
   </ItemGroup>

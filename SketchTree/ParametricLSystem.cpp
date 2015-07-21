@@ -433,8 +433,8 @@ String ParametricLSystem::derive(const String& start_model, int max_iterations, 
 	return model;
 }
 
-void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices) {
-	vertices.clear();
+void ParametricLSystem::draw(const String& model, RenderManager* renderManager) {
+	std::vector<Vertex> vertices;
 
 	glm::mat4 modelMat;
 
@@ -483,7 +483,9 @@ void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices)
 			glutils::drawCircle(radius, length, glm::vec3(0.3, 1, 0.3), mat, vertices);
 		}
 	}
-	this->axiom = axiom;
+	
+	renderManager->removeObject("object");
+	renderManager->addObject("object", "", vertices);
 }
 
 /**
