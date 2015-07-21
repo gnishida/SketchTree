@@ -445,6 +445,7 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 	std::vector<Vertex> vertices;
 	std::vector<Vertex> windowVertices;
 	std::vector<Vertex> doorVertices;
+	std::vector<Vertex> wallVertices;
 
 	const double door_depth = 20.0;
 	const double window_depth = 4.0;
@@ -462,7 +463,13 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 			{
 				glm::mat4 mat;
 				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.875, 0.0));
-				glutils::drawQuad(w, h * 0.25, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+				//glutils::drawQuad(w, h * 0.25, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+				glutils::drawQuad(w, h * 0.25, 
+					glm::vec3(x * 0.05, (y + h * 0.75) * 0.05, 0.0), 
+					glm::vec3((x + w) * 0.05, (y + h * 0.75) * 0.05, 0.0),
+					glm::vec3((x + w) * 0.05, (y + h) * 0.05, 0.0),
+					glm::vec3(x * 0.05, (y + h) * 0.05, 0.0),
+					mat, wallVertices);
 			}
 
 			// 左側の横壁
@@ -505,14 +512,26 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 			{
 				glm::mat4 mat;
 				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.875, 0.0));
-				glutils::drawQuad(w, h * 0.25, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+				//glutils::drawQuad(w, h * 0.25, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+				glutils::drawQuad(w, h * 0.25, 
+					glm::vec3(x * 0.05, (y + h * 0.75) * 0.05, 0.8), 
+					glm::vec3((x + w) * 0.05, (y + h * 0.75) * 0.05, 0.8), 
+					glm::vec3((x + w) * 0.05, (y + h) * 0.05, 0.8), 
+					glm::vec3(x * 0.05, (y + h) * 0.05, 0.8), 
+					mat, wallVertices);
 			}
 
 			// 下の壁を描画
 			{
 				glm::mat4 mat;
 				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.105, 0.0));
-				glutils::drawQuad(w, h * 0.21, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+				//glutils::drawQuad(w, h * 0.21, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+				glutils::drawQuad(w, h * 0.21, 
+					glm::vec3(x * 0.05, y * 0.05, 0.8), 
+					glm::vec3((x + w) * 0.05, y * 0.05, 0.8), 
+					glm::vec3((x + w) * 0.05, (y + h * 0.21) * 0.05, 0.8), 
+					glm::vec3(x * 0.05, (y + h * 0.21) * 0.05, 0.8), 
+					mat, wallVertices);
 			}
 
 			// 左側の横壁
@@ -590,19 +609,29 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 			double w = model[i].param_values[2];
 			double h = model[i].param_values[3];
 			
-			glm::mat4 mat;
-			mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.5, 0.0));
-
-			glutils::drawQuad(w, h, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+			// 壁
+			{
+				glm::mat4 mat;
+				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.5, 0.0));
+				//glutils::drawQuad(w, h, glm::vec3(0.8, 0.8, 0.8), mat, wallVertices);
+				glutils::drawQuad(w, h, 
+					glm::vec3(x * 0.05, y * 0.05, 0.0),
+					glm::vec3((x + w) * 0.05, y * 0.05, 0.0),
+					glm::vec3((x + w) * 0.05, (y + h) * 0.05, 0.0),
+					glm::vec3(x * 0.05, (y + h) * 0.05, 0.0),
+					mat, wallVertices);
+			}
 		}
 	}
 
 	renderManager->removeObject("object");
 	renderManager->removeObject("object2");
 	renderManager->removeObject("object3");
+	renderManager->removeObject("object4");
 	renderManager->addObject("object", "", vertices);
 	renderManager->addObject("object2", "textures/window.jpg", windowVertices);
 	renderManager->addObject("object3", "textures/door.jpg", doorVertices);
+	renderManager->addObject("object4", "textures/wall.jpg", wallVertices);
 }
 
 /**

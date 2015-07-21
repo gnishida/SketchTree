@@ -43,6 +43,7 @@ void GLWidget3D::drawScene(int drawMode) {
 	renderManager.render("object");
 	renderManager.render("object2");
 	renderManager.render("object3");
+	renderManager.render("object4");
 }
 
 void GLWidget3D::drawLineTo(const QPoint &endPoint) {
@@ -165,11 +166,11 @@ void GLWidget3D::initializeGL() {
 	// set the clear color for the screen
 	qglClearColor(QColor(224, 224, 224));
 
-	//glutils::drawCylinder(10, 10, 300, glm::vec3(1, 1, 1), glm::rotate(glm::mat4(), -1.57f, glm::vec3(1, 0, 0)), vertices);
-	std::vector<Vertex> vertices;
+	/*std::vector<Vertex> vertices;
 	glutils::drawSphere(10, glm::vec3(1, 1, 1), glm::translate(glm::mat4(), glm::vec3(0, 160, 0)), vertices);
 	glutils::drawSphere(10, glm::vec3(1, 1, 1), glm::mat4(), vertices);
 	renderManager.addObject("object", "", vertices);
+	*/
 }
 
 void GLWidget3D::paintEvent(QPaintEvent *event) {
