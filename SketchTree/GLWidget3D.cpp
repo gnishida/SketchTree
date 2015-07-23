@@ -28,25 +28,6 @@ GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers
 	setAutoFillBackground(false);
 }
 
-/** 
- * スケッチimageのサイズを変更する
- *
- * @param width		新しいwidth
- * @param height	新しいheight
- */
-void GLWidget3D::resizeImages(int width, int height) {
-	// sketch imageを更新
-	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
-		QImage newImage(width, height, QImage::Format_ARGB32);
-		newImage.fill(qRgba(255, 255, 255, 0));
-		QPainter painter(&newImage);
-		int offset_x = (width - sketch[i].size().width()) * 0.5;
-		int offset_y = (height - sketch[i].size().height()) * 0.5;
-		painter.drawImage(QPoint(offset_x, offset_y), sketch[i]);
-		sketch[i] = newImage;
-	}
-}
-
 /**
  * Draw the scene.
  */
@@ -87,8 +68,6 @@ void GLWidget3D::drawCircle(const QPoint &point) {
 }
 
 void GLWidget3D::resizeGL(int width, int height) {
-	resizeImages(width, height);
-
 	// OpenGLの設定を更新
 	height = height ? height : 1;
 	glViewport(0, 0, width, height);
@@ -178,8 +157,11 @@ void GLWidget3D::paintEvent(QPaintEvent *event) {
 	// QPainterで描画
 	QPainter painter(this);
 	painter.setOpacity(0.5);
-	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
-		painter.drawImage(0, 0, sketch[i]);
+	if (!sketch[0].isNull()) {
+		for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
+			QImage img = sketch[i].scaled(width(), height(), Qt::KeepAspectRatio);
+			painter.drawImage((width() - img.width()) * 0.5, (height() - img.height()) * 0.5, img);
+		}
 	}
 	painter.end();
 }

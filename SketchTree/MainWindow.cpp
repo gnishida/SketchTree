@@ -71,7 +71,6 @@ void MainWindow::onLoadSketch() {
 	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
 		glWidget->sketch[i].load(filename[i]);
 	}
-	glWidget->resizeImages(glWidget->width(), glWidget->height());
 
 	glWidget->update();
 }
