@@ -679,7 +679,11 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 				glm::vec4 p2(x + w, y + h, 0, 1);
 				p1 = mvpMat * p1;
 				p2 = mvpMat * p2;
-				cv::rectangle(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), -1);
+				int u1 = (p1.x / p1.w + 1.0) * grid_size * 0.5;
+				int v1 = (p1.y / p1.w + 1.0) * grid_size * 0.5;
+				int u2 = (p2.x / p2.w + 1.0) * grid_size * 0.5;
+				int v2 = (p2.y / p2.w + 1.0) * grid_size * 0.5;
+				cv::rectangle(indicator[0], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 				//cv::line(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Scalar(1), 10);
 				//cv::line(indicator[0], cv::Point(p1.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), 10);
 			}
@@ -690,7 +694,11 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 				glm::vec4 p2 = glm::vec4(x + w, y + h * 0.75, 0, 1);
 				p1 = mvpMat * p1;
 				p2 = mvpMat * p2;
-				cv::rectangle(indicator[1], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), -1);
+				int u1 = (p1.x / p1.w + 1.0) * grid_size * 0.5;
+				int v1 = (p1.y / p1.w + 1.0) * grid_size * 0.5;
+				int u2 = (p2.x / p2.w + 1.0) * grid_size * 0.5;
+				int v2 = (p2.y / p2.w + 1.0) * grid_size * 0.5;
+				cv::rectangle(indicator[1], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 			}
 		} else if (model[i].name == "Window") {
 			double x = model[i].param_values[0];
@@ -704,7 +712,11 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 				glm::vec4 p2(x + w, y + h, 0, 1);
 				p1 = mvpMat * p1;
 				p2 = mvpMat * p2;
-				cv::rectangle(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), -1);
+				int u1 = (p1.x / p1.w + 1.0) * grid_size * 0.5;
+				int v1 = (p1.y / p1.w + 1.0) * grid_size * 0.5;
+				int u2 = (p2.x / p2.w + 1.0) * grid_size * 0.5;
+				int v2 = (p2.y / p2.w + 1.0) * grid_size * 0.5;
+				cv::rectangle(indicator[0], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 				//cv::line(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Scalar(1), 10);
 				//cv::line(indicator[0], cv::Point(p1.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), 10);
 			}
@@ -715,7 +727,11 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 				glm::vec4 p2 = glm::vec4(x + w, y + h * 0.75, 0, 1);
 				p1 = mvpMat * p1;
 				p2 = mvpMat * p2;
-				cv::rectangle(indicator[2], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), -1);
+				int u1 = (p1.x / p1.w + 1.0) * grid_size * 0.5;
+				int v1 = (p1.y / p1.w + 1.0) * grid_size * 0.5;
+				int u2 = (p2.x / p2.w + 1.0) * grid_size * 0.5;
+				int v2 = (p2.y / p2.w + 1.0) * grid_size * 0.5;
+				cv::rectangle(indicator[2], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 			}
 		} else if (model[i].name == "Wall" || model[i].name == "W") {
 			double x = model[i].param_values[0];
@@ -728,7 +744,12 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 			glm::vec4 p2(x + w, y + h, 0, 1);
 			p1 = mvpMat * p1;
 			p2 = mvpMat * p2;
-			cv::rectangle(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), -1);
+			int u1 = (p1.x / p1.w + 1.0) * grid_size * 0.5;
+			int v1 = (p1.y / p1.w + 1.0) * grid_size * 0.5;
+			int u2 = (p2.x / p2.w + 1.0) * grid_size * 0.5;
+			int v2 = (p2.y / p2.w + 1.0) * grid_size * 0.5;
+
+			cv::rectangle(indicator[0], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 			//cv::rectangle(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), 10);
 			//cv::line(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Scalar(1), 10);
 			//cv::line(indicator[0], cv::Point(p1.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), 10);

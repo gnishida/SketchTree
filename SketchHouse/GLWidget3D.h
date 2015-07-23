@@ -47,6 +47,7 @@ public:
 public:
 	GLWidget3D(QWidget *parent = 0);
 
+	void resizeImages(int width, int height);
 	void drawScene(int drawMode);
 	void drawLineTo(const QPoint &endPoint);
 	void drawCircle(const QPoint &point);

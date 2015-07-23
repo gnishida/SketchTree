@@ -30,6 +30,28 @@ GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers
 	setAutoFillBackground(false);
 }
 
+/** 
+ * スケッチimageのサイズを変更する
+ *
+ * @param width		新しいwidth
+ * @param height	新しいheight
+ */
+void GLWidget3D::resizeImages(int width, int height) {
+	// sketch imageを更新
+	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
+		sketch[i] = sketch[i].scaled(width, height);
+		/*
+		QImage newImage(width, height, QImage::Format_ARGB32);
+		newImage.fill(qRgba(255, 255, 255, 0));
+		QPainter painter(&newImage);
+		int offset_x = (width - sketch[i].size().width()) * 0.5;
+		int offset_y = (height - sketch[i].size().height()) * 0.5;
+		painter.drawImage(QPoint(offset_x, offset_y), sketch[i]);
+		sketch[i] = newImage;
+		*/
+	}
+}
+
 /**
  * Draw the scene.
  */
@@ -96,16 +118,7 @@ void GLWidget3D::eraseCircle(const QPoint &point) {
 }
 
 void GLWidget3D::resizeGL(int width, int height) {
-	// sketch imageを更新
-	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
-		QImage newImage(width, height, QImage::Format_ARGB32);
-		newImage.fill(qRgba(255, 255, 255, 0));
-		QPainter painter(&newImage);
-		int offset_x = (width - sketch[i].size().width()) * 0.5;
-		int offset_y = (height - sketch[i].size().height()) * 0.5;
-		painter.drawImage(QPoint(offset_x, offset_y), sketch[i]);
-		sketch[i] = newImage;
-	}
+	resizeImages(width, height);
 
 	// OpenGLの設定を更新
 	height = height ? height : 1;
@@ -168,6 +181,10 @@ void GLWidget3D::initializeGL() {
 	glutils::drawSphere(10, glm::vec3(1, 1, 1), glm::mat4(), vertices);
 	renderManager.addObject("object", "", vertices);
 	*/
+
+	std::vector<Vertex> vertices;
+	glutils::drawAxes(1, 40, glm::mat4(), vertices);
+	renderManager.addObject("axis", "", vertices);
 }
 
 void GLWidget3D::paintEvent(QPaintEvent *event) {

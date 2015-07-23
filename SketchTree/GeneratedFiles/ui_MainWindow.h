@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created: Mon Jul 20 09:36:59 2015
+** Created: Thu Jul 23 12:10:26 2015
 **      by: Qt User Interface Compiler version 4.8.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -42,6 +42,9 @@ public:
     QAction *actionPenWidth20;
     QAction *actionPenWidth10;
     QAction *actionPenWidth5;
+    QAction *actionLoadCamera;
+    QAction *actionSaveCamera;
+    QAction *actionResetCamera;
     QWidget *centralWidget;
     QMenuBar *menuBar;
     QMenu *menuFile;
@@ -96,6 +99,12 @@ public:
         actionPenWidth5 = new QAction(MainWindowClass);
         actionPenWidth5->setObjectName(QString::fromUtf8("actionPenWidth5"));
         actionPenWidth5->setCheckable(true);
+        actionLoadCamera = new QAction(MainWindowClass);
+        actionLoadCamera->setObjectName(QString::fromUtf8("actionLoadCamera"));
+        actionSaveCamera = new QAction(MainWindowClass);
+        actionSaveCamera->setObjectName(QString::fromUtf8("actionSaveCamera"));
+        actionResetCamera = new QAction(MainWindowClass);
+        actionResetCamera->setObjectName(QString::fromUtf8("actionResetCamera"));
         centralWidget = new QWidget(MainWindowClass);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         MainWindowClass->setCentralWidget(centralWidget);
@@ -131,6 +140,10 @@ public:
         menuFile->addAction(actionSaveSketch);
         menuFile->addSeparator();
         menuFile->addAction(actionSaveImage);
+        menuFile->addSeparator();
+        menuFile->addAction(actionLoadCamera);
+        menuFile->addAction(actionSaveCamera);
+        menuFile->addAction(actionResetCamera);
         menuFile->addSeparator();
         menuFile->addAction(actionExit);
         menuL_System->addAction(actionRandomGeneration);
@@ -174,6 +187,9 @@ public:
         actionPenWidth20->setText(QApplication::translate("MainWindowClass", "20", 0, QApplication::UnicodeUTF8));
         actionPenWidth10->setText(QApplication::translate("MainWindowClass", "10", 0, QApplication::UnicodeUTF8));
         actionPenWidth5->setText(QApplication::translate("MainWindowClass", "5", 0, QApplication::UnicodeUTF8));
+        actionLoadCamera->setText(QApplication::translate("MainWindowClass", "Load Camera", 0, QApplication::UnicodeUTF8));
+        actionSaveCamera->setText(QApplication::translate("MainWindowClass", "Save Camera", 0, QApplication::UnicodeUTF8));
+        actionResetCamera->setText(QApplication::translate("MainWindowClass", "Reset Camera", 0, QApplication::UnicodeUTF8));
         menuFile->setTitle(QApplication::translate("MainWindowClass", "&File", 0, QApplication::UnicodeUTF8));
         menuL_System->setTitle(QApplication::translate("MainWindowClass", "&L-System", 0, QApplication::UnicodeUTF8));
         menuMode->setTitle(QApplication::translate("MainWindowClass", "&Mode", 0, QApplication::UnicodeUTF8));

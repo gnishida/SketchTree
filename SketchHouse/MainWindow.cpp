@@ -38,6 +38,9 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	connect(ui.actionLoadSketch, SIGNAL(triggered()), this, SLOT(onLoadSketch()));
 	connect(ui.actionSaveSketch, SIGNAL(triggered()), this, SLOT(onSaveSketch()));
 	connect(ui.actionSaveImage, SIGNAL(triggered()), this, SLOT(onSaveImage()));
+	connect(ui.actionLoadCamera, SIGNAL(triggered()), this, SLOT(onLoadCamera()));
+	connect(ui.actionSaveCamera, SIGNAL(triggered()), this, SLOT(onSaveCamera()));
+	connect(ui.actionResetCamera, SIGNAL(triggered()), this, SLOT(onResetCamera()));
 	connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
 	connect(ui.actionRandomGeneration, SIGNAL(triggered()), this, SLOT(onRandomGeneration()));
 	connect(ui.actionGreedyInverse, SIGNAL(triggered()), this, SLOT(onGreedyInverse()));
@@ -71,6 +74,7 @@ void MainWindow::onLoadSketch() {
 	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
 		glWidget->sketch[i].load(filename[i]);
 	}
+	glWidget->resizeImages(glWidget->width(), glWidget->height());
 
 	glWidget->update();
 }
@@ -92,6 +96,26 @@ void MainWindow::onSaveImage() {
 	QString fileName = "screenshots/" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("HHmmss") + ".png";
 	glWidget->grabFrameBuffer().save(fileName);
 	printf("Save %s\n",fileName.toAscii().constData());
+}
+
+void MainWindow::onLoadCamera() {
+	QString filename = QFileDialog::getOpenFileName(this, tr("Open camera file..."), "", tr("Camera Files (*.cam)"));
+	if (filename.isEmpty()) return;
+
+	glWidget->camera.loadCameraPose(filename.toUtf8().data());
+	glWidget->update();
+}
+
+void MainWindow::onSaveCamera() {
+	QString filename = QFileDialog::getSaveFileName(this, tr("Save camera file..."), "", tr("Camera Files (*.cam)"));
+	if (filename.isEmpty()) return;
+
+	glWidget->camera.saveCameraPose(filename.toUtf8().data());
+}
+
+void MainWindow::onResetCamera() {
+	glWidget->camera.resetCamera();
+	glWidget->update();
 }
 
 void MainWindow::onRandomGeneration() {
@@ -153,7 +177,7 @@ void MainWindow::onGreedyInverse() {
 	// 生成したモデルの画像を保存する
 	std::vector<cv::Mat> indicator;
 	glWidget->lsystem.computeIndicator(glWidget->model, glWidget->camera.mvpMatrix, indicator);
-	for (int i = 0; i < target.size(); ++i) {
+	for (int i = 0; i < indicator.size(); ++i) {
 		char filename[256];
 		sprintf(filename, "result%d.png", i);
 		ml::mat_save(filename, indicator[i] + target[i] * 0.4);

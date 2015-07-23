@@ -406,6 +406,15 @@ String ParametricLSystem::derive(int random_seed) {
 	}
 
 	return result_model;
+
+	/*
+	String model;
+	model = Literal("F", 0, 31.0, 10.0)
+		+ Literal("[", 0, true) + Literal("-", 0, 90.0) + Literal("F", 0, 49.0, 20.0) + Literal("+", 0, 90.0) + Literal("F", 0, 49.0, 20.0) + Literal("]", 0, true)
+		+ Literal("F", 0, 49.0, 10.0)
+		+ Literal("[", 0, true) + Literal("-", 0, 90.0) + Literal("F", 0, 95.0, 20.0) + Literal("]", 0, true) + Literal("F", 0, 95.0, 20.0);
+	return model;
+	*/
 }
 
 /**
@@ -440,31 +449,41 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 
 	std::list<glm::mat4> stack;
 
+	int undefined = 0;
 	for (int i = 0; i < model.length(); ++i) {
+		if (undefined == 0 && !model[i].param_defined) {
+			undefined = 1;
+			continue;
+		}
+
 		if (model[i].name == "[") {
 			stack.push_back(modelMat);
+			if (undefined > 0) undefined++;
 		} else if (model[i].name == "]") {
 			if (!stack.empty()) {
 				modelMat = stack.back();
 				stack.pop_back();
+				if (undefined > 0) undefined--;
 			}
-		} else if (model[i].name == "+" && model[i].param_defined) {
+		} else if (undefined > 0) {
+			continue;
+		} else if (model[i].name == "+") {
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "-" && model[i].param_defined) {
+		} else if (model[i].name == "-") {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "#" && model[i].param_defined) {
+		} else if (model[i].name == "#") {
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "\\" && model[i].param_defined) {
+		} else if (model[i].name == "\\") {
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "/" && model[i].param_defined) {
+		} else if (model[i].name == "/") {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "&" && model[i].param_defined) {
+		} else if (model[i].name == "&") {
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "^" && model[i].param_defined) {
+		} else if (model[i].name == "^") {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "f" && model[i].param_defined) {
+		} else if (model[i].name == "f") {
 			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_values[0], 0));
-		} else if (model[i].name == "F" && model[i].param_defined) {
+		} else if (model[i].name == "F") {
 			double length = model[i].param_values[0];
 			double radius1 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * model[i].param_values[1]);
 			double radius2 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * (model[i].param_values[1] + model[i].param_values[0]));
@@ -473,7 +492,7 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 			glutils::drawCylinder(radius1, radius2, length, glm::vec3(0.9, 0.3, 0.3), glm::rotate(modelMat, deg2rad(-90), glm::vec3(1, 0, 0)), vertices);
 
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
-		} else if (model[i].name == "C" && model[i].param_defined) {
+		} else if (model[i].name == "C") {
 			double length = model[i].param_values[0];
 			double radius = model[i].param_values[1];
 			
@@ -535,23 +554,23 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 			}
 		} else if (undefined > 0) {
 			continue;
-		} else if (model[i].name == "+" && model[i].param_defined) {
+		} else if (model[i].name == "+") {
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "-" && model[i].param_defined) {
+		} else if (model[i].name == "-") {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "#" && model[i].param_defined) {
+		} else if (model[i].name == "#") {
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "\\" && model[i].param_defined) {
+		} else if (model[i].name == "\\") {
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "/" && model[i].param_defined) {
+		} else if (model[i].name == "/") {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "&" && model[i].param_defined) {
+		} else if (model[i].name == "&") {
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "^" && model[i].param_defined) {
+		} else if (model[i].name == "^") {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "f" && model[i].param_defined) {
+		} else if (model[i].name == "f") {
 			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_values[0], 0));
-		} else if (model[i].name == "F" && model[i].param_defined) {
+		} else if (model[i].name == "F") {
 			double length = model[i].param_values[0];
 			double radius1 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * model[i].param_values[1]);
 			double radius2 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * (model[i].param_values[1] + model[i].param_values[0]));
@@ -562,16 +581,16 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 			glm::vec4 p2(0, length, 0, 1);
 			p1 = mvpMat * modelMat * p1;
 			p2 = mvpMat * modelMat * p2;
-			int u1 = p1.x + grid_size * 0.5;
-			int v1 = p1.y + grid_size * 0.5;
-			int u2 = p2.x + grid_size * 0.5;
-			int v2 = p2.y + grid_size * 0.5;
+			int u1 = (p1.x / p1.w + 1.0) * grid_size * 0.5;
+			int v1 = (p1.y / p1.w + 1.0) * grid_size * 0.5;
+			int u2 = (p2.x / p2.w + 1.0) * grid_size * 0.5;
+			int v2 = (p2.y / p2.w + 1.0) * grid_size * 0.5;
 
 			int thickness = max(1.0, radius);
 			cv::line(indicator[0], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), thickness);
 
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
-		} else if (model[i].name == "C" && model[i].param_defined) {
+		} else if (model[i].name == "C") {
 			double length = model[i].param_values[0];
 			double radius = model[i].param_values[1];
 
@@ -582,13 +601,15 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 			p1 = mvpMat * modelMat * p1;
 			p2 = mvpMat * modelMat * p2;
 			p3 = mvpMat * modelMat * p3;
-			int u1 = p1.x + grid_size * 0.5;
-			int v1 = p1.y + grid_size * 0.5;
-			int u2 = p3.x + grid_size * 0.5;
-			int v2 = p3.y + grid_size * 0.5;
-			int r1 = sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
-			int r2 = sqrt((p3.x - p1.x) * (p3.x - p1.x) + (p3.y - p1.y) * (p3.y - p1.y));
-			float angle = atan2(p2.y - p1.y, p2.x - p1.x) / M_PI * 180.0;
+			double u1 = (p1.x / p1.w + 1.0) * grid_size * 0.5;
+			double v1 = (p1.y / p1.w + 1.0) * grid_size * 0.5;
+			double u2 = (p2.x / p2.w + 1.0) * grid_size * 0.5;
+			double v2 = (p2.y / p2.w + 1.0) * grid_size * 0.5;
+			double u3 = (p3.x / p3.w + 1.0) * grid_size * 0.5;
+			double v3 = (p3.y / p3.w + 1.0) * grid_size * 0.5;
+			int r1 = sqrt((u2 - u1) * (u2 - u1) + (v2 - v1) * (v2 - v1));
+			int r2 = sqrt((u3 - u1) * (u3 - u1) + (v3 - v1) * (v3 - v1));
+			float angle = atan2(v2 - v1, u2 - u1) / M_PI * 180.0;
 
 			cv::ellipse(indicator[1], cv::Point(u1, v1), cv::Size(r1, r2), angle, 0, 360, cv::Scalar(1), -1);
 			//cv::line(indicator[1], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), 3);

@@ -21,6 +21,9 @@ public slots:
 	void onLoadSketch();
 	void onSaveSketch();
 	void onSaveImage();
+	void onLoadCamera();
+	void onSaveCamera();
+	void onResetCamera();
 	void onRandomGeneration();
 	void onGreedyInverse();
 	void onModeUpdate();
