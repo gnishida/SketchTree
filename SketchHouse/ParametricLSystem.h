@@ -72,8 +72,6 @@ public:
 	void setValue(double value);
 	void replace(const String& str);
 
-	void setExpand();
-	void resetExpand();
 	String getExpand() const;
 	void nextCursor(int depth);
 };
