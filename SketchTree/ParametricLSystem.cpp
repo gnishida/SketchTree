@@ -853,19 +853,21 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 		}
 
 		if (model[i].param_values[1] < 200.0) {
-			String rule = Literal("F", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1])
-				+ Literal("#", model[i].depth + 1)
+			String rule = Literal("#", model[i].depth + 1)
+				+ Literal("F", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1])
+				//+ Literal("#", model[i].depth + 1)
 				+ Literal("\\", model[i].depth + 1, 50.0)
 				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
 			actions.push_back(Action(actions.size(), i, rule));
 
-			rule = Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1])
+			rule = Literal("#", model[i].depth + 1)
+				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1])
 				+ Literal("[", model[i].depth + 1, true)
 				+ Literal("+", model[i].depth + 1)
 				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0] * 0.5f)
 				+ Literal("]", model[i].depth + 1, true)
 				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1] + model[i].param_values[0] * 0.5f)
-				+ Literal("#", model[i].depth + 1)
+				//+ Literal("#", model[i].depth + 1)
 				+ Literal("\\", model[i].depth + 1, 50.0)
 				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
 			actions.push_back(Action(actions.size(), i, rule));

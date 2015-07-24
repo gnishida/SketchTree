@@ -15,17 +15,17 @@ using namespace std;
 namespace parametriclsystem {
 
 const int NUM_LAYERS = 2;
-const int GRID_SIZE = 300;
+const int GRID_SIZE = 100;//300;
 
-const int MAX_ITERATIONS = 1000;//400
-const int MAX_ITERATIONS_FOR_MC = 15;
+const int MAX_ITERATIONS = 500;//1000;
+const int MAX_ITERATIONS_FOR_MC = 10;//15;
 const int NUM_MONTE_CARLO_SAMPLING = 100;
 const double PARAM_EXPLORATION = 0.3;
 const double PARAM_EXPLORATION_VARIANCE = 0.1;
 const double LENGTH_ATTENUATION = 0.9;
 const double INITIAL_SIZE = 6.0;
 const double SIZE_ATTENUATION = 0.02;
-const double MASK_RADIUS_RATIO = 0.133;
+const double MASK_RADIUS_RATIO = 0.11;//0.133;
 
 class String;
 
