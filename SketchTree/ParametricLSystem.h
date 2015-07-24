@@ -15,16 +15,17 @@ using namespace std;
 namespace parametriclsystem {
 
 const int NUM_LAYERS = 2;
+const int GRID_SIZE = 300;
 
-class State {
-public:
-	double diameter;
-	glm::mat4 modelMat;
-	glm::vec3 color;
-
-public:
-	State() : diameter(0.0), color(0, 0.7, 0) {};
-};
+const int MAX_ITERATIONS = 1000;//400
+const int MAX_ITERATIONS_FOR_MC = 15;
+const int NUM_MONTE_CARLO_SAMPLING = 100;
+const double PARAM_EXPLORATION = 0.3;
+const double PARAM_EXPLORATION_VARIANCE = 0.1;
+const double LENGTH_ATTENUATION = 0.9;
+const double INITIAL_SIZE = 6.0;
+const double SIZE_ATTENUATION = 0.02;
+const double MASK_RADIUS_RATIO = 0.133;
 
 class String;
 
@@ -45,7 +46,6 @@ public:
 	Literal(const string& name, int depth, double param_value1, double param_value2);
 	Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3);
 	Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3, double param_value4);
-	Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3, double param_value4, double param_value5);
 	Literal(const string& name, int depth, const std::vector<double>& param_values);
 	
 	String operator+(const Literal& l) const;
@@ -56,7 +56,6 @@ class String {
 public:
 	vector<Literal> str;
 	int cursor;				// expandするリテラルの位置
-	//priority_queue<int, vector<int>, greater<int> > queue;
 
 public:
 	String();
@@ -140,7 +139,7 @@ public:
 	map<char, vector<string> > rules;
 
 public:
-	ParametricLSystem(int grid_size, const String& axiom);
+	ParametricLSystem(const String& axiom);
 	String derive(int random_seed);
 	String derive(const String& start_model, int max_iterations, std::vector<int>& derivation_history);
 	void draw(const String& model, RenderManager* renderManager);

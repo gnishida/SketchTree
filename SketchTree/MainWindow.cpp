@@ -144,8 +144,8 @@ void MainWindow::onGreedyInverse() {
 		std::vector<cv::Mat> planes;
 		cv::split(target[i], planes);
 	
-		// 300x300に変換する
-		cv::resize(planes[3], target[i], cv::Size(300, 300));
+		// grid sizeに変換する
+		cv::resize(planes[3], target[i], cv::Size(parametriclsystem::GRID_SIZE, parametriclsystem::GRID_SIZE));
 
 		// float型 [0, 1]に変換する
 		target[i].convertTo(target[i], CV_32F, 1.0/255.0);

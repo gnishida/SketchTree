@@ -8,21 +8,6 @@
 
 #define SQR(x)	((x) * (x))
 
-
-#define MAX_ITERATIONS						20//400//1400//200
-#define MAX_ITERATIONS_FOR_MC				15
-#define NUM_MONTE_CARLO_SAMPLING			300
-
-#define PARAM_EXPLORATION					0.3 //1
-#define PARAM_EXPLORATION_VARIANCE			0.1//10
-
-#define LENGTH_ATTENUATION					0.9
-#define INITIAL_SIZE						6.0
-#define SIZE_ATTENUATION					0.02//0.03 //0.04
-#define MASK_RADIUS							100//40//34
-
-//#define DEBUG		1
-
 namespace parametriclsystem {
 
 const double M_PI = 3.141592653592;
@@ -64,17 +49,6 @@ Literal::Literal(const string& name, int depth, double param_value1, double para
 	this->param_values.push_back(param_value2);
 	this->param_values.push_back(param_value3);
 	this->param_values.push_back(param_value4);
-	this->param_defined = true;
-}
-
-Literal::Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3, double param_value4, double param_value5) {
-	this->name = name;
-	this->depth = depth;
-	this->param_values.push_back(param_value1);
-	this->param_values.push_back(param_value2);
-	this->param_values.push_back(param_value3);
-	this->param_values.push_back(param_value4);
-	this->param_values.push_back(param_value5);
 	this->param_defined = true;
 }
 
@@ -392,8 +366,7 @@ Node* Node::bestChild() {
 	return best_child;
 }
 
-ParametricLSystem::ParametricLSystem(int grid_size, const String& axiom) {
-	this->grid_size = grid_size;
+ParametricLSystem::ParametricLSystem(const String& axiom) {
 	this->axiom = axiom;
 }
 
@@ -656,7 +629,7 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, std::vector<cv::Mat>& indicator) {
 	indicator.resize(NUM_LAYERS);
 	for (int i = 0; i < NUM_LAYERS; ++i) {
-		indicator[i] = cv::Mat::zeros(grid_size, grid_size, CV_32F);
+		indicator[i] = cv::Mat::zeros(GRID_SIZE, GRID_SIZE, CV_32F);
 	}
 
 	std::list<glm::mat4> stack;
@@ -679,10 +652,10 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 				glm::vec4 p2(x + w, y + h, 0, 1);
 				p1 = mvpMat * p1;
 				p2 = mvpMat * p2;
-				int u1 = (p1.x / p1.w + 1.0) * grid_size * 0.5;
-				int v1 = (p1.y / p1.w + 1.0) * grid_size * 0.5;
-				int u2 = (p2.x / p2.w + 1.0) * grid_size * 0.5;
-				int v2 = (p2.y / p2.w + 1.0) * grid_size * 0.5;
+				int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5;
+				int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5;
+				int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5;
+				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5;
 				cv::rectangle(indicator[0], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 				//cv::line(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Scalar(1), 10);
 				//cv::line(indicator[0], cv::Point(p1.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), 10);
@@ -694,10 +667,10 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 				glm::vec4 p2 = glm::vec4(x + w, y + h * 0.75, 0, 1);
 				p1 = mvpMat * p1;
 				p2 = mvpMat * p2;
-				int u1 = (p1.x / p1.w + 1.0) * grid_size * 0.5;
-				int v1 = (p1.y / p1.w + 1.0) * grid_size * 0.5;
-				int u2 = (p2.x / p2.w + 1.0) * grid_size * 0.5;
-				int v2 = (p2.y / p2.w + 1.0) * grid_size * 0.5;
+				int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5;
+				int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5;
+				int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5;
+				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5;
 				cv::rectangle(indicator[1], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 			}
 		} else if (model[i].name == "Window") {
@@ -712,10 +685,10 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 				glm::vec4 p2(x + w, y + h, 0, 1);
 				p1 = mvpMat * p1;
 				p2 = mvpMat * p2;
-				int u1 = (p1.x / p1.w + 1.0) * grid_size * 0.5;
-				int v1 = (p1.y / p1.w + 1.0) * grid_size * 0.5;
-				int u2 = (p2.x / p2.w + 1.0) * grid_size * 0.5;
-				int v2 = (p2.y / p2.w + 1.0) * grid_size * 0.5;
+				int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5;
+				int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5;
+				int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5;
+				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5;
 				cv::rectangle(indicator[0], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 				//cv::line(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Scalar(1), 10);
 				//cv::line(indicator[0], cv::Point(p1.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), 10);
@@ -727,10 +700,10 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 				glm::vec4 p2 = glm::vec4(x + w, y + h * 0.75, 0, 1);
 				p1 = mvpMat * p1;
 				p2 = mvpMat * p2;
-				int u1 = (p1.x / p1.w + 1.0) * grid_size * 0.5;
-				int v1 = (p1.y / p1.w + 1.0) * grid_size * 0.5;
-				int u2 = (p2.x / p2.w + 1.0) * grid_size * 0.5;
-				int v2 = (p2.y / p2.w + 1.0) * grid_size * 0.5;
+				int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5;
+				int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5;
+				int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5;
+				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5;
 				cv::rectangle(indicator[2], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 			}
 		} else if (model[i].name == "Wall" || model[i].name == "W") {
@@ -744,10 +717,10 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 			glm::vec4 p2(x + w, y + h, 0, 1);
 			p1 = mvpMat * p1;
 			p2 = mvpMat * p2;
-			int u1 = (p1.x / p1.w + 1.0) * grid_size * 0.5;
-			int v1 = (p1.y / p1.w + 1.0) * grid_size * 0.5;
-			int u2 = (p2.x / p2.w + 1.0) * grid_size * 0.5;
-			int v2 = (p2.y / p2.w + 1.0) * grid_size * 0.5;
+			int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5;
+			int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5;
+			int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5;
+			int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5;
 
 			cv::rectangle(indicator[0], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 			//cv::rectangle(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), 10);
@@ -886,9 +859,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 			}
 		}*/
 		/////// デバッグ ///////
-
-
-
+		
 		// リーフノードなら、スコアを確定する
 		if (node->untriedActions.size() == 0 && node->children.size() == 0) {
 			node->fixed = true;
@@ -1008,7 +979,7 @@ double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std
 		return 1.0 - count / total;
 	} else {
 		if (count > 0.0) {
-			return -10000.0;
+			return -1.0;
 		} else {
 			return 1.0;
 		}
@@ -1091,8 +1062,8 @@ cv::Mat ParametricLSystem::createMask(const String& model, const glm::mat4& mvpM
 	p1 = mvpMat * p1;
 	p2 = mvpMat * p2;
 	
-	cv::Mat mask = cv::Mat::zeros(grid_size, grid_size, CV_8U);
-	cv::rectangle(mask, cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), -1);
+	cv::Mat mask = cv::Mat::zeros(GRID_SIZE, GRID_SIZE, CV_8U);
+	cv::rectangle(mask, cv::Point((p1.x / p1.w + 1.0) * GRID_SIZE * 0.5, (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5), cv::Point((p2.x / p2.w + 1.0) * GRID_SIZE * 0.5, (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5), cv::Scalar(1), -1);
 	return mask;
 }
 
