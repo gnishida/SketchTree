@@ -167,7 +167,7 @@ void MainWindow::onGreedyInverse() {
 	glWidget->model = glWidget->lsystem.inverse(target, glWidget->camera.mvpMatrix);
 	time_t end = clock();
 
-	cout << glWidget->model << endl;
+	//cout << glWidget->model << endl;
 
 	cout << fixed << "Elapsed: " << (double)(end - start) / CLOCKS_PER_SEC  << " [sec]" << endl;
 

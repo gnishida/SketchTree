@@ -369,12 +369,10 @@ ParametricLSystem::ParametricLSystem(const String& axiom) {
  * @return					生成されたモデル
  */
 String ParametricLSystem::derive(int random_seed) {
-	std::vector<int> derivation_history;
-
 	String result_model;
 	ml::initRand(random_seed);
 	while (true) {
-		result_model = derive(axiom, MAX_ITERATIONS, derivation_history);
+		result_model = derive(axiom, MAX_ITERATIONS);
 		if (result_model.length() > 0) break;
 	}
 
@@ -390,7 +388,7 @@ String ParametricLSystem::derive(int random_seed) {
  * @param indicator [OUT]		生成されたモデルのindicator
  * @return						生成されたモデル
  */
-String ParametricLSystem::derive(const String& start_model, int max_iterations, std::vector<int>& derivation_history) {
+String ParametricLSystem::derive(const String& start_model, int max_iterations) {
 	String model = start_model;
 
 	for (int iter = 0; iter < max_iterations; ++iter) {
@@ -398,7 +396,6 @@ String ParametricLSystem::derive(const String& start_model, int max_iterations, 
 		if (actions.size() == 0) break;
 		
 		int index = ml::genRand(0, actions.size());
-		derivation_history.push_back(index);
 		model = actions[index].apply(model);
 	}
 
@@ -592,7 +589,7 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 	String model = axiom;
 
 	for (int l = 0; l < MAX_ITERATIONS; ++l) {
-		model = UCT(model, target, mvpMat, l);
+		model = inverse_one_step(model, target, mvpMat, l);
 
 		std::vector<cv::Mat> indicator;
 		computeIndicator(model, mvpMat, indicator);
@@ -624,125 +621,52 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 }
 
 /**
- * 指定されたmodelからUCTをスタートし、最善のoptionを返却する。
+ * 指定されたmodelに対して、UCTに基づいて最善のoptionを探し、derivationを1ステップ進める。
  *
  * @param model		モデル
  * @param target	ターゲット
- * @return			最善のoption
+ * @param mvpMat	model/view/projextion行列
+ * @return			次のmodel
  */
-String ParametricLSystem::UCT(const String& current_model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step) {
+String ParametricLSystem::inverse_one_step(const String& root_model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step) {
 	// これ以上、derivationできなら、終了
-	int index = current_model.cursor;
-	if (index < 0) return current_model;
+	int index = root_model.cursor;
+	if (index < 0) return root_model;
 
 	// expandするリテラルを取得する
-	String model = current_model.getExpand();
+	String model = root_model.getExpand();
 
 	// 現在のカーソルのdepthを取得
-	int depth = current_model[current_model.cursor].depth;
+	int depth = root_model[root_model.cursor].depth;
 
 	// 現在の座標を計算
 	glm::mat4 baseModelMat;
-	glm::vec2 curPt = computeCurrentPoint(current_model, mvpMat, baseModelMat);
+	glm::vec2 curPt = computeCurrentPoint(root_model, mvpMat, baseModelMat);
 	
 	// マスク画像を作成
 	cv::Mat mask = ml::create_mask(GRID_SIZE, GRID_SIZE, CV_8U, cv::Point(curPt.x, curPt.y), MASK_RADIUS_RATIO * GRID_SIZE);
 
 	// ルートノードを作成
-	Node* current_node = new Node(model);
-	current_node->setActions(getActions(model));
+	Node* root_node = new Node(model);
+	root_node->setActions(getActions(model));
 
 	// ベースとなるindicatorを計算
 	std::vector<cv::Mat> baseIndicator;
-	computeIndicator(current_model, mvpMat, baseIndicator);
+	computeIndicator(root_model, mvpMat, baseIndicator);
+
+	std::vector<boost::thread> th;
 
 	for (int iter = 0; iter < NUM_MONTE_CARLO_SAMPLING; ++iter) {
 		// もしノードがリーフノードなら、終了
-		if (current_node->untriedActions.size() == 0 && current_node->children.size() == 0) break;
+		if (root_node->untriedActions.size() == 0 && root_node->children.size() == 0) break;
 
 		// 現在のノードのスコアが確定したら、終了
-		if (current_node->fixed) break;
+		if (root_node->fixed) break;
 
-		Node* node = current_node;
+		Node* node = root_node;
 
-		// 探索木のリーフノードを選択
-		while (node->untriedActions.size() == 0 && node->children.size() > 0) {
-			node = node->UCTSelectChild();
-		}
-		
-		// 子ノードがまだ全てexpandされていない時は、1つランダムにexpand
-		if (node->untriedActions.size() > 0) {// && node->children.size() <= ml::log((double)iter * 0.01 + 1, 1.4)) {
-			Action action = node->randomlySelectAction();
-			String child_model = action.apply(node->model);
-						
-			node = node->addChild(child_model, action);
-			node->setActions(getActions(child_model));
-			num_nodes++;
-		}
-
-		// ランダムにderiveする
-		std::vector<int> derivation_history;
-		String result_model = derive(node->model, MAX_ITERATIONS_FOR_MC, derivation_history);
-
-		// indicatorを計算する
-		std::vector<cv::Mat> indicator;
-		computeIndicator(result_model, mvpMat, baseModelMat, indicator);
-		for (int i = 0; i < NUM_LAYERS; ++i) {
-			indicator[i] += baseIndicator[i];
-
-			// clamp
-			cv::threshold(indicator[i], indicator[i], 0.0, 1.0, cv::THRESH_BINARY);
-		}
-
-		// スコアを計算する
-		double sc = score(indicator, target, mask);
-		node->best_score = sc;
-
-		/////// デバッグ ///////
-		/*{
-			for (int i = 0; i < NUM_LAYERS; ++i) {
-				char filename[256];
-				sprintf(filename, "images/indicator_%d_%d_%d.png", derivation_step, iter, i);
-				cv::Mat img = indicator[i] + target[i] * 0.4;
-				img = ml::mat_mask(img, mask, 0.7);
-
-				ml::mat_save(filename, img);
-
-				cout << "   " << filename << " : " << result_model << endl;
-			}
-		}*/
-		/////// デバッグ ///////
-
-		// リーフノードなら、スコアを確定する
-		if (node->untriedActions.size() == 0 && node->children.size() == 0) {
-			node->fixed = true;
-		}
-
-		// スコアをbackpropagateする
-		bool updated = false;
-		Node* leaf = node;
-		while (node != NULL) {
-			node->visits++;
-			node->scores.push_back(sc);
-			if (sc > node->best_score) {
-				node->best_score = sc;
-				updated = true;
-			}
-
-			// 子ノードが全て展開済みで、且つ、スコア確定済みなら、このノードのスコアも確定とする
-			if (node->untriedActions.size() == 0) {
-				bool fixed = true;
-				for (int c = 0; c < node->children.size(); ++c) {
-					if (!node->children[c]->fixed) {
-						fixed = false;
-						break;
-					}
-				}
-				node->fixed = fixed;
-			}
-
-			node = node->parent;
-		}
+		th.push_back(boost::thread(&ParametricLSystem::UCT, this, node, MAX_ITERATIONS_FOR_MC, target, mask, mvpMat, baseModelMat, baseIndicator));
+		//th[iter].join();
 	}
 
 	////// デバッグ //////
@@ -762,8 +686,13 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 	*/
 	////// デバッグ //////
 
-	Action best_action = current_node->bestChild()->action;
-	String best_model = best_action.apply(current_model);
+	// 全てのスレッドが終了するのを待つ
+	for (int i = 0; i < th.size(); ++i) {
+		th[i].join();
+	}
+
+	Action best_action = root_node->bestChild()->action;
+	String best_model = best_action.apply(root_model);
 
 	/////// デバッグ ///////
 	/*
@@ -781,9 +710,100 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 	/////// デバッグ ///////
 
 	// 探索木のメモリを解放する
-	releaseNodeMemory(current_node);
+	releaseNodeMemory(root_node);
 	
 	return best_model;
+}
+
+/**
+ * UTC select/expand/simulation/backpropagation を実行する。
+ */
+void ParametricLSystem::UCT(Node* node, int max_iterations, const std::vector<cv::Mat>& target, const cv::Mat& mask, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, const std::vector<cv::Mat>& baseIndicator) {
+	//mtx_tree.lock();
+
+	// 探索木のリーフノードを選択
+	mtx_tree.lock();
+	while (node->untriedActions.size() == 0 && node->children.size() > 0) {
+		node = node->UCTSelectChild();
+	}
+		
+	// 子ノードがまだ全てexpandされていない時は、1つランダムにexpand
+	//mtx_tree.lock();
+	if (node->untriedActions.size() > 0) {// && node->children.size() <= ml::log((double)iter * 0.01 + 1, 1.4)) {
+		Action action = node->randomlySelectAction();
+		String child_model = action.apply(node->model);
+					
+		node = node->addChild(child_model, action);
+		node->setActions(getActions(child_model));
+	}
+	mtx_tree.unlock();
+
+	// ランダムにderiveする
+	std::vector<int> derivation_history;
+	String result_model = derive(node->model, max_iterations);
+
+	// indicatorを計算する
+	std::vector<cv::Mat> indicator;
+	computeIndicator(result_model, mvpMat, baseModelMat, indicator);
+	for (int i = 0; i < NUM_LAYERS; ++i) {
+		indicator[i] += baseIndicator[i];
+
+		// clamp
+		cv::threshold(indicator[i], indicator[i], 0.0, 1.0, cv::THRESH_BINARY);
+	}
+
+	// スコアを計算する
+	double sc = score(indicator, target, mask);
+	node->best_score = sc;
+
+	/////// デバッグ ///////
+	/*{
+		for (int i = 0; i < NUM_LAYERS; ++i) {
+			char filename[256];
+			sprintf(filename, "images/indicator_%d_%d_%d.png", derivation_step, iter, i);
+			cv::Mat img = indicator[i] + target[i] * 0.4;
+			img = ml::mat_mask(img, mask, 0.7);
+
+			ml::mat_save(filename, img);
+
+			cout << "   " << filename << " : " << result_model << endl;
+		}
+	}*/
+	/////// デバッグ ///////
+
+	mtx_tree.lock();
+
+	// リーフノードなら、スコアを確定する
+	if (node->untriedActions.size() == 0 && node->children.size() == 0) {
+		node->fixed = true;
+	}
+
+	// スコアをbackpropagateする
+	while (node != NULL) {
+		node->visits++;
+		node->scores.push_back(sc);
+		if (sc > node->best_score) {
+			node->best_score = sc;
+		}
+
+		// 子ノードが全て展開済みで、且つ、スコア確定済みなら、このノードのスコアも確定とする
+		/*
+		if (node->untriedActions.size() == 0) {
+			bool fixed = true;
+			for (int c = 0; c < node->children.size(); ++c) {
+				if (!node->children[c]->fixed) {
+					fixed = false;
+					break;
+				}
+			}
+			node->fixed = fixed;
+		}
+		*/
+
+		node = node->parent;
+	}
+
+	mtx_tree.unlock();
 }
 
 /**
@@ -976,7 +996,6 @@ void ParametricLSystem::releaseNodeMemory(Node* node) {
 	for (int i = 0; i < node->children.size(); ++i) {
 		if (node->children[i] != NULL) {
 			releaseNodeMemory(node->children[i]);
-			num_nodes--;
 		}
 	}
 	delete node;

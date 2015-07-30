@@ -141,7 +141,7 @@ public:
 public:
 	ParametricLSystem(const String& axiom);
 	String derive(int random_seed);
-	String derive(const String& start_model, int max_iterations, std::vector<int>& derivation_history);
+	String derive(const String& start_model, int max_iterations);
 	void draw(const String& model, RenderManager* renderManager);
 	void computeIndicator(const String& model, const glm::mat4& mvpMat, std::vector<cv::Mat>& indicator);
 	void computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, std::vector<cv::Mat>& indicator);

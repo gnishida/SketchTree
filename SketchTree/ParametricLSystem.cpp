@@ -369,12 +369,10 @@ ParametricLSystem::ParametricLSystem(const String& axiom) {
  * @return					生成されたモデル
  */
 String ParametricLSystem::derive(int random_seed) {
-	std::vector<int> derivation_history;
-
 	String result_model;
 	ml::initRand(random_seed);
 	while (true) {
-		result_model = derive(axiom, MAX_ITERATIONS, derivation_history);
+		result_model = derive(axiom, MAX_ITERATIONS);
 		if (result_model.length() > 0) break;
 	}
 
@@ -390,7 +388,7 @@ String ParametricLSystem::derive(int random_seed) {
  * @param indicator [OUT]		生成されたモデルのindicator
  * @return						生成されたモデル
  */
-String ParametricLSystem::derive(const String& start_model, int max_iterations, std::vector<int>& derivation_history) {
+String ParametricLSystem::derive(const String& start_model, int max_iterations) {
 	String model = start_model;
 
 	for (int iter = 0; iter < max_iterations; ++iter) {
@@ -398,7 +396,6 @@ String ParametricLSystem::derive(const String& start_model, int max_iterations, 
 		if (actions.size() == 0) break;
 		
 		int index = ml::genRand(0, actions.size());
-		derivation_history.push_back(index);
 		model = actions[index].apply(model);
 	}
 
@@ -618,7 +615,7 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 	// スコア表示
 	std::vector<cv::Mat> indicator;
 	computeIndicator(model, mvpMat, indicator);
-	cout << score(indicator, target) << endl;
+	//cout << score(indicator, target) << endl;
 	
 	return model;
 }
@@ -682,7 +679,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 
 		// ランダムにderiveする
 		std::vector<int> derivation_history;
-		String result_model = derive(node->model, MAX_ITERATIONS_FOR_MC, derivation_history);
+		String result_model = derive(node->model, MAX_ITERATIONS_FOR_MC);
 
 		// indicatorを計算する
 		std::vector<cv::Mat> indicator;
