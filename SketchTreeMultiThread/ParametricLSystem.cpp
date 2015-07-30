@@ -832,11 +832,13 @@ double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std
 	for (int i = 0; i < indicator.size(); ++i) {
 		cv::Mat result;
 		cv::subtract(indicator[i], target[i], result, mask);
-		count += ml::mat_squared_sum(result);
+		count += cv::countNonZero(result);
+		//count += ml::mat_squared_sum(result);
 
 		cv::Mat result2;
 		cv::subtract(target[i], cv::Mat::zeros(target[i].size(), target[i].type()), result2, mask);
-		total += ml::mat_squared_sum(result2);
+		total += cv::countNonZero(result2);
+		//total += ml::mat_squared_sum(result2);
 	}
 
 	if (total > 0.0) {
