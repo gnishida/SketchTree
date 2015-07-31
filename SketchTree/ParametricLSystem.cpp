@@ -696,7 +696,6 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 						
 			node = node->addChild(child_model, action);
 			node->setActions(getActions(child_model));
-			num_nodes++;
 		}
 
 		// ランダムにderiveする
@@ -999,7 +998,6 @@ void ParametricLSystem::releaseNodeMemory(Node* node) {
 	for (int i = 0; i < node->children.size(); ++i) {
 		if (node->children[i] != NULL) {
 			releaseNodeMemory(node->children[i]);
-			num_nodes--;
 		}
 	}
 	delete node;

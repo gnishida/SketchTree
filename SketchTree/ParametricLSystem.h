@@ -132,10 +132,7 @@ public:
 
 class ParametricLSystem {
 public:
-	int num_nodes;
-
 	String axiom;
-	map<char, vector<string> > rules;
 
 public:
 	ParametricLSystem(const String& axiom);
