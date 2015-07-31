@@ -36,7 +36,9 @@ public:
 public:
 	string name;
 	int depth;
-	std::vector<double> param_values;
+	//std::vector<double> param_values;
+	double param_value1;
+	double param_value2;
 	bool param_defined;
 
 public:
@@ -44,10 +46,7 @@ public:
 	Literal(const string& name, int depth, bool param_defined = false);
 	Literal(const string& name, int depth, double param_value);
 	Literal(const string& name, int depth, double param_value1, double param_value2);
-	Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3);
-	Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3, double param_value4);
-	Literal(const string& name, int depth, const std::vector<double>& param_values);
-	
+
 	String operator+(const Literal& l) const;
 	int type();
 };

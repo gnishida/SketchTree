@@ -21,41 +21,15 @@ Literal::Literal(const string& name, int depth, bool param_defined) {
 Literal::Literal(const string& name, int depth, double param_value) {
 	this->name = name;
 	this->depth = depth;
-	this->param_values.push_back(param_value);
+	this->param_value1 = param_value;
 	this->param_defined = true;
 }
 
 Literal::Literal(const string& name, int depth, double param_value1, double param_value2) {
 	this->name = name;
 	this->depth = depth;
-	this->param_values.push_back(param_value1);
-	this->param_values.push_back(param_value2);
-	this->param_defined = true;
-}
-
-Literal::Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3) {
-	this->name = name;
-	this->depth = depth;
-	this->param_values.push_back(param_value1);
-	this->param_values.push_back(param_value2);
-	this->param_values.push_back(param_value3);
-	this->param_defined = true;
-}
-
-Literal::Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3, double param_value4) {
-	this->name = name;
-	this->depth = depth;
-	this->param_values.push_back(param_value1);
-	this->param_values.push_back(param_value2);
-	this->param_values.push_back(param_value3);
-	this->param_values.push_back(param_value4);
-	this->param_defined = true;
-}
-
-Literal::Literal(const string& name, int depth, const std::vector<double>& param_values) {
-	this->name = name;
-	this->depth = depth;
-	this->param_values = param_values;
+	this->param_value1 = param_value1;
+	this->param_value2 = param_value2;
 	this->param_defined = true;
 }
 
@@ -113,7 +87,8 @@ String String::operator+(const String& str) const {
 }
 
 void String::setValue(double value) {
-	str[cursor].param_values.push_back(value);
+	//str[cursor].param_values.push_back(value);
+	str[cursor].param_value1 = value;
 	str[cursor].param_defined = true;
 
 	cursor++;
@@ -428,33 +403,33 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 		} else if (undefined > 0) {
 			continue;
 		} else if (model[i].name == "+") {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 0, 1));
 		} else if (model[i].name == "-") {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 0, 1));
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 0, 1));
 		} else if (model[i].name == "#") {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 0, 1));
 		} else if (model[i].name == "\\") {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 1, 0));
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 1, 0));
 		} else if (model[i].name == "/") {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 1, 0));
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 1, 0));
 		} else if (model[i].name == "&") {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(1, 0, 0));
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(1, 0, 0));
 		} else if (model[i].name == "^") {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(1, 0, 0));
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(1, 0, 0));
 		} else if (model[i].name == "f") {
-			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_values[0], 0));
+			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_value1, 0));
 		} else if (model[i].name == "F") {
-			double length = model[i].param_values[0];
-			double radius1 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * model[i].param_values[1]);
-			double radius2 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * (model[i].param_values[1] + model[i].param_values[0]));
+			double length = model[i].param_value1;
+			double radius1 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * model[i].param_value2);
+			double radius2 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * (model[i].param_value2 + model[i].param_value1));
 			
 			// 線を描画する
 			glutils::drawCylinder(radius1, radius2, length, glm::vec3(0.9, 0.3, 0.3), glm::rotate(modelMat, deg2rad(-90), glm::vec3(1, 0, 0)), vertices);
 
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
 		} else if (model[i].name == "C") {
-			double length = model[i].param_values[0];
-			double radius = model[i].param_values[1];
+			double length = model[i].param_value1;
+			double radius = model[i].param_value2;
 			
 			glm::mat4 mat = glm::translate(modelMat, glm::vec3(0, length, 0));
 
@@ -519,25 +494,25 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 		} else if (undefined > 0) {
 			continue;
 		} else if (model[i].name == "+") {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 0, 1));
 		} else if (model[i].name == "-") {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 0, 1));
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 0, 1));
 		} else if (model[i].name == "#") {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 0, 1));
 		} else if (model[i].name == "\\") {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 1, 0));
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 1, 0));
 		} else if (model[i].name == "/") {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 1, 0));
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 1, 0));
 		} else if (model[i].name == "&") {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(1, 0, 0));
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(1, 0, 0));
 		} else if (model[i].name == "^") {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(1, 0, 0));
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(1, 0, 0));
 		} else if (model[i].name == "f") {
-			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_values[0], 0));
+			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_value1, 0));
 		} else if (model[i].name == "F") {
-			double length = model[i].param_values[0];
-			double radius1 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * model[i].param_values[1]);
-			double radius2 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * (model[i].param_values[1] + model[i].param_values[0]));
+			double length = model[i].param_value1;
+			double radius1 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * model[i].param_value2);
+			double radius2 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * (model[i].param_value2 + model[i].param_value1));
 			double radius = (radius1 + radius2) * 0.5f;
 
 			// 線を描画する代わりに、indicatorを更新する
@@ -555,8 +530,8 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
 		} else if (model[i].name == "C") {
-			double length = model[i].param_values[0];
-			double radius = model[i].param_values[1];
+			double length = model[i].param_value1;
+			double radius = model[i].param_value2;
 
 			// 描画する代わりに、indicatorを更新する
 			glm::vec4 p1(0, length, 0, 1);
@@ -869,42 +844,42 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 	if (i == -1) return actions;
 
 	if (model[i].name == "X") {
-		if (model[i].param_values[1] > 40.0) {
+		if (model[i].param_value2 > 40.0) {
 			String rule;
 			actions.push_back(Action(actions.size(), i, rule));
 		}
 
-		if (model[i].param_values[1] < 200.0) {
+		if (model[i].param_value2 < 200.0) {
 			String rule = Literal("#", model[i].depth + 1)
-				+ Literal("F", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1])
+				+ Literal("F", model[i].depth + 1, model[i].param_value1, model[i].param_value2)
 				//+ Literal("#", model[i].depth + 1)
 				+ Literal("\\", model[i].depth + 1, 50.0)
-				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
+				+ Literal("X", model[i].depth + 1, model[i].param_value1 * LENGTH_ATTENUATION, model[i].param_value2 + model[i].param_value1);
 			actions.push_back(Action(actions.size(), i, rule));
 
 			rule = Literal("#", model[i].depth + 1)
-				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1])
+				+ Literal("F", model[i].depth + 1, model[i].param_value1 * 0.5f, model[i].param_value2)
 				+ Literal("[", model[i].depth + 1, true)
 				+ Literal("+", model[i].depth + 1)
-				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0] * 0.5f)
+				+ Literal("X", model[i].depth + 1, model[i].param_value1 * LENGTH_ATTENUATION, model[i].param_value2 + model[i].param_value1 * 0.5f)
 				+ Literal("]", model[i].depth + 1, true)
-				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1] + model[i].param_values[0] * 0.5f)
+				+ Literal("F", model[i].depth + 1, model[i].param_value1 * 0.5f, model[i].param_value2 + model[i].param_value1 * 0.5f)
 				//+ Literal("#", model[i].depth + 1)
 				+ Literal("\\", model[i].depth + 1, 50.0)
-				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
+				+ Literal("X", model[i].depth + 1, model[i].param_value1 * LENGTH_ATTENUATION, model[i].param_value2 + model[i].param_value1);
 			actions.push_back(Action(actions.size(), i, rule));
 		}
 
-		if (model[i].param_values[1] > 40.0) {
-			String rule = Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1])
+		if (model[i].param_value2 > 40.0) {
+			String rule = Literal("F", model[i].depth + 1, model[i].param_value1 * 0.5f, model[i].param_value2)
 				+ Literal("[", model[i].depth + 1, true)
 				+ Literal("+", model[i].depth + 1)
 				+ Literal("Y", model[i].depth + 1, 3.0, 100.0)
 				+ Literal("]", model[i].depth + 1, true)
-				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1] + model[i].param_values[0] * 0.5f)
+				+ Literal("F", model[i].depth + 1, model[i].param_value1 * 0.5f, model[i].param_value2 + model[i].param_value1 * 0.5f)
 				+ Literal("#", model[i].depth + 1)
 				+ Literal("\\", model[i].depth + 1, 50.0)
-				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
+				+ Literal("X", model[i].depth + 1, model[i].param_value1 * LENGTH_ATTENUATION, model[i].param_value2 + model[i].param_value1);
 			actions.push_back(Action(actions.size(), i, rule));
 		}
 	} else if (model[i].name == "Y") {
@@ -961,24 +936,24 @@ glm::vec2 ParametricLSystem::computeCurrentPoint(const String& model, const glm:
 			modelMat = stack.back();
 			stack.pop_back();
 		} else if (model[i].name == "+" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 0, 1));
 		} else if (model[i].name == "-" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 0, 1));
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 0, 1));
 		} else if (model[i].name == "#" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 0, 1));
 		} else if (model[i].name == "\\" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 1, 0));
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 1, 0));
 		} else if (model[i].name == "/" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 1, 0));
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 1, 0));
 		} else if (model[i].name == "&" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(1, 0, 0));
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(1, 0, 0));
 		} else if (model[i].name == "^" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(1, 0, 0));
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(1, 0, 0));
 		} else if (model[i].name == "f" && model[i].param_defined) {
-			double length = model[i].param_values[0];
+			double length = model[i].param_value1;
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
 		} else if (model[i].name == "F" && model[i].param_defined) {
-			double length = model[i].param_values[0];
+			double length = model[i].param_value1;
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
 		}
 	}
