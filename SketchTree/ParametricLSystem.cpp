@@ -475,7 +475,11 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
  * @param indicator [OUT]	indicator
  */
 void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, std::vector<cv::Mat>& indicator) {
-	computeIndicator(model, mvpMat, glm::mat4(), indicator);
+	computeIndicator(model, mvpMat, glm::mat4(), cv::Rect(0, 0, GRID_SIZE, GRID_SIZE), indicator);
+}
+
+void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator) {
+	computeIndicator(model, mvpMat, glm::mat4(), roi, indicator);
 }
 
 /**
@@ -486,10 +490,10 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
  * @param baseModelMat		モデルのベース変換行列
  * @param indicator [OUT]	indicator
  */
-void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, std::vector<cv::Mat>& indicator) {
+void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator) {
 	indicator.resize(NUM_LAYERS);
 	for (int i = 0; i < NUM_LAYERS; ++i) {
-		indicator[i] = cv::Mat::zeros(GRID_SIZE, GRID_SIZE, CV_32F);
+		indicator[i] = cv::Mat::zeros(roi.height, roi.width, CV_32F);
 	}
 
 	std::list<glm::mat4> stack;
@@ -541,10 +545,10 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 			glm::vec4 p2(0, length, 0, 1);
 			p1 = mvpMat * modelMat * p1;
 			p2 = mvpMat * modelMat * p2;
-			int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5;
-			int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5;
-			int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5;
-			int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5;
+			int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+			int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
+			int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+			int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
 
 			int thickness = max(1.0, radius);
 			cv::line(indicator[0], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), thickness);
@@ -561,12 +565,12 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 			p1 = mvpMat * modelMat * p1;
 			p2 = mvpMat * modelMat * p2;
 			p3 = mvpMat * modelMat * p3;
-			double u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5;
-			double v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5;
-			double u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5;
-			double v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5;
-			double u3 = (p3.x / p3.w + 1.0) * GRID_SIZE * 0.5;
-			double v3 = (p3.y / p3.w + 1.0) * GRID_SIZE * 0.5;
+			double u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+			double v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
+			double u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+			double v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
+			double u3 = (p3.x / p3.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+			double v3 = (p3.y / p3.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
 			int r1 = sqrt((u2 - u1) * (u2 - u1) + (v2 - v1) * (v2 - v1));
 			int r2 = sqrt((u3 - u1) * (u3 - u1) + (v3 - v1) * (v3 - v1));
 			float angle = atan2(v2 - v1, u2 - u1) / M_PI * 180.0;
@@ -641,9 +645,27 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 	// 現在の座標を計算
 	glm::mat4 baseModelMat;
 	glm::vec2 curPt = computeCurrentPoint(current_model, mvpMat, baseModelMat);
+
+	// cripping領域を計算
+	cv::Rect crip_roi(curPt.x - MASK_RADIUS_RATIO * GRID_SIZE, curPt.y - MASK_RADIUS_RATIO * GRID_SIZE, curPt.x + MASK_RADIUS_RATIO * GRID_SIZE, curPt.y + MASK_RADIUS_RATIO * GRID_SIZE);
+	if (crip_roi.x < 0) crip_roi.x = 0;
+	if (crip_roi.y < 0) crip_roi.y = 0;
+	if (crip_roi.width >= GRID_SIZE) crip_roi.width = GRID_SIZE - 1;
+	if (crip_roi.height >= GRID_SIZE) crip_roi.height = GRID_SIZE - 1;
+	crip_roi.width -= crip_roi.x - 1;
+	crip_roi.height -= crip_roi.y - 1;
+	
+
+	// targetから現在の座標周辺を切り取る
+	std::vector<cv::Mat> cripped_target(target.size());
+	{
+		for (int i = 0; i < target.size(); ++i) {
+			cripped_target[i] = target[i](crip_roi);
+		}
+	}
 	
 	// マスク画像を作成
-	cv::Mat mask = ml::create_mask(GRID_SIZE, GRID_SIZE, CV_8U, cv::Point(curPt.x, curPt.y), MASK_RADIUS_RATIO * GRID_SIZE);
+	//cv::Mat mask = ml::create_mask(GRID_SIZE, GRID_SIZE, CV_8U, cv::Point(curPt.x, curPt.y), MASK_RADIUS_RATIO * GRID_SIZE);
 
 	// ルートノードを作成
 	Node* current_node = new Node(model);
@@ -651,7 +673,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 
 	// ベースとなるindicatorを計算
 	std::vector<cv::Mat> baseIndicator;
-	computeIndicator(current_model, mvpMat, baseIndicator);
+	computeIndicator(current_model, mvpMat, crip_roi, baseIndicator);
 
 	for (int iter = 0; iter < NUM_MONTE_CARLO_SAMPLING; ++iter) {
 		// もしノードがリーフノードなら、終了
@@ -683,7 +705,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 
 		// indicatorを計算する
 		std::vector<cv::Mat> indicator;
-		computeIndicator(result_model, mvpMat, baseModelMat, indicator);
+		computeIndicator(result_model, mvpMat, baseModelMat, crip_roi, indicator);
 		for (int i = 0; i < NUM_LAYERS; ++i) {
 			indicator[i] += baseIndicator[i];
 
@@ -692,7 +714,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		}
 
 		// スコアを計算する
-		double sc = score(indicator, target, mask);
+		double sc = score(indicator, cripped_target);//, mask);
 		node->best_score = sc;
 
 		/////// デバッグ ///////
@@ -790,9 +812,11 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
  * @param target		ターゲットindicator
  * @return				スコア
  */
+/*
 double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target) {
 	return score(indicator, target, cv::Mat::ones(target[0].size(), CV_8U));
 }
+*/
 
 /**
  * indicatorのスコアを計算して返却する。
@@ -802,19 +826,19 @@ double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std
  * @param mask			マスク
  * @return				スコア
  */
-double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target, const cv::Mat& mask) {
+inline double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target) {//, const cv::Mat& mask) {
 	double count = 0;
 	double total = 0;
 
 	for (int i = 0; i < indicator.size(); ++i) {
 		cv::Mat result;
-		cv::subtract(indicator[i], target[i], result, mask);
+		cv::subtract(indicator[i], target[i], result);//, mask);
 		count += cv::countNonZero(result);
 		//count += ml::mat_squared_sum(result);
 
 		cv::Mat result2;
-		cv::subtract(target[i], cv::Mat::zeros(target[i].size(), target[i].type()), result2, mask);
-		total += cv::countNonZero(result2);
+		//cv::subtract(target[i], cv::Mat::zeros(target[i].size(), target[i].type()), result2, mask);
+		total += cv::countNonZero(target[i]);//result2);
 		//total += ml::mat_squared_sum(result2);
 	}
 

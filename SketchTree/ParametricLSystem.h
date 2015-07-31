@@ -17,15 +17,15 @@ namespace parametriclsystem {
 const int NUM_LAYERS = 2;
 const int GRID_SIZE = 100;//300;
 
-const int MAX_ITERATIONS = 500;//1000;
-const int MAX_ITERATIONS_FOR_MC = 10;//15;
+const int MAX_ITERATIONS = 500;
+const int MAX_ITERATIONS_FOR_MC = 10;
 const int NUM_MONTE_CARLO_SAMPLING = 100;
 const double PARAM_EXPLORATION = 0.3;
 const double PARAM_EXPLORATION_VARIANCE = 0.1;
 const double LENGTH_ATTENUATION = 0.9;
 const double INITIAL_SIZE = 6.0;
 const double SIZE_ATTENUATION = 0.02;
-const double MASK_RADIUS_RATIO = 0.11;//0.133;
+const double MASK_RADIUS_RATIO = 0.11;
 
 class String;
 
@@ -132,7 +132,6 @@ public:
 
 class ParametricLSystem {
 public:
-	int grid_size;
 	int num_nodes;
 
 	String axiom;
@@ -144,11 +143,12 @@ public:
 	String derive(const String& start_model, int max_iterations);
 	void draw(const String& model, RenderManager* renderManager);
 	void computeIndicator(const String& model, const glm::mat4& mvpMat, std::vector<cv::Mat>& indicator);
-	void computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, std::vector<cv::Mat>& indicator);
+	void computeIndicator(const String& model, const glm::mat4& mvpMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator);
+	void computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator);
 	String inverse(const std::vector<cv::Mat>& target, const glm::mat4& mvpMat);
 	String UCT(const String& model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step);
 	double score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target);
-	double score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target, const cv::Mat& mask);
+	//double score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target, const cv::Mat& mask);
 
 private:
 	std::vector<Action> getActions(const String& model);
