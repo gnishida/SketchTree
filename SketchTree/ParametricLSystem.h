@@ -36,7 +36,6 @@ public:
 public:
 	string name;
 	int depth;
-	//std::vector<double> param_values;
 	double param_value1;
 	double param_value2;
 	bool param_defined;
@@ -85,15 +84,14 @@ public:
 
 public:
 	int type;		// 0 -- rule / 1 -- value
-	int index;		// モデルの何文字目の変数に対するactionか？
 	int action_index;	// actionsの中の何番目のactionか？
 	String rule;
 	double value;
 
 public:
 	Action() {}
-	Action(int action_index, int index, const String& rule);
-	Action(int action_index, int index, double value);
+	Action(int action_index, const String& rule);
+	Action(int action_index, double value);
 
 	String apply(const String& model);
 };
