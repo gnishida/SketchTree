@@ -9,6 +9,7 @@
 #include <vector>
 #include <map>
 #include "Vertex.h"
+#include "MyTimer.h"
 
 using namespace std;
 
@@ -41,7 +42,7 @@ public:
 	bool param_defined;
 
 public:
-	Literal() {}
+	Literal() : depth(0), param_value1(0.0), param_value2(0.0), param_defined(false) {}
 	Literal(const string& name, int depth, bool param_defined = false);
 	Literal(const string& name, int depth, double param_value);
 	Literal(const string& name, int depth, double param_value1, double param_value2);
@@ -49,6 +50,8 @@ public:
 	String operator+(const Literal& l) const;
 	int type();
 };
+
+class Action;
 
 class String {
 public:
@@ -71,6 +74,8 @@ public:
 
 	String getExpand() const;
 	void nextCursor(int depth);
+
+	void rewrite(const Action& action);
 };
 
 ostream& operator<<(ostream& os, const String& dt);
@@ -93,7 +98,7 @@ public:
 	Action(int action_index, const String& rule);
 	Action(int action_index, double value);
 
-	String apply(const String& model);
+	//String apply(const String& model);
 };
 
 ostream& operator<<(ostream& os, const Action& a);
@@ -130,9 +135,13 @@ public:
 class ParametricLSystem {
 public:
 	String axiom;
+	MyTimer timer;
+
+	map<string, vector<Action> > actions_template;
 
 public:
 	ParametricLSystem(const String& axiom);
+	void initActionsTemplate();
 	String derive(int random_seed);
 	String derive(const String& start_model, int max_iterations);
 	void draw(const String& model, RenderManager* renderManager);

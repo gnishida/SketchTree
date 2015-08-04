@@ -15,6 +15,8 @@ const double M_PI = 3.141592653592;
 Literal::Literal(const string& name, int depth, bool param_defined) {
 	this->name = name;
 	this->depth = depth;
+	this->param_value1 = 0.0;
+	this->param_value2 = 0.0;
 	this->param_defined = param_defined;
 }
 
@@ -22,6 +24,7 @@ Literal::Literal(const string& name, int depth, double param_value) {
 	this->name = name;
 	this->depth = depth;
 	this->param_value1 = param_value;
+	this->param_value2 = 0.0;
 	this->param_defined = true;
 }
 
@@ -103,6 +106,11 @@ void String::replace(const String& str) {
 	this->str.erase(this->str.begin() + cursor);
 	this->str.insert(this->str.begin() + cursor, str.str.begin(), str.str.end());
 
+	// depthの設定
+	for (int i = 0; i < str.length(); ++i) {
+		this->str[cursor + i].depth = depth + 1;
+	}
+
 	// 次のリテラルを探す
 	nextCursor(depth);
 }
@@ -158,6 +166,14 @@ void String::nextCursor(int depth) {
 	cursor = -1;
 }
 
+void String::rewrite(const Action& action) {
+	if (action.type == Action::ACTION_RULE) {
+		replace(action.rule);
+	} else {
+		setValue(action.value);
+	}
+}
+
 ostream& operator<<(ostream& os, const String& str) {
 	os << setprecision(1);
 	for (int i = 0; i < str.length(); ++i) {
@@ -185,7 +201,7 @@ Action::Action(int action_index, double value) {
  * @param model					モデル
  * @return						action適用した後のモデル
  */
-String Action::apply(const String& model) {
+/*String Action::apply(const String& model) {
 	String new_model = model;
 
 	if (type == ACTION_RULE) {
@@ -195,7 +211,7 @@ String Action::apply(const String& model) {
 	}
 
 	return new_model;
-}
+}*/
 
 ostream& operator<<(ostream& os, const Action& a) {
 	os << "type(";
@@ -333,6 +349,125 @@ Node* Node::bestChild() {
 
 ParametricLSystem::ParametricLSystem(const String& axiom) {
 	this->axiom = axiom;
+
+	initActionsTemplate();
+}
+
+void ParametricLSystem::initActionsTemplate() {
+	{
+		String rule1 = Literal("#", 0)
+			+ Literal("F", 0, 0, 0)
+			+ Literal("\\", 0, 50.0)
+			+ Literal("X", 0, 0, 0);
+		actions_template["X1"].push_back(Action(0, rule1));
+
+		String rule2 = Literal("#", 0)
+			+ Literal("F", 0, 0, 0)
+			+ Literal("[", 0, true)
+			+ Literal("+", 0)
+			+ Literal("X", 0, 0, 0)
+			+ Literal("]", 0, true)
+			+ Literal("F", 0, 0, 0)
+			+ Literal("\\", 0, 50.0)
+			+ Literal("X", 0, 0, 0);
+		actions_template["X1"].push_back(Action(1, rule2));
+	}
+
+	{
+		String rule1;
+		actions_template["X2"].push_back(Action(0, rule1));
+
+		String rule2 = Literal("#", 0)
+			+ Literal("F", 0, 0, 0)
+			+ Literal("\\", 0, 50.0)
+			+ Literal("X", 0, 0, 0);
+		actions_template["X2"].push_back(Action(1, rule2));
+
+		String rule3 = Literal("#", 0)
+			+ Literal("F", 0, 0, 0)
+			+ Literal("[", 0, true)
+			+ Literal("+", 0)
+			+ Literal("X", 0, 0, 0)
+			+ Literal("]", 0, true)
+			+ Literal("F", 0, 0, 0)
+			+ Literal("\\", 0, 50.0)
+			+ Literal("X", 0, 0, 0);
+		actions_template["X2"].push_back(Action(2, rule3));
+
+		String rule4 = Literal("F", 0, 0, 0)
+			+ Literal("[", 0, true)
+			+ Literal("+", 0)
+			+ Literal("Y", 0, 3.0, 100.0)
+			+ Literal("]", 0, true)
+			+ Literal("F", 0, 0, 0)
+			+ Literal("#", 0)
+			+ Literal("\\", 0, 50.0)
+			+ Literal("X", 0, 0, 0);
+		actions_template["X2"].push_back(Action(3, rule4));
+	}
+
+	{
+		String rule1;
+		actions_template["X3"].push_back(Action(0, rule1));
+
+		String rule2 = Literal("F", 0, 0, 0)
+			+ Literal("[", 0, true)
+			+ Literal("+", 0)
+			+ Literal("Y", 0, 3.0, 100.0)
+			+ Literal("]", 0, true)
+			+ Literal("F", 0, 0, 0)
+			+ Literal("#", 0)
+			+ Literal("\\", 0, 50.0)
+			+ Literal("X", 0, 0, 0);
+		actions_template["X3"].push_back(Action(1, rule2));
+	}
+
+	{
+		String rule1;
+		actions_template["Y"].push_back(Action(0, rule1));
+		
+		String rule2 = Literal("F", 0, 2.0, 250.0)
+			+ Literal("[", 0, true)
+			+ Literal("+", 0, 60.0)
+			+ Literal("F", 0, 1.0, 250.0)
+			+ Literal("\\", 0, 70.0)
+			+ Literal("C", 0, 3.0, 2.0)
+			+ Literal("]", 0, true)
+			+ Literal("[", 0, true)
+			+ Literal("-", 0, 60.0)
+			+ Literal("F", 0, 1.0, 250.0)
+			+ Literal("\\", 0, -70.0)
+			+ Literal("C", 0, 3.0, 2.0)
+			+ Literal("]", 0, true)
+			+ Literal("F", 0, 2.0, 250.0)
+			+ Literal("#", 0)
+			+ Literal("\\", 0, 50.0)
+			+ Literal("Y", 0, 4.0, 250.0);
+		actions_template["Y"].push_back(Action(1, rule2));
+	}
+
+	{
+		int count = 0;
+		for (int k = -80; k <= 80; k += 20) {
+			if (k == 0) continue;
+			actions_template["-"].push_back(Action(count, k));
+			actions_template["+"].push_back(Action(count++, k));
+		}
+	}
+
+	{
+		int count = 0;
+		for (int k = -20; k <= 20; k += 10, ++count) {
+			actions_template["#"].push_back(Action(count, k));
+		}
+	}
+
+	{
+		int count = 0;
+		for (int k = 0; k <= 180; k += 30, ++count) {
+			actions_template["\\"].push_back(Action(count, k));
+		}
+	}
 }
 
 /**
@@ -365,11 +500,15 @@ String ParametricLSystem::derive(const String& start_model, int max_iterations) 
 	String model = start_model;
 
 	for (int iter = 0; iter < max_iterations; ++iter) {
+		timer.start("get_actions");
 		std::vector<Action> actions = getActions(model);
+		timer.end("get_actions");
 		if (actions.size() == 0) break;
 		
+		timer.start("action_apply");
 		int index = ml::genRand(0, actions.size());
-		model = actions[index].apply(model);
+		model.rewrite(actions[index]);
+		timer.end("action_apply");
 	}
 
 	return model;
@@ -658,23 +797,29 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		Node* node = current_node;
 
 		// 探索木のリーフノードを選択
+		timer.start("UCT_select");
 		while (node->untriedActions.size() == 0 && node->children.size() > 0) {
 			node = node->UCTSelectChild();
 		}
+		timer.end("UCT_select");
 		
 		// 子ノードがまだ全てexpandされていない時は、1つランダムにexpand
+		timer.start("UCT_expand");
 		if (node->untriedActions.size() > 0) {// && node->children.size() <= ml::log((double)iter * 0.01 + 1, 1.4)) {
 			Action action = node->randomlySelectAction();
-			String child_model = action.apply(node->model);
+			String child_model = node->model;
+			child_model.rewrite(action);
 						
 			node = node->addChild(child_model, action);
 			node->setActions(getActions(child_model));
 		}
+		timer.end("UCT_expand");
 
 		// ランダムにderiveする
 		String result_model = derive(node->model, MAX_ITERATIONS_FOR_MC);
 
 		// indicatorを計算する
+		timer.start("compute_indicator");
 		std::vector<cv::Mat> indicator;
 		computeIndicator(result_model, mvpMat, baseModelMat, crip_roi, indicator);
 		for (int i = 0; i < NUM_LAYERS; ++i) {
@@ -683,10 +828,13 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 			// clamp
 			cv::threshold(indicator[i], indicator[i], 0.0, 1.0, cv::THRESH_BINARY);
 		}
+		timer.end("compute_indicator");
 
 		// スコアを計算する
+		timer.start("compute_score");
 		double sc = score(indicator, cripped_target);//, mask);
 		node->best_score = sc;
+		timer.end("compute_score");
 
 		/////// デバッグ ///////
 		/*{
@@ -709,6 +857,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		}
 
 		// スコアをbackpropagateする
+		timer.start("UCT_backpropagate");
 		bool updated = false;
 		Node* leaf = node;
 		while (node != NULL) {
@@ -733,6 +882,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 
 			node = node->parent;
 		}
+		timer.end("UCT_backpropagate");
 	}
 
 	////// デバッグ //////
@@ -753,7 +903,8 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 	////// デバッグ //////
 
 	Action best_action = current_node->bestChild()->action;
-	String best_model = best_action.apply(current_model);
+	String best_model = current_model;
+	best_model.rewrite(best_action);
 
 	/////// デバッグ ///////
 	/*
@@ -841,80 +992,57 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 	if (i == -1) return actions;
 
 	if (model[i].name == "X") {
-		if (model[i].param_value2 > 40.0) {
-			String rule;
-			actions.push_back(Action(actions.size(), rule));
-		}
-
-		if (model[i].param_value2 < 200.0) {
-			String rule = Literal("#", model[i].depth + 1)
-				+ Literal("F", model[i].depth + 1, model[i].param_value1, model[i].param_value2)
-				//+ Literal("#", model[i].depth + 1)
-				+ Literal("\\", model[i].depth + 1, 50.0)
-				+ Literal("X", model[i].depth + 1, model[i].param_value1 * LENGTH_ATTENUATION, model[i].param_value2 + model[i].param_value1);
-			actions.push_back(Action(actions.size(), rule));
-
-			rule = Literal("#", model[i].depth + 1)
-				+ Literal("F", model[i].depth + 1, model[i].param_value1 * 0.5f, model[i].param_value2)
-				+ Literal("[", model[i].depth + 1, true)
-				+ Literal("+", model[i].depth + 1)
-				+ Literal("X", model[i].depth + 1, model[i].param_value1 * LENGTH_ATTENUATION, model[i].param_value2 + model[i].param_value1 * 0.5f)
-				+ Literal("]", model[i].depth + 1, true)
-				+ Literal("F", model[i].depth + 1, model[i].param_value1 * 0.5f, model[i].param_value2 + model[i].param_value1 * 0.5f)
-				//+ Literal("#", model[i].depth + 1)
-				+ Literal("\\", model[i].depth + 1, 50.0)
-				+ Literal("X", model[i].depth + 1, model[i].param_value1 * LENGTH_ATTENUATION, model[i].param_value2 + model[i].param_value1);
-			actions.push_back(Action(actions.size(), rule));
-		}
-
-		if (model[i].param_value2 > 40.0) {
-			String rule = Literal("F", model[i].depth + 1, model[i].param_value1 * 0.5f, model[i].param_value2)
-				+ Literal("[", model[i].depth + 1, true)
-				+ Literal("+", model[i].depth + 1)
-				+ Literal("Y", model[i].depth + 1, 3.0, 100.0)
-				+ Literal("]", model[i].depth + 1, true)
-				+ Literal("F", model[i].depth + 1, model[i].param_value1 * 0.5f, model[i].param_value2 + model[i].param_value1 * 0.5f)
-				+ Literal("#", model[i].depth + 1)
-				+ Literal("\\", model[i].depth + 1, 50.0)
-				+ Literal("X", model[i].depth + 1, model[i].param_value1 * LENGTH_ATTENUATION, model[i].param_value2 + model[i].param_value1);
-			actions.push_back(Action(actions.size(), rule));
+		if (model[i].param_value2 <= 40.0) {
+			actions = actions_template["X1"];
+			actions[0].rule.str[1].param_value1 = model[i].param_value1;
+			actions[0].rule.str[1].param_value2 = model[i].param_value2;
+			actions[0].rule.str[3].param_value1 = model[i].param_value1 * LENGTH_ATTENUATION;
+			actions[0].rule.str[3].param_value2 = model[i].param_value2 + model[i].param_value1;
+			actions[1].rule.str[1].param_value1 = model[i].param_value1 * 0.5f;
+			actions[1].rule.str[1].param_value2 = model[i].param_value2;
+			actions[1].rule.str[4].param_value1 = model[i].param_value1 * LENGTH_ATTENUATION;
+			actions[1].rule.str[4].param_value2 = model[i].param_value2 + model[i].param_value1 * 0.5f;
+			actions[1].rule.str[6].param_value1 = model[i].param_value1 * 0.5f;
+			actions[1].rule.str[6].param_value2 = model[i].param_value2 + model[i].param_value1 * 0.5f;
+			actions[1].rule.str[8].param_value1 = model[i].param_value1 * LENGTH_ATTENUATION;
+			actions[1].rule.str[8].param_value2 = model[i].param_value2 + model[i].param_value1;
+		} else if (model[i].param_value2 < 200.0) {
+			actions = actions_template["X2"];
+			actions[1].rule.str[1].param_value1 = model[i].param_value1;
+			actions[1].rule.str[1].param_value2 = model[i].param_value2;
+			actions[1].rule.str[3].param_value1 = model[i].param_value1 * LENGTH_ATTENUATION;
+			actions[1].rule.str[3].param_value2 = model[i].param_value2 + model[i].param_value1;
+			actions[2].rule.str[1].param_value1 = model[i].param_value1 * 0.5f;
+			actions[2].rule.str[1].param_value2 = model[i].param_value2;
+			actions[2].rule.str[4].param_value1 = model[i].param_value1 * LENGTH_ATTENUATION;
+			actions[2].rule.str[4].param_value2 = model[i].param_value2 + model[i].param_value1 * 0.5f;
+			actions[2].rule.str[6].param_value1 = model[i].param_value1 * 0.5f;
+			actions[2].rule.str[6].param_value2 = model[i].param_value2 + model[i].param_value1 * 0.5f;
+			actions[2].rule.str[8].param_value1 = model[i].param_value1 * LENGTH_ATTENUATION;
+			actions[2].rule.str[8].param_value2 = model[i].param_value2 + model[i].param_value1;
+			actions[3].rule.str[0].param_value1 = model[i].param_value1 * 0.5f;
+			actions[3].rule.str[0].param_value2 = model[i].param_value2;
+			actions[3].rule.str[5].param_value1 = model[i].param_value1 * 0.5f;
+			actions[3].rule.str[5].param_value2 = model[i].param_value2 + model[i].param_value1 * 0.5f;
+			actions[3].rule.str[8].param_value1 = model[i].param_value1 * LENGTH_ATTENUATION;
+			actions[3].rule.str[8].param_value2 = model[i].param_value2 + model[i].param_value1;
+		} else {
+			actions = actions_template["X3"];
+			actions[1].rule.str[0].param_value1 = model[i].param_value1 * 0.5f;
+			actions[1].rule.str[0].param_value2 = model[i].param_value2;
+			actions[1].rule.str[5].param_value1 = model[i].param_value1 * 0.5f;
+			actions[1].rule.str[5].param_value2 = model[i].param_value2 + model[i].param_value1 * 0.5f;
+			actions[1].rule.str[8].param_value1 = model[i].param_value1 * LENGTH_ATTENUATION;
+			actions[1].rule.str[8].param_value2 = model[i].param_value2 + model[i].param_value1;
 		}
 	} else if (model[i].name == "Y") {
-		String rule;
-		actions.push_back(Action(actions.size(), rule));
-		
-		rule = Literal("F", model[i].depth + 1, 2.0, 250.0)
-			+ Literal("[", model[i].depth + 1, true)
-			+ Literal("+", model[i].depth + 1, 60.0)
-			+ Literal("F", model[i].depth + 1, 1.0, 250.0)
-			+ Literal("\\", model[i].depth + 1, 70.0)
-			+ Literal("C", model[i].depth + 1, 3.0, 2.0)
-			+ Literal("]", model[i].depth + 1, true)
-			+ Literal("[", model[i].depth + 1, true)
-			+ Literal("-", model[i].depth + 1, 60.0)
-			+ Literal("F", model[i].depth + 1, 1.0, 250.0)
-			+ Literal("\\", model[i].depth + 1, -70.0)
-			+ Literal("C", model[i].depth + 1, 3.0, 2.0)
-			+ Literal("]", model[i].depth + 1, true)
-			+ Literal("F", model[i].depth + 1, 2.0, 250.0)
-			+ Literal("#", model[i].depth + 1)
-			+ Literal("\\", model[i].depth + 1, 50.0)
-			+ Literal("Y", model[i].depth + 1, 4.0, 250.0);
-		actions.push_back(Action(actions.size(), rule));
+		return actions_template["Y"];
 	} else if (model[i].name == "-" || model[i].name == "+") {
-		for (int k = -80; k <= 80; k += 20) {
-			if (k == 0) continue;
-			actions.push_back(Action(actions.size(), k));
-		}
+		return actions_template[model[i].name];
 	} else if (model[i].name == "#") {
-		for (int k = -20; k <= 20; k += 10) {
-			actions.push_back(Action(actions.size(), k));
-		}
+		return actions_template["#"];
 	} else if (model[i].name == "\\") {
-		//actions.push_back(Action(count, i, 180));
-		for (int k = 0; k <= 180; k += 30) {
-			actions.push_back(Action(actions.size(), k));
-		}
+		return actions_template["\\"];
 	}
 
 	return actions;
