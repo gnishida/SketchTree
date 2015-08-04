@@ -41,18 +41,19 @@ public:
 public:
 	Literal() {}
 	Literal(const string& name, int depth, bool param_defined = false);
-	Literal(const string& name, int depth, double param_value1);
+	Literal(const string& name, int depth, double param_value);
 	Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3, double param_value4);
 	
 	String operator+(const Literal& l) const;
 	int type();
 };
 
+class Action;
+
 class String {
 public:
 	vector<Literal> str;
 	int cursor;				// expandするリテラルの位置
-	//priority_queue<int, vector<int>, greater<int> > queue;
 
 public:
 	String();
@@ -70,6 +71,7 @@ public:
 
 	String getExpand() const;
 	void nextCursor(int depth);
+	void rewrite(const Action& action);
 };
 
 ostream& operator<<(ostream& os, const String& dt);
@@ -91,8 +93,6 @@ public:
 	Action() {}
 	Action(int action_index, const String& rule);
 	Action(int action_index, double value);
-
-	String apply(const String& model);
 };
 
 ostream& operator<<(ostream& os, const Action& a);
@@ -129,10 +129,7 @@ public:
 
 class ParametricLSystem {
 public:
-	int num_nodes;
-
 	String axiom;
-	map<char, vector<string> > rules;
 
 public:
 	ParametricLSystem(const String& axiom);

@@ -15,13 +15,20 @@ const double M_PI = 3.141592653592;
 Literal::Literal(const string& name, int depth, bool param_defined) {
 	this->name = name;
 	this->depth = depth;
+	this->param_value1 = 0.0;
+	this->param_value2 = 0.0;
+	this->param_value3 = 0.0;
+	this->param_value4 = 0.0;
 	this->param_defined = param_defined;
 }
 
-Literal::Literal(const string& name, int depth, double param_value1) {
+Literal::Literal(const string& name, int depth, double param_value) {
 	this->name = name;
 	this->depth = depth;
-	this->param_value1 = param_value1;
+	this->param_value1 = param_value;
+	this->param_value2 = 0.0;
+	this->param_value3 = 0.0;
+	this->param_value4 = 0.0;
 	this->param_defined = true;
 }
 
@@ -104,6 +111,11 @@ void String::replace(const String& str) {
 	this->str.erase(this->str.begin() + cursor);
 	this->str.insert(this->str.begin() + cursor, str.str.begin(), str.str.end());
 
+	// depthの設定
+	for (int i = 0; i < str.length(); ++i) {
+		this->str[cursor + i].depth = depth + 1;
+	}
+
 	// 次のリテラルを探す
 	nextCursor(depth);
 }
@@ -159,6 +171,14 @@ void String::nextCursor(int depth) {
 	cursor = -1;
 }
 
+void String::rewrite(const Action& action) {
+	if (action.type == Action::ACTION_RULE) {
+		replace(action.rule);
+	} else {
+		setValue(action.value);
+	}
+}
+
 ostream& operator<<(ostream& os, const String& str) {
 	os << fixed << setprecision(0);
 	for (int i = 0; i < str.length(); ++i) {
@@ -181,24 +201,6 @@ Action::Action(int action_index, double value) {
 	this->type = ACTION_VALUE;
 	this->action_index = action_index;
 	this->value = value;
-}
-
-/**
- * 指定されたモデルに、このアクションを適用する。
- *
- * @param model					モデル
- * @return						action適用した後のモデル
- */
-String Action::apply(const String& model) {
-	String new_model = model;
-
-	if (type == ACTION_RULE) {
-		new_model.replace(rule);
-	} else {
-		new_model.setValue(value);
-	}
-
-	return new_model;
 }
 
 ostream& operator<<(ostream& os, const Action& a) {
@@ -346,8 +348,6 @@ ParametricLSystem::ParametricLSystem(const String& axiom) {
  * @return					生成されたモデル
  */
 String ParametricLSystem::derive(int random_seed) {
-	std::vector<int> derivation_history;
-
 	String result_model;
 	ml::initRand(random_seed);
 	while (true) {
@@ -376,7 +376,7 @@ String ParametricLSystem::derive(const String& start_model, int max_iterations) 
 
 
 		int index = ml::genRand(0, actions.size());
-		model = actions[index].apply(model);
+		model.rewrite(actions[index]);
 	}
 
 	return model;
@@ -766,11 +766,11 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		// 子ノードがまだ全てexpandされていない時は、1つランダムにexpand
 		if (node->untriedActions.size() > 0) {// && node->children.size() <= ml::log((double)iter * 0.01 + 1, 1.4)) {
 			Action action = node->randomlySelectAction();
-			String child_model = action.apply(node->model);
+			String child_model = node->model;
+			child_model.rewrite(action);
 						
 			node = node->addChild(child_model, action);
 			node->setActions(getActions(child_model));
-			num_nodes++;
 		}
 
 		// ランダムにderiveする
@@ -796,8 +796,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 			for (int i = 0; i < NUM_LAYERS; ++i) {
 				char filename[256];
 				sprintf(filename, "images/indicator_%d_%d_%d.png", derivation_step, iter, i);
-				cv::Mat img = indicator[i] * 0.7 + target[i] * 0.4;
-				img = ml::mat_mask(img, mask, 0.7);
+				cv::Mat img = indicator[i] * 0.5 + target[i] * 0.5;
 
 				ml::mat_save(filename, img);
 
@@ -856,13 +855,11 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 	}
 	*/
 	////// デバッグ //////
-
-
+	
 	Action best_action = current_node->bestChild()->action;
-	String best_model = best_action.apply(current_model);
-
-
-
+	String best_model = current_model;
+	best_model.rewrite(best_action);
+	
 	/////// デバッグ ///////
 	/*
 	char filename[256];
@@ -953,12 +950,12 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 			String rule;
 			double height = model[i].param_value4 / (double)k;
 			for (int l = 0; l < k; ++l) {
-				rule += Literal("Floor", model[i].depth + 1, model[i].param_value1, model[i].param_value2 + height * l, model[i].param_value3, height);
+				rule += Literal("Floor", 0, model[i].param_value1, model[i].param_value2 + height * l, model[i].param_value3, height);
 			}
 			actions.push_back(Action(actions.size(), rule));
 		}
 	} else if (model[i].name == "Floor") {
-		String rule = Literal("W", model[i].depth + 1, model[i].param_value1, model[i].param_value2, model[i].param_value3, model[i].param_value4);
+		String rule = Literal("W", 0, model[i].param_value1, model[i].param_value2, model[i].param_value3, model[i].param_value4);
 		actions.push_back(Action(actions.size(), rule));
 
 		for (double k = 0.2; k <= 0.8; k += 0.1) {
@@ -967,14 +964,14 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 				if (model[i].param_value3 * l < 10.0) continue;
 				if (model[i].param_value3 * (1.0 - k - l) < 10.0) continue;
 				
-				String rule = Literal("W", model[i].depth + 1,  model[i].param_value1, model[i].param_value2, model[i].param_value3 * k, model[i].param_value4)
-					+ Literal("Door", model[i].depth + 1, model[i].param_value1 + model[i].param_value3 * k, model[i].param_value2, model[i].param_value3 * l, model[i].param_value4)
-					+ Literal("W", model[i].depth + 1, model[i].param_value1 + model[i].param_value3 * (k + l), model[i].param_value2, model[i].param_value3 * (1.0 - k - l), model[i].param_value4);
+				String rule = Literal("W", 0,  model[i].param_value1, model[i].param_value2, model[i].param_value3 * k, model[i].param_value4)
+					+ Literal("Door", 0, model[i].param_value1 + model[i].param_value3 * k, model[i].param_value2, model[i].param_value3 * l, model[i].param_value4)
+					+ Literal("W", 0, model[i].param_value1 + model[i].param_value3 * (k + l), model[i].param_value2, model[i].param_value3 * (1.0 - k - l), model[i].param_value4);
 				actions.push_back(Action(actions.size(), rule));
 			}
 		}
 	} else if (model[i].name == "W") {
-		String rule = Literal("Wall", model[i].depth + 1, model[i].param_value1, model[i].param_value2, model[i].param_value3, model[i].param_value4);
+		String rule = Literal("Wall", 0, model[i].param_value1, model[i].param_value2, model[i].param_value3, model[i].param_value4);
 		actions.push_back(Action(actions.size(), rule));
 
 		for (double k = 0.2; k <= 0.8; k += 0.1) {
@@ -983,9 +980,9 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 				if (model[i].param_value3 * l < 10.0) continue;
 				if (model[i].param_value3 * (1.0 - k - l) < 10.0) continue;
 
-				String rule = Literal("W", model[i].depth + 1, model[i].param_value1, model[i].param_value2, model[i].param_value3 * k, model[i].param_value4)
-					+ Literal("Window", model[i].depth + 1, model[i].param_value1 + model[i].param_value3 * k, model[i].param_value2, model[i].param_value3 * l, model[i].param_value4)
-					+ Literal("W", model[i].depth + 1, model[i].param_value1 + model[i].param_value3 * (k + l), model[i].param_value2, model[i].param_value3 * (1.0 - k - l), model[i].param_value4);
+				String rule = Literal("W", 0, model[i].param_value1, model[i].param_value2, model[i].param_value3 * k, model[i].param_value4)
+					+ Literal("Window", 0, model[i].param_value1 + model[i].param_value3 * k, model[i].param_value2, model[i].param_value3 * l, model[i].param_value4)
+					+ Literal("W", 0, model[i].param_value1 + model[i].param_value3 * (k + l), model[i].param_value2, model[i].param_value3 * (1.0 - k - l), model[i].param_value4);
 				actions.push_back(Action(actions.size(), rule));
 			}
 		}
@@ -1022,7 +1019,6 @@ void ParametricLSystem::releaseNodeMemory(Node* node) {
 	for (int i = 0; i < node->children.size(); ++i) {
 		if (node->children[i] != NULL) {
 			releaseNodeMemory(node->children[i]);
-			num_nodes--;
 		}
 	}
 	delete node;

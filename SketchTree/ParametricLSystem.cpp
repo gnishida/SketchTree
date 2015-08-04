@@ -90,7 +90,6 @@ String String::operator+(const String& str) const {
 }
 
 void String::setValue(double value) {
-	//str[cursor].param_values.push_back(value);
 	str[cursor].param_value1 = value;
 	str[cursor].param_defined = true;
 
@@ -194,24 +193,6 @@ Action::Action(int action_index, double value) {
 	this->action_index = action_index;
 	this->value = value;
 }
-
-/**
- * 指定されたモデルに、このアクションを適用する。
- *
- * @param model					モデル
- * @return						action適用した後のモデル
- */
-/*String Action::apply(const String& model) {
-	String new_model = model;
-
-	if (type == ACTION_RULE) {
-		new_model.replace(rule);
-	} else {
-		new_model.setValue(value);
-	}
-
-	return new_model;
-}*/
 
 ostream& operator<<(ostream& os, const Action& a) {
 	os << "type(";
@@ -842,8 +823,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 			for (int i = 0; i < NUM_LAYERS; ++i) {
 				char filename[256];
 				sprintf(filename, "images/indicator_%d_%d_%d.png", derivation_step, iter, i);
-				cv::Mat img = indicator[i] + target[i] * 0.4;
-				img = ml::mat_mask(img, mask, 0.7);
+				cv::Mat img = indicator[i] * 0.5 + target[i] * 0.5;
 
 				ml::mat_save(filename, img);
 

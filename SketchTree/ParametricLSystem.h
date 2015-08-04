@@ -97,8 +97,6 @@ public:
 	Action() {}
 	Action(int action_index, const String& rule);
 	Action(int action_index, double value);
-
-	//String apply(const String& model);
 };
 
 ostream& operator<<(ostream& os, const Action& a);
