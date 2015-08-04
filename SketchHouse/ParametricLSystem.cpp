@@ -18,44 +18,20 @@ Literal::Literal(const string& name, int depth, bool param_defined) {
 	this->param_defined = param_defined;
 }
 
-Literal::Literal(const string& name, int depth, double param_value) {
+Literal::Literal(const string& name, int depth, double param_value1) {
 	this->name = name;
 	this->depth = depth;
-	this->param_values.push_back(param_value);
-	this->param_defined = true;
-}
-
-Literal::Literal(const string& name, int depth, double param_value1, double param_value2) {
-	this->name = name;
-	this->depth = depth;
-	this->param_values.push_back(param_value1);
-	this->param_values.push_back(param_value2);
-	this->param_defined = true;
-}
-
-Literal::Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3) {
-	this->name = name;
-	this->depth = depth;
-	this->param_values.push_back(param_value1);
-	this->param_values.push_back(param_value2);
-	this->param_values.push_back(param_value3);
+	this->param_value1 = param_value1;
 	this->param_defined = true;
 }
 
 Literal::Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3, double param_value4) {
 	this->name = name;
 	this->depth = depth;
-	this->param_values.push_back(param_value1);
-	this->param_values.push_back(param_value2);
-	this->param_values.push_back(param_value3);
-	this->param_values.push_back(param_value4);
-	this->param_defined = true;
-}
-
-Literal::Literal(const string& name, int depth, const std::vector<double>& param_values) {
-	this->name = name;
-	this->depth = depth;
-	this->param_values = param_values;
+	this->param_value1 = param_value1;
+	this->param_value2 = param_value2;
+	this->param_value3 = param_value3;
+	this->param_value4 = param_value4;
 	this->param_defined = true;
 }
 
@@ -113,7 +89,7 @@ String String::operator+(const String& str) const {
 }
 
 void String::setValue(double value) {
-	str[cursor].param_values.push_back(value);
+	str[cursor].param_value1 = value;
 	str[cursor].param_defined = true;
 
 	cursor++;
@@ -188,29 +164,22 @@ ostream& operator<<(ostream& os, const String& str) {
 	for (int i = 0; i < str.length(); ++i) {
 		os << str[i].name;
 		if (str[i].param_defined) {
-			os << "(";
-			for (int j = 0; j < str[i].param_values.size(); ++j) {
-				if (j > 0) os << ",";
-				os << str[i].param_values[j];
-			}
-			os << ")";
+			os << "(" << str[i].param_value1 << "," << str[i].param_value2 << "," << str[i].param_value3 << "," << str[i].param_value4 << ")";
 		}
 	}
 
     return os;
 }
 
-Action::Action(int action_index, int index, const String& rule) {
+Action::Action(int action_index, const String& rule) {
 	this->type = ACTION_RULE;
 	this->action_index = action_index;
-	this->index = index;
 	this->rule = rule;
 }
 
-Action::Action(int action_index, int index, double value) {
+Action::Action(int action_index, double value) {
 	this->type = ACTION_VALUE;
 	this->action_index = action_index;
-	this->index = index;
 	this->value = value;
 }
 
@@ -382,7 +351,7 @@ String ParametricLSystem::derive(int random_seed) {
 	String result_model;
 	ml::initRand(random_seed);
 	while (true) {
-		result_model = derive(axiom, MAX_ITERATIONS, derivation_history);
+		result_model = derive(axiom, MAX_ITERATIONS);
 		if (result_model.length() > 0) break;
 	}
 
@@ -398,7 +367,7 @@ String ParametricLSystem::derive(int random_seed) {
  * @param indicator [OUT]		生成されたモデルのindicator
  * @return						生成されたモデル
  */
-String ParametricLSystem::derive(const String& start_model, int max_iterations, std::vector<int>& derivation_history) {
+String ParametricLSystem::derive(const String& start_model, int max_iterations) {
 	String model = start_model;
 
 	for (int iter = 0; iter < max_iterations; ++iter) {
@@ -407,7 +376,6 @@ String ParametricLSystem::derive(const String& start_model, int max_iterations, 
 
 
 		int index = ml::genRand(0, actions.size());
-		derivation_history.push_back(index);
 		model = actions[index].apply(model);
 	}
 
@@ -426,12 +394,11 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 	for (int i = 0; i < model.length(); ++i) {
 		if (!model[i].param_defined) continue;
 
-		if (model[i].name == "Door") {
-			double x = model[i].param_values[0];
-			double y = model[i].param_values[1];
-			double w = model[i].param_values[2];
-			double h = model[i].param_values[3];
-			
+		double x = model[i].param_value1;
+		double y = model[i].param_value2;
+		double w = model[i].param_value3;
+		double h = model[i].param_value4;
+		if (model[i].name == "Door") {			
 			// 上の壁を描画
 			{
 				glm::mat4 mat;
@@ -475,12 +442,7 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.375, -door_depth));
 				glutils::drawQuad(w, h * 0.75, glm::vec3(0.8, 0.5, 0.3), mat, doorVertices);
 			}
-		} else if (model[i].name == "Window") {
-			double x = model[i].param_values[0];
-			double y = model[i].param_values[1];
-			double w = model[i].param_values[2];
-			double h = model[i].param_values[3];
-			
+		} else if (model[i].name == "Window") {			
 			// 上の壁を描画
 			{
 				glm::mat4 mat;
@@ -576,12 +538,7 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.5, -window_depth));
 				glutils::drawQuad(w, h * 0.5, glm::vec3(1, 1, 1), mat, windowVertices);
 			}
-		} else if (model[i].name == "Wall" || model[i].name == "W") {
-			double x = model[i].param_values[0];
-			double y = model[i].param_values[1];
-			double w = model[i].param_values[2];
-			double h = model[i].param_values[3];
-			
+		} else if (model[i].name == "Wall" || model[i].name == "W") {			
 			// 壁
 			{
 				glm::mat4 mat;
@@ -640,12 +597,12 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 	for (int i = 0; i < model.length(); ++i) {
 		if (!model[i].param_defined) break;
 
-		if (model[i].name == "Door") {
-			double x = model[i].param_values[0];
-			double y = model[i].param_values[1];
-			double w = model[i].param_values[2];
-			double h = model[i].param_values[3];
-			
+		double x = model[i].param_value1;
+		double y = model[i].param_value2;
+		double w = model[i].param_value3;
+		double h = model[i].param_value4;
+
+		if (model[i].name == "Door") {	
 			// 壁を描画
 			{
 				glm::vec4 p1(x, y, 0, 1);
@@ -674,11 +631,6 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 				cv::rectangle(indicator[1], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 			}
 		} else if (model[i].name == "Window") {
-			double x = model[i].param_values[0];
-			double y = model[i].param_values[1];
-			double w = model[i].param_values[2];
-			double h = model[i].param_values[3];
-			
 			// 壁を描画
 			{
 				glm::vec4 p1(x, y, 0, 1);
@@ -706,12 +658,7 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5;
 				cv::rectangle(indicator[2], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 			}
-		} else if (model[i].name == "Wall" || model[i].name == "W") {
-			double x = model[i].param_values[0];
-			double y = model[i].param_values[1];
-			double w = model[i].param_values[2];
-			double h = model[i].param_values[3];
-			
+		} else if (model[i].name == "Wall" || model[i].name == "W") {			
 			// 壁を描画
 			glm::vec4 p1(x, y, 0, 1);
 			glm::vec4 p2(x + w, y + h, 0, 1);
@@ -827,8 +774,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		}
 
 		// ランダムにderiveする
-		std::vector<int> derivation_history;
-		String result_model = derive(node->model, MAX_ITERATIONS_FOR_MC, derivation_history);
+		String result_model = derive(node->model, MAX_ITERATIONS_FOR_MC);
 
 		// indicatorを計算する
 		std::vector<cv::Mat> indicator;
@@ -1005,42 +951,42 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 	if (model[i].name == "X") {
 		for (int k = 2; k <= 2; ++k) {
 			String rule;
-			double height = model[i].param_values[3] / (double)k;
+			double height = model[i].param_value4 / (double)k;
 			for (int l = 0; l < k; ++l) {
-				rule += Literal("Floor", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1] + height * l, model[i].param_values[2], height);
+				rule += Literal("Floor", model[i].depth + 1, model[i].param_value1, model[i].param_value2 + height * l, model[i].param_value3, height);
 			}
-			actions.push_back(Action(actions.size(), i, rule));
+			actions.push_back(Action(actions.size(), rule));
 		}
 	} else if (model[i].name == "Floor") {
-		String rule = Literal("W", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1], model[i].param_values[2], model[i].param_values[3]);
-		actions.push_back(Action(actions.size(), i, rule));
+		String rule = Literal("W", model[i].depth + 1, model[i].param_value1, model[i].param_value2, model[i].param_value3, model[i].param_value4);
+		actions.push_back(Action(actions.size(), rule));
 
 		for (double k = 0.2; k <= 0.8; k += 0.1) {
 			for (double l = 0.1; l <= 0.3; l += 0.1) {
-				if (model[i].param_values[2] * k < 10.0) continue;
-				if (model[i].param_values[2] * l < 10.0) continue;
-				if (model[i].param_values[2] * (1.0 - k - l) < 10.0) continue;
+				if (model[i].param_value3 * k < 10.0) continue;
+				if (model[i].param_value3 * l < 10.0) continue;
+				if (model[i].param_value3 * (1.0 - k - l) < 10.0) continue;
 				
-				String rule = Literal("W", model[i].depth + 1,  model[i].param_values[0], model[i].param_values[1], model[i].param_values[2] * k, model[i].param_values[3])
-					+ Literal("Door", model[i].depth + 1, model[i].param_values[0] + model[i].param_values[2] * k, model[i].param_values[1], model[i].param_values[2] * l, model[i].param_values[3])
-					+ Literal("W", model[i].depth + 1, model[i].param_values[0] + model[i].param_values[2] * (k + l), model[i].param_values[1], model[i].param_values[2] * (1.0 - k - l), model[i].param_values[3]);
-				actions.push_back(Action(actions.size(), i, rule));
+				String rule = Literal("W", model[i].depth + 1,  model[i].param_value1, model[i].param_value2, model[i].param_value3 * k, model[i].param_value4)
+					+ Literal("Door", model[i].depth + 1, model[i].param_value1 + model[i].param_value3 * k, model[i].param_value2, model[i].param_value3 * l, model[i].param_value4)
+					+ Literal("W", model[i].depth + 1, model[i].param_value1 + model[i].param_value3 * (k + l), model[i].param_value2, model[i].param_value3 * (1.0 - k - l), model[i].param_value4);
+				actions.push_back(Action(actions.size(), rule));
 			}
 		}
 	} else if (model[i].name == "W") {
-		String rule = Literal("Wall", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1], model[i].param_values[2], model[i].param_values[3]);
-		actions.push_back(Action(actions.size(), i, rule));
+		String rule = Literal("Wall", model[i].depth + 1, model[i].param_value1, model[i].param_value2, model[i].param_value3, model[i].param_value4);
+		actions.push_back(Action(actions.size(), rule));
 
 		for (double k = 0.2; k <= 0.8; k += 0.1) {
 			for (double l = 0.1; l <= 0.6; l += 0.1) {
-				if (model[i].param_values[2] * k < 10.0) continue;
-				if (model[i].param_values[2] * l < 10.0) continue;
-				if (model[i].param_values[2] * (1.0 - k - l) < 10.0) continue;
+				if (model[i].param_value3 * k < 10.0) continue;
+				if (model[i].param_value3 * l < 10.0) continue;
+				if (model[i].param_value3 * (1.0 - k - l) < 10.0) continue;
 
-				String rule = Literal("W", model[i].depth + 1, model[i].param_values[0], model[i].param_values[1], model[i].param_values[2] * k, model[i].param_values[3])
-					+ Literal("Window", model[i].depth + 1, model[i].param_values[0] + model[i].param_values[2] * k, model[i].param_values[1], model[i].param_values[2] * l, model[i].param_values[3])
-					+ Literal("W", model[i].depth + 1, model[i].param_values[0] + model[i].param_values[2] * (k + l), model[i].param_values[1], model[i].param_values[2] * (1.0 - k - l), model[i].param_values[3]);
-				actions.push_back(Action(actions.size(), i, rule));
+				String rule = Literal("W", model[i].depth + 1, model[i].param_value1, model[i].param_value2, model[i].param_value3 * k, model[i].param_value4)
+					+ Literal("Window", model[i].depth + 1, model[i].param_value1 + model[i].param_value3 * k, model[i].param_value2, model[i].param_value3 * l, model[i].param_value4)
+					+ Literal("W", model[i].depth + 1, model[i].param_value1 + model[i].param_value3 * (k + l), model[i].param_value2, model[i].param_value3 * (1.0 - k - l), model[i].param_value4);
+				actions.push_back(Action(actions.size(), rule));
 			}
 		}
 	}
@@ -1052,10 +998,10 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
  * 現在の座標を計算して返却する。
  */
 cv::Mat ParametricLSystem::createMask(const String& model, const glm::mat4& mvpMat) {
-	double x = model[model.cursor].param_values[0];
-	double y = model[model.cursor].param_values[1];
-	double w = model[model.cursor].param_values[2];
-	double h = model[model.cursor].param_values[3];
+	double x = model[model.cursor].param_value1;
+	double y = model[model.cursor].param_value2;
+	double w = model[model.cursor].param_value3;
+	double h = model[model.cursor].param_value4;
 
 	glm::vec4 p1(x, y, 0, 1);
 	glm::vec4 p2(x + w, y + h, 0, 1);

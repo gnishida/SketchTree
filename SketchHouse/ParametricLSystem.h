@@ -32,17 +32,17 @@ public:
 public:
 	string name;
 	int depth;
-	std::vector<double> param_values;
+	double param_value1;
+	double param_value2;
+	double param_value3;
+	double param_value4;
 	bool param_defined;
 
 public:
 	Literal() {}
 	Literal(const string& name, int depth, bool param_defined = false);
-	Literal(const string& name, int depth, double param_value);
-	Literal(const string& name, int depth, double param_value1, double param_value2);
-	Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3);
+	Literal(const string& name, int depth, double param_value1);
 	Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3, double param_value4);
-	Literal(const string& name, int depth, const std::vector<double>& param_values);
 	
 	String operator+(const Literal& l) const;
 	int type();
@@ -83,15 +83,14 @@ public:
 
 public:
 	int type;		// 0 -- rule / 1 -- value
-	int index;		// モデルの何文字目の変数に対するactionか？
 	int action_index;	// actionsの中の何番目のactionか？
 	String rule;
 	double value;
 
 public:
 	Action() {}
-	Action(int action_index, int index, const String& rule);
-	Action(int action_index, int index, double value);
+	Action(int action_index, const String& rule);
+	Action(int action_index, double value);
 
 	String apply(const String& model);
 };
@@ -138,7 +137,7 @@ public:
 public:
 	ParametricLSystem(const String& axiom);
 	String derive(int random_seed);
-	String derive(const String& start_model, int max_iterations, std::vector<int>& derivation_history);
+	String derive(const String& start_model, int max_iterations);
 	void draw(const String& model, RenderManager* renderManager);
 	void computeIndicator(const String& model, const glm::mat4& mvpMat, std::vector<cv::Mat>& indicator);
 	void computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, std::vector<cv::Mat>& indicator);
