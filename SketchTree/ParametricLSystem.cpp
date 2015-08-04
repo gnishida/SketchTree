@@ -708,9 +708,9 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 	for (int l = 0; l < MAX_ITERATIONS; ++l) {
 		model = UCT(model, target, mvpMat, l);
 
-		std::vector<cv::Mat> indicator;
+		/*std::vector<cv::Mat> indicator;
 		computeIndicator(model, mvpMat, indicator);
-		double sc = score(indicator, target);
+		double sc = score(indicator, target);*/
 
 		/////// デバッグ ///////
 		/*
@@ -723,7 +723,7 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 		/////// デバッグ ///////
 
 		//cout << l << ": " << "Best score=" << sc << " : " << model << endl;
-		cout << l << ": " << "Best score=" << sc << endl;
+		//cout << l << ": " << "Best score=" << sc << endl;
 
 		// これ以上、derivationできなら、終了
 		if (model.cursor < 0) break;
