@@ -15,14 +15,15 @@ using namespace std;
 
 namespace parametriclsystem {
 
-const int NUM_LAYERS = 3;
+const int NUM_LAYERS = 1;
 const int GRID_SIZE = 100;
 
-const int MAX_ITERATIONS = 20;
-const int MAX_ITERATIONS_FOR_MC = 15;
-const int NUM_MONTE_CARLO_SAMPLING = 300;
+const int MAX_ITERATIONS = 500;
+const int MAX_ITERATIONS_FOR_MC = 10;
+const int NUM_MONTE_CARLO_SAMPLING = 100;
 const double PARAM_EXPLORATION = 0.3;
 const double PARAM_EXPLORATION_VARIANCE = 0.1;
+const double MASK_RADIUS_RATIO = 0.11;
 
 class String;
 
@@ -33,18 +34,14 @@ public:
 public:
 	string name;
 	int depth;
-	double param_value1;
-	double param_value2;
-	double param_value3;
-	double param_value4;
+	double param_value;
 	bool param_defined;
 
 public:
-	Literal() : depth(0), param_value1(0.0), param_value2(0.0), param_value3(0.0), param_value4(0.0), param_defined(false) {}
+	Literal() : depth(0), param_value(0.0), param_defined(false) {}
 	Literal(const string& name, int depth, bool param_defined = false);
 	Literal(const string& name, int depth, double param_value);
-	Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3, double param_value4);
-	
+
 	String operator+(const Literal& l) const;
 	int type();
 };
@@ -72,6 +69,7 @@ public:
 
 	String getExpand() const;
 	void nextCursor(int depth);
+
 	void rewrite(const Action& action);
 };
 
@@ -125,14 +123,15 @@ public:
 	Node* bestChild();
 };
 
-
 class ParametricLSystem {
 public:
 	String axiom;
+	map<string, vector<Action> > actions_template;
 	MyTimer timer;
 
 public:
 	ParametricLSystem(const String& axiom);
+	void initActionsTemplate();
 	String derive(int random_seed);
 	String derive(const String& start_model, int max_iterations);
 	void draw(const String& model, RenderManager* renderManager);
@@ -140,12 +139,12 @@ public:
 	void computeIndicator(const String& model, const glm::mat4& mvpMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator);
 	void computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator);
 	String inverse(const std::vector<cv::Mat>& target, const glm::mat4& mvpMat);
-	String UCT(const String& model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step);
+	String UCT(const String& current_model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step);
 	double score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target);
 
 private:
 	std::vector<Action> getActions(const String& model);
-	//glm::vec2 computeCurrentPoint(const String& model, const glm::mat4& mvpMat, glm::mat4& modelMmat);
+	glm::vec2 computeCurrentPoint(const String& model, const glm::mat4& mvpMat, glm::mat4& modelMmat);
 	void releaseNodeMemory(Node* node);
 };
 
