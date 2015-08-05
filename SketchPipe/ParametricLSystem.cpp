@@ -304,6 +304,44 @@ ParametricLSystem::ParametricLSystem(const String& axiom) {
 }
 
 void ParametricLSystem::initActionsTemplate() {
+	{
+		String rule;
+		actions_template["X"].push_back(Action(0, rule));
+
+		rule = Literal("F", 0)	+ Literal("X", 0);
+		actions_template["X"].push_back(Action(0, rule));
+
+		rule = Literal("F", 0) + Literal("+", 0, 90.0) + Literal("X", 0);
+		actions_template["X"].push_back(Action(1, rule));
+
+		rule = Literal("F", 0) + Literal("-", 0, 90.0) + Literal("X", 0);
+		actions_template["X"].push_back(Action(2, rule));
+
+		rule = Literal("F", 0) + Literal("&", 0, 90.0) + Literal("X", 0);
+		actions_template["X"].push_back(Action(3, rule));
+
+		rule = Literal("F", 0) + Literal("^", 0, 90.0) + Literal("X", 0);
+		actions_template["X"].push_back(Action(4, rule));
+
+		rule = Literal("F", 0) + Literal("[", 0, true) + Literal("+", 0, 90.0) + Literal("X", 0) + Literal("]", 0, true) + Literal("X", 0);
+		actions_template["X"].push_back(Action(5, rule));
+
+		rule = Literal("F", 0) + Literal("[", 0, true) + Literal("-", 0, 90.0) + Literal("X", 0) + Literal("]", 0, true) + Literal("X", 0);
+		actions_template["X"].push_back(Action(6, rule));
+
+		rule = Literal("F", 0) + Literal("[", 0, true) + Literal("&", 0, 90.0) + Literal("X", 0) + Literal("]", 0, true) + Literal("X", 0);
+		actions_template["X"].push_back(Action(7, rule));
+
+		rule = Literal("F", 0) + Literal("[", 0, true) + Literal("^", 0, 90.0) + Literal("X", 0) + Literal("]", 0, true) + Literal("X", 0);
+		actions_template["X"].push_back(Action(8, rule));
+	}
+
+	{
+		int count = 0;
+		for (int k = 4; k <= 16; k += 4) {
+			actions_template["F"].push_back(Action(count++, k));
+		}
+	}
 }
 
 /**
@@ -770,40 +808,9 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 	if (i == -1) return actions;
 
 	if (model[i].name == "X") {
-		String rule;
-		actions.push_back(Action(0, rule));
-
-		rule = Literal("F", 0)	+ Literal("X", 0);
-		actions.push_back(Action(0, rule));
-
-		rule = Literal("F", 0) + Literal("+", 0, 90.0) + Literal("X", 0);
-		actions.push_back(Action(1, rule));
-
-		rule = Literal("F", 0) + Literal("-", 0, 90.0) + Literal("X", 0);
-		actions.push_back(Action(2, rule));
-
-		rule = Literal("F", 0) + Literal("&", 0, 90.0) + Literal("X", 0);
-		actions.push_back(Action(3, rule));
-
-		rule = Literal("F", 0) + Literal("^", 0, 90.0) + Literal("X", 0);
-		actions.push_back(Action(4, rule));
-
-		rule = Literal("F", 0) + Literal("[", 0, true) + Literal("+", 0, 90.0) + Literal("X", 0) + Literal("]", 0, true) + Literal("X", 0);
-		actions.push_back(Action(5, rule));
-
-		rule = Literal("F", 0) + Literal("[", 0, true) + Literal("-", 0, 90.0) + Literal("X", 0) + Literal("]", 0, true) + Literal("X", 0);
-		actions.push_back(Action(6, rule));
-
-		rule = Literal("F", 0) + Literal("[", 0, true) + Literal("&", 0, 90.0) + Literal("X", 0) + Literal("]", 0, true) + Literal("X", 0);
-		actions.push_back(Action(7, rule));
-
-		rule = Literal("F", 0) + Literal("[", 0, true) + Literal("^", 0, 90.0) + Literal("X", 0) + Literal("]", 0, true) + Literal("X", 0);
-		actions.push_back(Action(8, rule));
+		return actions_template["X"];
 	} else if (model[i].name == "F") {
-		int count = 0;
-		for (int k = 4; k <= 16; k += 4) {
-			actions.push_back(Action(count++, k));
-		}
+		return actions_template["F"];
 	}
 
 	return actions;
