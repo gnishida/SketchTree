@@ -310,7 +310,7 @@ ParametricLSystem::ParametricLSystem(const String& axiom) {
 	this->axiom = axiom;
 
 	initActionsTemplate();
-	timer.validate(true);
+	timer.validate(false);
 }
 
 void ParametricLSystem::initActionsTemplate() {
@@ -665,11 +665,13 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 	String model = axiom;
 
 	for (int l = 0; l < MAX_ITERATIONS; ++l) {
-		UCT(model, target, mvpMat, l);
+		model = UCT(model, target, mvpMat, l);
 
-		std::vector<cv::Mat> indicator;
-		computeIndicator(model, mvpMat, indicator);
-		double sc = score(indicator, target);
+		/*{
+			std::vector<cv::Mat> indicator;
+			computeIndicator(model, mvpMat, indicator);
+			double sc = score(indicator, target);
+		}*/
 
 		/////// デバッグ ///////
 		/*
@@ -681,8 +683,7 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 		*/
 		/////// デバッグ ///////
 
-		//cout << l << ": " << "Best score=" << sc << " : " << model << endl;
-		cout << l << ": " << "Best score=" << sc << endl;
+		//cout << l << ": " << "Best score=" << sc << endl;
 
 		// これ以上、derivationできなら、終了
 		if (model.cursor < 0) break;
@@ -699,24 +700,21 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 /**
  * 指定されたmodelからUCTをスタートし、最善のoptionを返却する。
  *
- * @param root_model		モデル
+ * @param current_model		モデル
  * @param target			ターゲット
  * @param mvpMat			model/view/projection行列
  */
-void ParametricLSystem::UCT(String& root_model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step) {
+String ParametricLSystem::UCT(const String& current_model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step) {
 	// これ以上、derivationできなら、終了
-	int index = root_model.cursor;
-	if (index < 0) return;
-
-	// expandするリテラルを取得する
-	String model = root_model.getExpand();
+	int index = current_model.cursor;
+	if (index < 0) return current_model;
 
 	// 現在のカーソルのdepthを取得
-	int depth = root_model[root_model.cursor].depth;
+	int depth = current_model[current_model.cursor].depth;
 
 	// 現在の座標を計算
 	glm::mat4 baseModelMat;
-	glm::vec2 curPt = computeCurrentPoint(root_model, mvpMat, baseModelMat);
+	glm::vec2 curPt = computeCurrentPoint(current_model, mvpMat, baseModelMat);
 
 	// cripping領域を計算
 	cv::Rect crip_roi(curPt.x - MASK_RADIUS_RATIO * GRID_SIZE, curPt.y - MASK_RADIUS_RATIO * GRID_SIZE, curPt.x + MASK_RADIUS_RATIO * GRID_SIZE, curPt.y + MASK_RADIUS_RATIO * GRID_SIZE);
@@ -734,14 +732,17 @@ void ParametricLSystem::UCT(String& root_model, const std::vector<cv::Mat>& targ
 			cripped_target[i] = target[i](crip_roi);
 		}
 	}
-	
-	// ルートノードを作成
-	Node* root_node = new Node(model);
-	root_node->setActions(getActions(model));
 
 	// ベースとなるindicatorを計算
 	std::vector<cv::Mat> baseIndicator;
-	computeIndicator(root_model, mvpMat, crip_roi, baseIndicator);
+	computeIndicator(current_model, mvpMat, crip_roi, baseIndicator);
+
+	// expandするリテラルを取得する
+	String root_model = current_model.getExpand();
+
+	// ルートノードを作成
+	Node* root_node = new Node(root_model);
+	root_node->setActions(getActions(root_model));
 
 	for (int iter = 0; iter < NUM_MONTE_CARLO_SAMPLING; ++iter) {
 		// もしノードがリーフノードなら、終了
@@ -855,7 +856,8 @@ void ParametricLSystem::UCT(String& root_model, const std::vector<cv::Mat>& targ
 	*/
 	////// デバッグ //////
 
-	root_model.rewrite(root_node->bestChild()->action);
+	String next_model = current_model;
+	next_model.rewrite(root_node->bestChild()->action);
 
 	/////// デバッグ ///////
 	/*
@@ -876,6 +878,8 @@ void ParametricLSystem::UCT(String& root_model, const std::vector<cv::Mat>& targ
 	timer.start("release_memory");
 	releaseNodeMemory(root_node);
 	timer.end("release_memory");
+
+	return next_model;
 }
 
 /**
