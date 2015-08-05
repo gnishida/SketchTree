@@ -710,17 +710,15 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 /**
  * 指定されたmodelからUCTをスタートし、最善のoptionを返却する。
  *
- * @param model		モデル
- * @param target	ターゲット
- * @return			最善のoption
+ * @param current_model		モデル
+ * @param target			ターゲット
+ * @param mvpMat			model/view/projection行列
+ * @return					最善のoption
  */
 String ParametricLSystem::UCT(const String& current_model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step) {
 	// これ以上、derivationできなら、終了
 	int index = current_model.cursor;
 	if (index < 0) return current_model;
-
-	// expandするリテラルを取得する
-	String model = current_model.getExpand();
 
 	// 現在のカーソルのdepthを取得
 	int depth = current_model[current_model.cursor].depth;
@@ -752,13 +750,16 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		}
 	}
 
-	// ルートノードを作成
-	Node* current_node = new Node(model);
-	current_node->setActions(getActions(model));
-
 	// ベースとなるindicatorを計算
 	std::vector<cv::Mat> baseIndicator;
 	computeIndicator(current_model, mvpMat, crip_roi, baseIndicator);
+
+	// expandするリテラルを取得する
+	String root_model = current_model.getExpand();
+
+	// ルートノードを作成
+	Node* current_node = new Node(root_model);
+	current_node->setActions(getActions(root_model));
 
 	for (int iter = 0; iter < NUM_MONTE_CARLO_SAMPLING; ++iter) {
 		// もしノードがリーフノードなら、終了

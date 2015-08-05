@@ -703,6 +703,7 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
  * @param current_model		モデル
  * @param target			ターゲット
  * @param mvpMat			model/view/projection行列
+ * @return					最善のoption
  */
 String ParametricLSystem::UCT(const String& current_model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step) {
 	// これ以上、derivationできなら、終了
