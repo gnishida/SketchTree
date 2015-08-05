@@ -268,16 +268,6 @@ Action Node::randomlySelectAction() {
 }
 
 /**
- * childrenの中で、指定されたindex値を持つ子ノードを返却する。
- */
-Node* Node::getChild(int index) {
-	for (int i = 0; i < children.size(); ++i) {
-		if (children[i]->action.action_index == index) return children[i];
-	}
-	return NULL;
-}
-
-/**
  * UCTアルゴリズムに従い、子ノードを1つ選択する。
  */
 Node* Node::UCTSelectChild() {
