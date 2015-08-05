@@ -268,18 +268,6 @@ Action Node::randomlySelectAction() {
 }
 
 /**
- * untriedActionsの中で、指定されたindex値を持つ要素を削除する。
- */
-void Node::removeAction(int index) {
-	for (int i = 0; i < untriedActions.size(); ++i) {
-		if (untriedActions[i] == index) {
-			untriedActions.erase(untriedActions.begin() + i);
-			return;
-		}
-	}
-}
-
-/**
  * childrenの中で、指定されたindex値を持つ子ノードを返却する。
  */
 Node* Node::getChild(int index) {

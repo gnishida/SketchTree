@@ -125,7 +125,6 @@ public:
 	Node* addChild(const String& model, const Action& action);
 	void setActions(std::vector<Action>& actions);
 	Action randomlySelectAction();
-	void removeAction(int index);
 	Node* getChild(int index);
 	Node* UCTSelectChild();
 	Node* bestChild();
