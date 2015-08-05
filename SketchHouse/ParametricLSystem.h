@@ -9,6 +9,7 @@
 #include <vector>
 #include <map>
 #include "Vertex.h"
+#include "MyTimer.h"
 
 using namespace std;
 
@@ -130,23 +131,25 @@ public:
 class ParametricLSystem {
 public:
 	String axiom;
+	map<string, vector<Action> > actions_template;
+	MyTimer timer;
 
 public:
 	ParametricLSystem(const String& axiom);
+	void initActionsTemplate();
 	String derive(int random_seed);
 	String derive(const String& start_model, int max_iterations);
 	void draw(const String& model, RenderManager* renderManager);
 	void computeIndicator(const String& model, const glm::mat4& mvpMat, std::vector<cv::Mat>& indicator);
-	void computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, std::vector<cv::Mat>& indicator);
+	void computeIndicator(const String& model, const glm::mat4& mvpMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator);
+	void computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator);
 	String inverse(const std::vector<cv::Mat>& target, const glm::mat4& mvpMat);
 	String UCT(const String& model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step);
 	double score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target);
-	double score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target, const cv::Mat& mask);
 
 private:
 	std::vector<Action> getActions(const String& model);
 	//glm::vec2 computeCurrentPoint(const String& model, const glm::mat4& mvpMat, glm::mat4& modelMmat);
-	cv::Mat createMask(const String& model, const glm::mat4& mvpMat);
 	void releaseNodeMemory(Node* node);
 };
 

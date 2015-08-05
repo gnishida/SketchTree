@@ -568,11 +568,11 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
  * @param mvpMat			カメラ視点への射影行列
  * @param indicator [OUT]	indicator
  */
-void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, std::vector<cv::Mat>& indicator) {
+inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, std::vector<cv::Mat>& indicator) {
 	computeIndicator(model, mvpMat, glm::mat4(), cv::Rect(0, 0, GRID_SIZE, GRID_SIZE), indicator);
 }
 
-void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator) {
+inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator) {
 	computeIndicator(model, mvpMat, glm::mat4(), roi, indicator);
 }
 
@@ -584,7 +584,7 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
  * @param baseModelMat		モデルのベース変換行列
  * @param indicator [OUT]	indicator
  */
-void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator) {
+inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator) {
 	indicator.resize(NUM_LAYERS);
 	for (int i = 0; i < NUM_LAYERS; ++i) {
 		indicator[i] = cv::Mat::zeros(roi.height, roi.width, CV_32F);
@@ -749,7 +749,6 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 	crip_roi.width -= crip_roi.x - 1;
 	crip_roi.height -= crip_roi.y - 1;
 	
-
 	// targetから現在の座標周辺を切り取る
 	std::vector<cv::Mat> cripped_target(target.size());
 	{
@@ -758,9 +757,6 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		}
 	}
 	
-	// マスク画像を作成
-	//cv::Mat mask = ml::create_mask(GRID_SIZE, GRID_SIZE, CV_8U, cv::Point(curPt.x, curPt.y), MASK_RADIUS_RATIO * GRID_SIZE);
-
 	// ルートノードを作成
 	Node* current_node = new Node(model);
 	current_node->setActions(getActions(model));
@@ -814,7 +810,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 
 		// スコアを計算する
 		timer.start("compute_score");
-		double sc = score(indicator, cripped_target);//, mask);
+		double sc = score(indicator, cripped_target);
 		node->best_score = sc;
 		timer.end("compute_score");
 
@@ -823,7 +819,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 			for (int i = 0; i < NUM_LAYERS; ++i) {
 				char filename[256];
 				sprintf(filename, "images/indicator_%d_%d_%d.png", derivation_step, iter, i);
-				cv::Mat img = indicator[i] * 0.5 + target[i] * 0.5;
+				cv::Mat img = indicator[i] * 0.5 + cripped_target[i] * 0.5;
 
 				ml::mat_save(filename, img);
 
@@ -839,14 +835,12 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 
 		// スコアをbackpropagateする
 		timer.start("UCT_backpropagate");
-		bool updated = false;
 		Node* leaf = node;
 		while (node != NULL) {
 			node->visits++;
 			node->scores.push_back(sc);
 			if (sc > node->best_score) {
 				node->best_score = sc;
-				updated = true;
 			}
 
 			// 子ノードが全て展開済みで、且つ、スコア確定済みなら、このノードのスコアも確定とする
@@ -913,36 +907,19 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
  *
  * @param indicator		indicator
  * @param target		ターゲットindicator
- * @return				スコア
- */
-/*
-double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target) {
-	return score(indicator, target, cv::Mat::ones(target[0].size(), CV_8U));
-}
-*/
-
-/**
- * indicatorのスコアを計算して返却する。
- *
- * @param indicator		indicator
- * @param target		ターゲットindicator
  * @param mask			マスク
  * @return				スコア
  */
-inline double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target) {//, const cv::Mat& mask) {
+inline double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target) {
 	double count = 0;
 	double total = 0;
 
 	for (int i = 0; i < indicator.size(); ++i) {
 		cv::Mat result;
-		cv::subtract(indicator[i], target[i], result);//, mask);
+		cv::subtract(indicator[i], target[i], result);
 		count += cv::countNonZero(result);
-		//count += ml::mat_squared_sum(result);
 
-		cv::Mat result2;
-		//cv::subtract(target[i], cv::Mat::zeros(target[i].size(), target[i].type()), result2, mask);
-		total += cv::countNonZero(target[i]);//result2);
-		//total += ml::mat_squared_sum(result2);
+		total += cv::countNonZero(target[i]);
 	}
 
 	if (total > 0.0) {

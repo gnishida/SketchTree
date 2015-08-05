@@ -339,6 +339,12 @@ Node* Node::bestChild() {
 
 ParametricLSystem::ParametricLSystem(const String& axiom) {
 	this->axiom = axiom;
+
+	initActionsTemplate();
+	timer.validate(false);
+}
+
+void ParametricLSystem::initActionsTemplate() {
 }
 
 /**
@@ -371,12 +377,15 @@ String ParametricLSystem::derive(const String& start_model, int max_iterations) 
 	String model = start_model;
 
 	for (int iter = 0; iter < max_iterations; ++iter) {
+		timer.start("get_actions");
 		std::vector<Action> actions = getActions(model);
+		timer.end("get_actions");
 		if (actions.size() == 0) break;
 
-
+		timer.start("action_apply");
 		int index = ml::genRand(0, actions.size());
 		model.rewrite(actions[index]);
+		timer.end("action_apply");
 	}
 
 	return model;
@@ -571,8 +580,12 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
  * @param mvpMat			カメラ視点への射影行列
  * @param indicator [OUT]	indicator
  */
-void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, std::vector<cv::Mat>& indicator) {
-	computeIndicator(model, mvpMat, glm::mat4(), indicator);
+inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, std::vector<cv::Mat>& indicator) {
+	computeIndicator(model, mvpMat, glm::mat4(), cv::Rect(0, 0, GRID_SIZE, GRID_SIZE), indicator);
+}
+
+inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator) {
+	computeIndicator(model, mvpMat, glm::mat4(), roi, indicator);
 }
 
 /**
@@ -583,10 +596,10 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
  * @param baseModelMat		モデルのベース変換行列
  * @param indicator [OUT]	indicator
  */
-void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, std::vector<cv::Mat>& indicator) {
+inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator) {
 	indicator.resize(NUM_LAYERS);
 	for (int i = 0; i < NUM_LAYERS; ++i) {
-		indicator[i] = cv::Mat::zeros(GRID_SIZE, GRID_SIZE, CV_32F);
+		indicator[i] = cv::Mat::zeros(roi.height, roi.width, CV_32F);
 	}
 
 	std::list<glm::mat4> stack;
@@ -609,10 +622,10 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 				glm::vec4 p2(x + w, y + h, 0, 1);
 				p1 = mvpMat * p1;
 				p2 = mvpMat * p2;
-				int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5;
-				int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5;
-				int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5;
-				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5;
+				int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+				int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
+				int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
 				cv::rectangle(indicator[0], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 				//cv::line(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Scalar(1), 10);
 				//cv::line(indicator[0], cv::Point(p1.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), 10);
@@ -624,10 +637,10 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 				glm::vec4 p2 = glm::vec4(x + w, y + h * 0.75, 0, 1);
 				p1 = mvpMat * p1;
 				p2 = mvpMat * p2;
-				int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5;
-				int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5;
-				int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5;
-				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5;
+				int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+				int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
+				int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
 				cv::rectangle(indicator[1], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 			}
 		} else if (model[i].name == "Window") {
@@ -637,10 +650,10 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 				glm::vec4 p2(x + w, y + h, 0, 1);
 				p1 = mvpMat * p1;
 				p2 = mvpMat * p2;
-				int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5;
-				int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5;
-				int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5;
-				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5;
+				int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+				int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
+				int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
 				cv::rectangle(indicator[0], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 				//cv::line(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Scalar(1), 10);
 				//cv::line(indicator[0], cv::Point(p1.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), 10);
@@ -652,10 +665,10 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 				glm::vec4 p2 = glm::vec4(x + w, y + h * 0.75, 0, 1);
 				p1 = mvpMat * p1;
 				p2 = mvpMat * p2;
-				int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5;
-				int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5;
-				int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5;
-				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5;
+				int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+				int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
+				int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
 				cv::rectangle(indicator[2], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 			}
 		} else if (model[i].name == "Wall" || model[i].name == "W") {			
@@ -664,10 +677,10 @@ void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& m
 			glm::vec4 p2(x + w, y + h, 0, 1);
 			p1 = mvpMat * p1;
 			p2 = mvpMat * p2;
-			int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5;
-			int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5;
-			int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5;
-			int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5;
+			int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+			int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
+			int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+			int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
 
 			cv::rectangle(indicator[0], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 			//cv::rectangle(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), 10);
@@ -738,8 +751,32 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 	// 現在のカーソルのdepthを取得
 	int depth = current_model[current_model.cursor].depth;
 
-	// マスク画像を作成
-	cv::Mat mask = createMask(current_model, mvpMat);
+	// cripping領域を計算
+	cv::Rect crip_roi;
+	{
+		double x = current_model[current_model.cursor].param_value1;
+		double y = current_model[current_model.cursor].param_value2;
+		double w = current_model[current_model.cursor].param_value3;
+		double h = current_model[current_model.cursor].param_value4;
+
+		glm::vec4 p1(x, y, 0, 1);
+		glm::vec4 p2(x + w, y + h, 0, 1);
+		p1 = mvpMat * p1;
+		p2 = mvpMat * p2;
+
+		crip_roi.x = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5;
+		crip_roi.y = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5;
+		crip_roi.width = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5 - crip_roi.x;
+		crip_roi.height = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5 - crip_roi.y;
+	}
+
+	// targetから現在の座標周辺を切り取る
+	std::vector<cv::Mat> cripped_target(target.size());
+	{
+		for (int i = 0; i < target.size(); ++i) {
+			cripped_target[i] = target[i](crip_roi);
+		}
+	}
 
 	// ルートノードを作成
 	Node* current_node = new Node(model);
@@ -747,7 +784,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 
 	// ベースとなるindicatorを計算
 	std::vector<cv::Mat> baseIndicator;
-	computeIndicator(current_model, mvpMat, baseIndicator);
+	computeIndicator(current_model, mvpMat, crip_roi, baseIndicator);
 
 	for (int iter = 0; iter < NUM_MONTE_CARLO_SAMPLING; ++iter) {
 		// もしノードがリーフノードなら、終了
@@ -759,11 +796,14 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		Node* node = current_node;
 
 		// 探索木のリーフノードを選択
+		timer.start("UCT_select");
 		while (node->untriedActions.size() == 0 && node->children.size() > 0) {
 			node = node->UCTSelectChild();
 		}
+		timer.end("UCT_select");
 
 		// 子ノードがまだ全てexpandされていない時は、1つランダムにexpand
+		timer.start("UCT_expand");
 		if (node->untriedActions.size() > 0) {// && node->children.size() <= ml::log((double)iter * 0.01 + 1, 1.4)) {
 			Action action = node->randomlySelectAction();
 			String child_model = node->model;
@@ -772,31 +812,35 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 			node = node->addChild(child_model, action);
 			node->setActions(getActions(child_model));
 		}
+		timer.end("UCT_expand");
 
 		// ランダムにderiveする
 		String result_model = derive(node->model, MAX_ITERATIONS_FOR_MC);
 
 		// indicatorを計算する
+		timer.start("compute_indicator");
 		std::vector<cv::Mat> indicator;
-		computeIndicator(result_model, mvpMat, glm::mat4(), indicator);
+		computeIndicator(result_model, mvpMat, glm::mat4(), crip_roi, indicator);
 		for (int i = 0; i < NUM_LAYERS; ++i) {
 			indicator[i] += baseIndicator[i];
 
 			// clamp
 			cv::threshold(indicator[i], indicator[i], 0.0, 1.0, cv::THRESH_BINARY);
 		}
+		timer.end("compute_indicator");
 
 		// スコアを計算する
-		double sc = score(indicator, target, mask);
+		timer.start("compute_score");
+		double sc = score(indicator, cripped_target);
 		node->best_score = sc;
-
+		timer.end("compute_score");
 
 		/////// デバッグ ///////
 		/*{
 			for (int i = 0; i < NUM_LAYERS; ++i) {
 				char filename[256];
 				sprintf(filename, "images/indicator_%d_%d_%d.png", derivation_step, iter, i);
-				cv::Mat img = indicator[i] * 0.5 + target[i] * 0.5;
+				cv::Mat img = indicator[i] * 0.5 + cripped_target[i] * 0.5;
 
 				ml::mat_save(filename, img);
 
@@ -811,14 +855,13 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		}
 
 		// スコアをbackpropagateする
-		bool updated = false;
+		timer.start("UCT_backpropagate");
 		Node* leaf = node;
 		while (node != NULL) {
 			node->visits++;
 			node->scores.push_back(sc);
 			if (sc > node->best_score) {
 				node->best_score = sc;
-				updated = true;
 			}
 
 			// 子ノードが全て展開済みで、且つ、スコア確定済みなら、このノードのスコアも確定とする
@@ -835,6 +878,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 
 			node = node->parent;
 		}
+		timer.end("UCT_backpropagate");
 	}
 
 
@@ -888,34 +932,19 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
  *
  * @param indicator		indicator
  * @param target		ターゲットindicator
- * @return				スコア
- */
-double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target) {
-	return score(indicator, target, cv::Mat::ones(target[0].size(), CV_8U));
-}
-
-/**
- * indicatorのスコアを計算して返却する。
- *
- * @param indicator		indicator
- * @param target		ターゲットindicator
  * @param mask			マスク
  * @return				スコア
  */
-double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target, const cv::Mat& mask) {
+inline double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target) {
 	double count = 0;
 	double total = 0;
 
 	for (int i = 0; i < indicator.size(); ++i) {
 		cv::Mat result;
-		cv::subtract(indicator[i], target[i], result, mask);
-		
-		count += ml::mat_squared_sum(result);
+		cv::subtract(indicator[i], target[i], result);
+		count += cv::countNonZero(result);		
 
-		cv::Mat result2;
-		cv::subtract(target[i], cv::Mat::zeros(target[i].size(), target[i].type()), result2, mask);
-
-		total += ml::mat_squared_sum(result2);
+		total += cv::countNonZero(target[i]);
 	}
 
 	if (total > 0.0) {
@@ -989,25 +1018,6 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 	}
 
 	return actions;
-}
-
-/**
- * 現在の座標を計算して返却する。
- */
-cv::Mat ParametricLSystem::createMask(const String& model, const glm::mat4& mvpMat) {
-	double x = model[model.cursor].param_value1;
-	double y = model[model.cursor].param_value2;
-	double w = model[model.cursor].param_value3;
-	double h = model[model.cursor].param_value4;
-
-	glm::vec4 p1(x, y, 0, 1);
-	glm::vec4 p2(x + w, y + h, 0, 1);
-	p1 = mvpMat * p1;
-	p2 = mvpMat * p2;
-	
-	cv::Mat mask = cv::Mat::zeros(GRID_SIZE, GRID_SIZE, CV_8U);
-	cv::rectangle(mask, cv::Point((p1.x / p1.w + 1.0) * GRID_SIZE * 0.5, (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5), cv::Point((p2.x / p2.w + 1.0) * GRID_SIZE * 0.5, (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5), cv::Scalar(1), -1);
-	return mask;
 }
 
 /**

@@ -86,6 +86,9 @@
     <ClCompile Include="..\..\codebase\RenderManager.cpp">
       <Filter>Source Files\codebase</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\codebase\MyTimer.cpp">
+      <Filter>Source Files\codebase</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.h">
@@ -127,6 +130,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\codebase\RenderManager.h">
+      <Filter>Source Files\codebase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\codebase\MyTimer.h">
       <Filter>Source Files\codebase</Filter>
     </ClInclude>
   </ItemGroup>

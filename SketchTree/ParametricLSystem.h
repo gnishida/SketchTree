@@ -133,9 +133,8 @@ public:
 class ParametricLSystem {
 public:
 	String axiom;
-	MyTimer timer;
-
 	map<string, vector<Action> > actions_template;
+	MyTimer timer;
 
 public:
 	ParametricLSystem(const String& axiom);
@@ -149,7 +148,6 @@ public:
 	String inverse(const std::vector<cv::Mat>& target, const glm::mat4& mvpMat);
 	String UCT(const String& model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step);
 	double score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target);
-	//double score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target, const cv::Mat& mask);
 
 private:
 	std::vector<Action> getActions(const String& model);
