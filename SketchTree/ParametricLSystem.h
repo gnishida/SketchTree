@@ -144,7 +144,7 @@ public:
 	void computeIndicator(const String& model, const glm::mat4& mvpMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator);
 	void computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator);
 	String inverse(const std::vector<cv::Mat>& target, const glm::mat4& mvpMat);
-	String UCT(const String& model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step);
+	void UCT(String& root_model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step);
 	double score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target);
 
 private:

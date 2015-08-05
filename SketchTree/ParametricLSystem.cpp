@@ -665,7 +665,7 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 	String model = axiom;
 
 	for (int l = 0; l < MAX_ITERATIONS; ++l) {
-		model = UCT(model, target, mvpMat, l);
+		UCT(model, target, mvpMat, l);
 
 		std::vector<cv::Mat> indicator;
 		computeIndicator(model, mvpMat, indicator);
@@ -699,24 +699,24 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 /**
  * 指定されたmodelからUCTをスタートし、最善のoptionを返却する。
  *
- * @param model		モデル
- * @param target	ターゲット
- * @return			最善のoption
+ * @param root_model		モデル
+ * @param target			ターゲット
+ * @param mvpMat			model/view/projection行列
  */
-String ParametricLSystem::UCT(const String& current_model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step) {
+void ParametricLSystem::UCT(String& root_model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step) {
 	// これ以上、derivationできなら、終了
-	int index = current_model.cursor;
-	if (index < 0) return current_model;
+	int index = root_model.cursor;
+	if (index < 0) return;
 
 	// expandするリテラルを取得する
-	String model = current_model.getExpand();
+	String model = root_model.getExpand();
 
 	// 現在のカーソルのdepthを取得
-	int depth = current_model[current_model.cursor].depth;
+	int depth = root_model[root_model.cursor].depth;
 
 	// 現在の座標を計算
 	glm::mat4 baseModelMat;
-	glm::vec2 curPt = computeCurrentPoint(current_model, mvpMat, baseModelMat);
+	glm::vec2 curPt = computeCurrentPoint(root_model, mvpMat, baseModelMat);
 
 	// cripping領域を計算
 	cv::Rect crip_roi(curPt.x - MASK_RADIUS_RATIO * GRID_SIZE, curPt.y - MASK_RADIUS_RATIO * GRID_SIZE, curPt.x + MASK_RADIUS_RATIO * GRID_SIZE, curPt.y + MASK_RADIUS_RATIO * GRID_SIZE);
@@ -736,21 +736,21 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 	}
 	
 	// ルートノードを作成
-	Node* current_node = new Node(model);
-	current_node->setActions(getActions(model));
+	Node* root_node = new Node(model);
+	root_node->setActions(getActions(model));
 
 	// ベースとなるindicatorを計算
 	std::vector<cv::Mat> baseIndicator;
-	computeIndicator(current_model, mvpMat, crip_roi, baseIndicator);
+	computeIndicator(root_model, mvpMat, crip_roi, baseIndicator);
 
 	for (int iter = 0; iter < NUM_MONTE_CARLO_SAMPLING; ++iter) {
 		// もしノードがリーフノードなら、終了
-		if (current_node->untriedActions.size() == 0 && current_node->children.size() == 0) break;
+		if (root_node->untriedActions.size() == 0 && root_node->children.size() == 0) break;
 
 		// 現在のノードのスコアが確定したら、終了
-		if (current_node->fixed) break;
+		if (root_node->fixed) break;
 
-		Node* node = current_node;
+		Node* node = root_node;
 
 		// 探索木のリーフノードを選択
 		timer.start("UCT_select");
@@ -855,9 +855,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 	*/
 	////// デバッグ //////
 
-	Action best_action = current_node->bestChild()->action;
-	String best_model = current_model;
-	best_model.rewrite(best_action);
+	root_model.rewrite(root_node->bestChild()->action);
 
 	/////// デバッグ ///////
 	/*
@@ -876,10 +874,8 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 
 	// 探索木のメモリを解放する
 	timer.start("release_memory");
-	releaseNodeMemory(current_node);
+	releaseNodeMemory(root_node);
 	timer.end("release_memory");
-	
-	return best_model;
 }
 
 /**
