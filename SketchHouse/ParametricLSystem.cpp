@@ -340,11 +340,7 @@ Node* Node::bestChild() {
 ParametricLSystem::ParametricLSystem(const String& axiom) {
 	this->axiom = axiom;
 
-	initActionsTemplate();
 	timer.validate(false);
-}
-
-void ParametricLSystem::initActionsTemplate() {
 }
 
 /**
