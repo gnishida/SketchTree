@@ -439,6 +439,9 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
 		}
 	}
+
+	// 背後の壁を描画する
+	glutils::drawQuad(300, 300, glm::vec3(1, 1, 1), glm::translate(glm::mat4(), glm::vec3(0, 0, -150)), vertices);
 	
 	renderManager->removeObject("object");
 	renderManager->addObject("object", "", vertices);
