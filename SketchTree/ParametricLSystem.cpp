@@ -182,15 +182,15 @@ ostream& operator<<(ostream& os, const String& str) {
     return os;
 }
 
-Action::Action(int action_index, const String& rule) {
+Action::Action(int index, const String& rule) {
 	this->type = ACTION_RULE;
-	this->action_index = action_index;
+	this->index = index;
 	this->rule = rule;
 }
 
-Action::Action(int action_index, double value) {
+Action::Action(int index, double value) {
 	this->type = ACTION_VALUE;
-	this->action_index = action_index;
+	this->index = index;
 	this->value = value;
 }
 

@@ -87,15 +87,14 @@ public:
 
 public:
 	int type;		// 0 -- rule / 1 -- value
-	int index;		// モデルの何文字目の変数に対するactionか？
-	int action_index;	// actionsの中の何番目のactionか？
+	int index;	// actionsの中の何番目のactionか？
 	String rule;
 	double value;
 
 public:
 	Action() {}
-	Action(int action_index, int index, const String& rule);
-	Action(int action_index, int index, double value);
+	Action(int index, const String& rule);
+	Action(int index, double value);
 
 	String apply(const String& model);
 };
@@ -131,10 +130,7 @@ public:
 
 class ParametricLSystem {
 public:
-	int grid_size;
-
 	String axiom;
-	map<char, vector<string> > rules;
 
 	boost::mutex mtx_tree;
 

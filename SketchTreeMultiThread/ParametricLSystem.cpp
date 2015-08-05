@@ -192,16 +192,14 @@ ostream& operator<<(ostream& os, const String& str) {
     return os;
 }
 
-Action::Action(int action_index, int index, const String& rule) {
+Action::Action(int index, const String& rule) {
 	this->type = ACTION_RULE;
-	this->action_index = action_index;
 	this->index = index;
 	this->rule = rule;
 }
 
-Action::Action(int action_index, int index, double value) {
+Action::Action(int index, double value) {
 	this->type = ACTION_VALUE;
-	this->action_index = action_index;
 	this->index = index;
 	this->value = value;
 }
@@ -849,7 +847,7 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 	if (model[i].name == "X") {
 		if (model[i].param_values[1] > 40.0) {
 			String rule;
-			actions.push_back(Action(actions.size(), i, rule));
+			actions.push_back(Action(actions.size(), rule));
 		}
 
 		if (model[i].param_values[1] < 200.0) {
@@ -858,7 +856,7 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 				//+ Literal("#", model[i].depth + 1)
 				+ Literal("\\", model[i].depth + 1, 50.0)
 				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
-			actions.push_back(Action(actions.size(), i, rule));
+			actions.push_back(Action(actions.size(), rule));
 
 			rule = Literal("#", model[i].depth + 1)
 				+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.5f, model[i].param_values[1])
@@ -870,7 +868,7 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 				//+ Literal("#", model[i].depth + 1)
 				+ Literal("\\", model[i].depth + 1, 50.0)
 				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
-			actions.push_back(Action(actions.size(), i, rule));
+			actions.push_back(Action(actions.size(), rule));
 		}
 
 		if (model[i].param_values[1] > 40.0) {
@@ -883,11 +881,11 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 				+ Literal("#", model[i].depth + 1)
 				+ Literal("\\", model[i].depth + 1, 50.0)
 				+ Literal("X", model[i].depth + 1, model[i].param_values[0] * LENGTH_ATTENUATION, model[i].param_values[1] + model[i].param_values[0]);
-			actions.push_back(Action(actions.size(), i, rule));
+			actions.push_back(Action(actions.size(), rule));
 		}
 	} else if (model[i].name == "Y") {
 		String rule;
-		actions.push_back(Action(actions.size(), i, rule));
+		actions.push_back(Action(actions.size(), rule));
 		
 		rule = Literal("F", model[i].depth + 1, 2.0, 250.0)
 			+ Literal("[", model[i].depth + 1, true)
@@ -906,20 +904,20 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 			+ Literal("#", model[i].depth + 1)
 			+ Literal("\\", model[i].depth + 1, 50.0)
 			+ Literal("Y", model[i].depth + 1, 4.0, 250.0);
-		actions.push_back(Action(actions.size(), i, rule));
+		actions.push_back(Action(actions.size(), rule));
 	} else if (model[i].name == "-" || model[i].name == "+") {
 		for (int k = -80; k <= 80; k += 20) {
 			if (k == 0) continue;
-			actions.push_back(Action(actions.size(), i, k));
+			actions.push_back(Action(actions.size(), k));
 		}
 	} else if (model[i].name == "#") {
 		for (int k = -20; k <= 20; k += 10) {
-			actions.push_back(Action(actions.size(), i, k));
+			actions.push_back(Action(actions.size(), k));
 		}
 	} else if (model[i].name == "\\") {
 		//actions.push_back(Action(count, i, 180));
 		for (int k = 0; k <= 180; k += 30) {
-			actions.push_back(Action(actions.size(), i, k));
+			actions.push_back(Action(actions.size(), k));
 		}
 	}
 

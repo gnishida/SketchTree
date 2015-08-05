@@ -16,7 +16,7 @@ using namespace std;
 namespace parametriclsystem {
 
 const int NUM_LAYERS = 3;
-const int GRID_SIZE = 100;//300;
+const int GRID_SIZE = 100;
 
 const int MAX_ITERATIONS = 20;
 const int MAX_ITERATIONS_FOR_MC = 15;
@@ -86,14 +86,14 @@ public:
 
 public:
 	int type;		// 0 -- rule / 1 -- value
-	int action_index;	// actionsの中の何番目のactionか？
+	int index;	// actionsの中の何番目のactionか？
 	String rule;
 	double value;
 
 public:
 	Action() {}
-	Action(int action_index, const String& rule);
-	Action(int action_index, double value);
+	Action(int index, const String& rule);
+	Action(int index, double value);
 };
 
 ostream& operator<<(ostream& os, const Action& a);
