@@ -310,7 +310,7 @@ ParametricLSystem::ParametricLSystem(const String& axiom) {
 	this->axiom = axiom;
 
 	initActionsTemplate();
-	timer.validate(false);
+	timer.validate(true);
 }
 
 void ParametricLSystem::initActionsTemplate() {
@@ -875,7 +875,9 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 	/////// デバッグ ///////
 
 	// 探索木のメモリを解放する
+	timer.start("release_memory");
 	releaseNodeMemory(current_node);
+	timer.end("release_memory");
 	
 	return best_model;
 }

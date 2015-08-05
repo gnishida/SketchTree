@@ -318,7 +318,7 @@ Node* Node::bestChild() {
 ParametricLSystem::ParametricLSystem(const String& axiom) {
 	this->axiom = axiom;
 
-	timer.validate(false);
+	timer.validate(true);
 }
 
 /**
@@ -896,7 +896,9 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 
 
 	// 探索木のメモリを解放する
+	timer.start("release_memory");
 	releaseNodeMemory(current_node);
+	timer.end("release_memory");
 	
 	return best_model;
 }
