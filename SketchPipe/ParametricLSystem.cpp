@@ -770,7 +770,10 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 	if (i == -1) return actions;
 
 	if (model[i].name == "X") {
-		String rule = Literal("F", 0)	+ Literal("X", 0);
+		String rule;
+		actions.push_back(Action(0, rule));
+
+		rule = Literal("F", 0)	+ Literal("X", 0);
 		actions.push_back(Action(0, rule));
 
 		rule = Literal("F", 0) + Literal("+", 0, 90.0) + Literal("X", 0);
