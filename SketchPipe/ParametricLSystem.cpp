@@ -825,30 +825,42 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 glm::vec2 ParametricLSystem::computeCurrentPoint(const String& model, const glm::mat4& mvpMat, glm::mat4& modelMat) {
 	std::list<glm::mat4> stack;
 
+	int undefined = 0;
 	for (int i = 0; i < model.cursor; ++i) {
+		if (undefined == 0 && !model[i].param_defined) {
+			undefined = 1;
+			continue;
+		}
+
 		if (model[i].name == "[") {
 			stack.push_back(modelMat);
+			if (undefined > 0) undefined++;
 		} else if (model[i].name == "]") {
-			modelMat = stack.back();
-			stack.pop_back();
-		} else if (model[i].name == "+" && model[i].param_defined) {
+			if (!stack.empty()) {
+				modelMat = stack.back();
+				stack.pop_back();
+				if (undefined > 0) undefined--;
+			}
+		} else if (undefined > 0) {
+			continue;
+		} else if (model[i].name == "+") {
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "-" && model[i].param_defined) {
+		} else if (model[i].name == "-") {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "#" && model[i].param_defined) {
+		} else if (model[i].name == "#") {
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "\\" && model[i].param_defined) {
+		} else if (model[i].name == "\\") {
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "/" && model[i].param_defined) {
+		} else if (model[i].name == "/") {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "&" && model[i].param_defined) {
+		} else if (model[i].name == "&") {
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "^" && model[i].param_defined) {
+		} else if (model[i].name == "^") {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "f" && model[i].param_defined) {
+		} else if (model[i].name == "f") {
 			double length = model[i].param_value;
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
-		} else if (model[i].name == "F" && model[i].param_defined) {
+		} else if (model[i].name == "F") {
 			double length = model[i].param_value;
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
 		}
