@@ -130,7 +130,7 @@ void MainWindow::onRandomGeneration() {
 	}
 
 	glWidget->lsystem.draw(glWidget->model, &glWidget->renderManager);
-	glWidget->renderManager.updateShadowMap(glWidget, glWidget->light_dir);
+	glWidget->renderManager.updateShadowMap(glWidget, glWidget->light_dir, glWidget->light_mvpMatrix);
 	glWidget->update();
 }
 
@@ -181,7 +181,7 @@ void MainWindow::onGreedyInverse() {
 	}
 
 	glWidget->lsystem.draw(glWidget->model, &glWidget->renderManager);
-	glWidget->renderManager.updateShadowMap(glWidget, glWidget->light_dir);
+	glWidget->renderManager.updateShadowMap(glWidget, glWidget->light_dir, glWidget->light_mvpMatrix);
 	glWidget->update();
 }
 

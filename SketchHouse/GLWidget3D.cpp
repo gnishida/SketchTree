@@ -28,6 +28,15 @@ GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers
 	
 	// これがないと、QPainterによって、OpenGLによる描画がクリアされてしまう
 	setAutoFillBackground(false);
+
+	// 光源位置をセット
+	// ShadowMappingは平行光源を使っている。この位置から原点方向を平行光源の方向とする。
+	light_dir = glm::normalize(glm::vec3(-0.1, -0.2, -1));
+
+	// シャドウマップ用のmodel/view/projection行列を作成
+	glm::mat4 light_pMatrix = glm::ortho<float>(-200, 200, -200, 200, 0.1, 5000);
+	glm::mat4 light_mvMatrix = glm::lookAt(-light_dir * 200.0f, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	light_mvpMatrix = light_pMatrix * light_mvMatrix;
 }
 
 /**
@@ -143,7 +152,7 @@ void GLWidget3D::mouseMoveEvent(QMouseEvent *e) {
 }
 
 void GLWidget3D::initializeGL() {
-	renderManager.init();
+	renderManager.init(4096);
 
 	// 光源位置をセット
 	// ShadowMappingは平行光源を使っている。この位置から原点方向を平行光源の方向とする。
@@ -165,7 +174,7 @@ void GLWidget3D::paintEvent(QPaintEvent *event) {
 	glPushMatrix();
 
 	glUseProgram(renderManager.program);
-	renderManager.updateShadowMap(this, light_dir);
+	renderManager.updateShadowMap(this, light_dir, light_mvpMatrix);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -200,4 +209,6 @@ void GLWidget3D::paintEvent(QPaintEvent *event) {
 		}
 	}
 	painter.end();
+
+	glEnable(GL_DEPTH_TEST);
 }

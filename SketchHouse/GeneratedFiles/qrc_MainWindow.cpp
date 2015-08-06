@@ -1,8 +1,8 @@
 /****************************************************************************
 ** Resource object code
 **
-** Created: Tue Aug 4 17:21:08 2015
-**      by: The Resource Compiler for Qt version 4.8.1
+** Created: Thu Aug 6 12:45:32 2015
+**      by: The Resource Compiler for Qt version 4.8.2
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/

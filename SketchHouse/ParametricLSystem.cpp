@@ -318,7 +318,7 @@ Node* Node::bestChild() {
 ParametricLSystem::ParametricLSystem(const String& axiom) {
 	this->axiom = axiom;
 
-	timer.validate(true);
+	timer.validate(false);
 }
 
 /**

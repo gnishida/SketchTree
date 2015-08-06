@@ -74,9 +74,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_GLWidget3D.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="ShadowMapping.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ParametricLSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -87,6 +84,9 @@
       <Filter>Source Files\codebase</Filter>
     </ClCompile>
     <ClCompile Include="..\..\codebase\MyTimer.cpp">
+      <Filter>Source Files\codebase</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\codebase\ShadowMapping.cpp">
       <Filter>Source Files\codebase</Filter>
     </ClCompile>
   </ItemGroup>
@@ -123,9 +123,6 @@
     <ClInclude Include="ParametricLSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ShadowMapping.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\codebase\MLUtils.h">
       <Filter>Source Files\codebase</Filter>
     </ClInclude>
@@ -133,6 +130,9 @@
       <Filter>Source Files\codebase</Filter>
     </ClInclude>
     <ClInclude Include="..\..\codebase\MyTimer.h">
+      <Filter>Source Files\codebase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\codebase\ShadowMapping.h">
       <Filter>Source Files\codebase</Filter>
     </ClInclude>
   </ItemGroup>

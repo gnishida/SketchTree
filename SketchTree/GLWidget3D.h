@@ -30,6 +30,7 @@ public:
 public:
 	Camera camera;
 	glm::vec3 light_dir;
+	glm::mat4 light_mvpMatrix;
 	RenderManager renderManager;
 
 	parametriclsystem::ParametricLSystem lsystem;

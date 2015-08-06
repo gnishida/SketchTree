@@ -433,8 +433,8 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 			double length = model[i].param_value;
 			
 			// 線を描画する
-			glutils::drawCylinder(1.0, 1.0, length, glm::vec3(0.9, 0.9, 0.9), glm::rotate(modelMat, deg2rad(-90), glm::vec3(1, 0, 0)), vertices);
-			glutils::drawSphere(1.0, glm::vec3(0.9, 0.9, 0.9), glm::rotate(modelMat, deg2rad(-90), glm::vec3(1, 0, 0)), vertices);
+			glutils::drawCylinder(1.4, 1.4, length, glm::vec3(0.9, 0.9, 0.9), glm::rotate(modelMat, deg2rad(-90), glm::vec3(1, 0, 0)), vertices);
+			glutils::drawSphere(1.4, glm::vec3(0.9, 0.9, 0.9), glm::rotate(modelMat, deg2rad(-90), glm::vec3(1, 0, 0)), vertices);
 
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
 		}
