@@ -26,6 +26,16 @@ GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers
 	
 	// これがないと、QPainterによって、OpenGLによる描画がクリアされてしまう
 	setAutoFillBackground(false);
+
+	// 光源位置をセット
+	// ShadowMappingは平行光源を使っている。この位置から原点方向を平行光源の方向とする。
+	//light_dir = glm::normalize(glm::vec3(-0.1, -0.2, -1));
+	light_dir = glm::normalize(glm::vec3(0, 0, -1));
+
+	// シャドウマップ用のmodel/view/projection行列を作成
+	glm::mat4 light_pMatrix = glm::ortho<float>(-200, 200, -200, 200, 0.1, 5000);
+	glm::mat4 light_mvMatrix = glm::lookAt(-light_dir * 200.0f, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	light_mvpMatrix = light_pMatrix * light_mvMatrix;
 }
 
 /**
@@ -79,6 +89,9 @@ void GLWidget3D::resizeSketch(int width, int height) {
 	}
 }
 
+/**
+ * This function is called whenever the widget has been resized.
+ */
 void GLWidget3D::resizeGL(int width, int height) {
 	// sketch imageを更新
 	resizeSketch(width, height);
@@ -89,6 +102,9 @@ void GLWidget3D::resizeGL(int width, int height) {
 	camera.updatePMatrix(width, height);
 }
 
+/**
+ * This event handler is called when the mouse press events occur.
+ */
 void GLWidget3D::mousePressEvent(QMouseEvent *e) {
 	if (mode == MODE_SKETCH) {
 		lastPoint = e->pos();
@@ -101,10 +117,16 @@ void GLWidget3D::mousePressEvent(QMouseEvent *e) {
 	update();
 }
 
+/**
+ * This event handler is called when the mouse release events occur.
+ */
 void GLWidget3D::mouseReleaseEvent(QMouseEvent *e) {
 	dragging = false;
 }
 
+/**
+ * This event handler is called when the mouse move events occur.
+ */
 void GLWidget3D::mouseMoveEvent(QMouseEvent *e) {
 	if (mode == MODE_SKETCH) {
 		drawLineTo(e->pos());
@@ -122,11 +144,7 @@ void GLWidget3D::mouseMoveEvent(QMouseEvent *e) {
 }
 
 void GLWidget3D::initializeGL() {
-	renderManager.init();
-
-	// 光源位置をセット
-	// ShadowMappingは平行光源を使っている。この位置から原点方向を平行光源の方向とする。
-	light_dir = glm::normalize(glm::vec3(-0.1, -0.2, -1));
+	renderManager.init(4096);
 
 	// set the clear color for the screen
 	qglClearColor(QColor(224, 224, 224));
@@ -149,7 +167,7 @@ void GLWidget3D::paintEvent(QPaintEvent *event) {
 	glPushMatrix();
 
 	glUseProgram(renderManager.program);
-	renderManager.updateShadowMap(this, light_dir);
+	renderManager.updateShadowMap(this, light_dir, light_mvpMatrix);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -181,4 +199,6 @@ void GLWidget3D::paintEvent(QPaintEvent *event) {
 		painter.drawImage(0, 0, sketch[i]);
 	}
 	painter.end();
+
+	glEnable(GL_DEPTH_TEST);
 }
