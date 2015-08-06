@@ -421,13 +421,6 @@ void ParametricLSystem::initActionsTemplate() {
 			actions_template["#"].push_back(Action(count, k));
 		}
 	}
-
-	{
-		int count = 0;
-		for (int k = 0; k <= 180; k += 30, ++count) {
-			actions_template["\\"].push_back(Action(count, k));
-		}
-	}
 }
 
 /**
@@ -985,8 +978,6 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 		return actions_template[model[i].name];
 	} else if (model[i].name == "#") {
 		return actions_template["#"];
-	} else if (model[i].name == "\\") {
-		return actions_template["\\"];
 	}
 
 	return actions;
