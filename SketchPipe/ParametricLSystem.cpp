@@ -297,6 +297,11 @@ Node* Node::bestChild() {
 }
 
 ParametricLSystem::ParametricLSystem(const String& axiom) {
+	MAX_ITERATIONS = 2000;
+	MAX_ITERATIONS_FOR_MC = 10;
+	NUM_MONTE_CARLO_SAMPLING = 100;
+	MASK_RADIUS_RATIO = 0.11;
+
 	this->axiom = axiom;
 
 	initActionsTemplate();

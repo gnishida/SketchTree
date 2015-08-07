@@ -89,6 +89,15 @@
     <ClCompile Include="..\..\codebase\ShadowMapping.cpp">
       <Filter>Source Files\codebase</Filter>
     </ClCompile>
+    <ClCompile Include="OptionsWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_OptionsWindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_OptionsWindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.h">
@@ -101,6 +110,12 @@
       <Filter>Resource Files</Filter>
     </CustomBuild>
     <CustomBuild Include="GLWidget3D.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="OptionsWindow.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="OptionsWindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -134,6 +149,9 @@
     </ClInclude>
     <ClInclude Include="..\..\codebase\ShadowMapping.h">
       <Filter>Source Files\codebase</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_OptionsWindow.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

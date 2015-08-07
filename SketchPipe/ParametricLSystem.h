@@ -18,12 +18,12 @@ namespace parametriclsystem {
 const int NUM_LAYERS = 1;
 const int GRID_SIZE = 100;
 
-const int MAX_ITERATIONS = 2000;
-const int MAX_ITERATIONS_FOR_MC = 10;
-const int NUM_MONTE_CARLO_SAMPLING = 100;
+//const int MAX_ITERATIONS = 2000;
+//const int MAX_ITERATIONS_FOR_MC = 10;
+//const int NUM_MONTE_CARLO_SAMPLING = 100;
 const double PARAM_EXPLORATION = 0.3;
 const double PARAM_EXPLORATION_VARIANCE = 0.1;
-const double MASK_RADIUS_RATIO = 0.11;
+//const double MASK_RADIUS_RATIO = 0.11;
 
 class String;
 
@@ -125,6 +125,11 @@ public:
 
 class ParametricLSystem {
 public:
+	int MAX_ITERATIONS;
+	int MAX_ITERATIONS_FOR_MC;
+	int NUM_MONTE_CARLO_SAMPLING;
+	double MASK_RADIUS_RATIO;
+
 	String axiom;
 	map<string, vector<Action> > actions_template;
 	MyTimer timer;
