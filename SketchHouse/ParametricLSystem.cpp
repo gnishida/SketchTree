@@ -956,7 +956,7 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 	if (i == -1) return actions;
 
 	if (model[i].name == "X") {
-		for (int k = 2; k <= 2; ++k) {
+		for (int k = 1; k <= 4; ++k) {
 			String rule;
 			double height = model[i].param_value4 / (double)k;
 			for (int l = 0; l < k; ++l) {
