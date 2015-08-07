@@ -151,6 +151,7 @@ private:
 	std::vector<Action> getActions(const String& model);
 	//glm::vec2 computeCurrentPoint(const String& model, const glm::mat4& mvpMat, glm::mat4& modelMmat);
 	void releaseNodeMemory(Node* node);
+	cv::Rect computeBoundingBox(const std::vector<cv::Mat>& target, const glm::mat4& mvpMat);
 };
 
 float deg2rad(float deg);

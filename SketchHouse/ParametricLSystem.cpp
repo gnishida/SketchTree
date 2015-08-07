@@ -676,6 +676,15 @@ inline void ParametricLSystem::computeIndicator(const String& model, const glm::
  * @return					生成されたモデル
  */
 String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm::mat4& mvpMat) {
+	// ターゲットのbounding boxを計算する
+	cv::Rect bbox = computeBoundingBox(target, mvpMat);
+	
+	// axiomのパラメータを設定
+	axiom[0].param_value1 = bbox.x;
+	axiom[0].param_value2 = bbox.y;
+	axiom[0].param_value3 = bbox.width;
+	axiom[0].param_value4 = bbox.height;
+
 	// UCTを使って探索木を構築していく
 	String model = axiom;
 
@@ -1014,6 +1023,42 @@ void ParametricLSystem::releaseNodeMemory(Node* node) {
 	}
 	delete node;
 	node = NULL;
+}
+
+cv::Rect ParametricLSystem::computeBoundingBox(const std::vector<cv::Mat>& target, const glm::mat4& mvpMat) {
+	// 2D平面でのbounding boxを計算
+	int min_x = std::numeric_limits<int>::max();
+	int min_y = std::numeric_limits<int>::max();
+	int max_x = 0;
+	int max_y = 0;
+
+	for (int r = 0; r < target[0].rows; ++r) {
+		for (int c = 0; c < target[0].cols; ++c) {
+			if (ml::mat_get_value(target[0], r, c) > 0) {
+				min_x = min(min_x, c);
+				min_y = min(min_y, r);
+				max_x = max(max_x, c);
+				max_y = max(max_y, r);
+			}
+		}
+	}
+
+	// 3Dでのbounding boxの座標を計算
+	glm::vec4 p1;
+	p1.w = mvpMat[3].w;
+	p1.x = (min_x / 0.5 / GRID_SIZE - 1.0) * p1.w;
+	p1.y = (min_y / 0.5 / GRID_SIZE - 1.0) * p1.w;
+	p1.z = mvpMat[3].z;
+	glm::vec4 p2;
+	p2.w = mvpMat[3].w;
+	p2.x = (max_x / 0.5 / GRID_SIZE - 1.0) * p1.w;
+	p2.y = (max_y / 0.5 / GRID_SIZE - 1.0) * p1.w;
+	p2.z = mvpMat[3].z;
+
+	p1 = glm::inverse(mvpMat) * p1;
+	p2 = glm::inverse(mvpMat) * p2;
+
+	return cv::Rect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
 }
 
 float deg2rad(float deg) {
