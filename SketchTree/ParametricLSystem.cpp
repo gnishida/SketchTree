@@ -317,7 +317,7 @@ void ParametricLSystem::initActionsTemplate() {
 	{
 		String rule1 = Literal("#", 0)
 			+ Literal("F", 0, 0, 0)
-			+ Literal("\\", 0, 50.0)
+			+ Literal("\\", 0)
 			+ Literal("X", 0, 0, 0);
 		actions_template["X1"].push_back(Action(0, rule1));
 
@@ -328,7 +328,7 @@ void ParametricLSystem::initActionsTemplate() {
 			+ Literal("X", 0, 0, 0)
 			+ Literal("]", 0, true)
 			+ Literal("F", 0, 0, 0)
-			+ Literal("\\", 0, 50.0)
+			+ Literal("\\", 0)
 			+ Literal("X", 0, 0, 0);
 		actions_template["X1"].push_back(Action(1, rule2));
 	}
@@ -339,7 +339,7 @@ void ParametricLSystem::initActionsTemplate() {
 
 		String rule2 = Literal("#", 0)
 			+ Literal("F", 0, 0, 0)
-			+ Literal("\\", 0, 50.0)
+			+ Literal("\\", 0)
 			+ Literal("X", 0, 0, 0);
 		actions_template["X2"].push_back(Action(1, rule2));
 
@@ -350,7 +350,7 @@ void ParametricLSystem::initActionsTemplate() {
 			+ Literal("X", 0, 0, 0)
 			+ Literal("]", 0, true)
 			+ Literal("F", 0, 0, 0)
-			+ Literal("\\", 0, 50.0)
+			+ Literal("\\", 0)
 			+ Literal("X", 0, 0, 0);
 		actions_template["X2"].push_back(Action(2, rule3));
 
@@ -417,8 +417,15 @@ void ParametricLSystem::initActionsTemplate() {
 
 	{
 		int count = 0;
-		for (int k = -20; k <= 20; k += 10, ++count) {
+		for (int k = -30; k <= 30; k += 10, ++count) {
 			actions_template["#"].push_back(Action(count, k));
+		}
+	}
+
+	{
+		int count = 0;
+		for (int k = 10; k <= 50; k += 10, ++count) {
+			actions_template["\\"].push_back(Action(count, k));
 		}
 	}
 }
@@ -978,6 +985,8 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 		return actions_template[model[i].name];
 	} else if (model[i].name == "#") {
 		return actions_template["#"];
+	} else if (model[i].name == "\\") {
+		return actions_template["\\"];
 	}
 
 	return actions;

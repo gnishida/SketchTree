@@ -18,7 +18,7 @@ namespace parametriclsystem {
 const int NUM_LAYERS = 2;
 const int GRID_SIZE = 100;
 
-const int MAX_ITERATIONS = 500;
+const int MAX_ITERATIONS = 1000;//500;
 const int MAX_ITERATIONS_FOR_MC = 10;
 const int NUM_MONTE_CARLO_SAMPLING = 100;
 const double PARAM_EXPLORATION = 0.3;
