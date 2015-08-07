@@ -53,6 +53,7 @@ public:
 	void drawCircle(const QPoint &point);
 	void eraseLineTo(const QPoint &endPoint);
 	void eraseCircle(const QPoint &point);
+	void resizeSketch(int width, int height);
 
 protected:
 	void resizeGL(int width, int height);

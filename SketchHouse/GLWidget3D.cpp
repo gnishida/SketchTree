@@ -104,7 +104,22 @@ void GLWidget3D::eraseCircle(const QPoint &point) {
 	painter.drawEllipse(p, (int)(pen.width() * 0.5), (int)(pen.width() * 0.5));
 }
 
+void GLWidget3D::resizeSketch(int width, int height) {
+	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
+		QImage newImage(width, height, QImage::Format_ARGB32);
+		newImage.fill(qRgba(255, 255, 255, 0));
+		QPainter painter(&newImage);
+
+		QImage img = sketch[i].scaled(width, height);
+		painter.drawImage(0, 0, img);
+		sketch[i] = newImage;
+	}
+}
+
 void GLWidget3D::resizeGL(int width, int height) {
+	// sketch imageを更新
+	resizeSketch(width, height);
+
 	// OpenGLの設定を更新
 	height = height ? height : 1;
 	glViewport(0, 0, width, height);
@@ -164,6 +179,11 @@ void GLWidget3D::initializeGL() {
 	std::vector<Vertex> vertices;
 	glutils::drawAxes(1, 40, glm::mat4(), vertices);
 	renderManager.addObject("axis", "", vertices);
+
+	// sketch imageを初期化
+	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
+		sketch[i] = QImage(this->width(), this->height(), QImage::Format_ARGB32);
+	}
 }
 
 void GLWidget3D::paintEvent(QPaintEvent *event) {
@@ -202,11 +222,8 @@ void GLWidget3D::paintEvent(QPaintEvent *event) {
 	// QPainterで描画
 	QPainter painter(this);
 	painter.setOpacity(0.5);
-	if (!sketch[0].isNull()) {
-		for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
-			QImage img = sketch[i].scaled(width(), height(), Qt::KeepAspectRatio);
-			painter.drawImage((width() - img.width()) * 0.5, (height() - img.height()) * 0.5, img);
-		}
+	for (int i = 0; i < parametriclsystem::NUM_LAYERS; ++i) {
+		painter.drawImage(0, 0, sketch[i]);
 	}
 	painter.end();
 
