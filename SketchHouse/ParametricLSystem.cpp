@@ -316,7 +316,7 @@ Node* Node::bestChild() {
 }
 
 ParametricLSystem::ParametricLSystem(const String& axiom) {
-	MAX_ITERATIONS = 20;
+	MAX_ITERATIONS = 40;
 	MAX_ITERATIONS_FOR_MC = 15;
 	NUM_MONTE_CARLO_SAMPLING = 300;
 
