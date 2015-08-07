@@ -316,7 +316,7 @@ Node* Node::bestChild() {
 }
 
 ParametricLSystem::ParametricLSystem(const String& axiom) {
-	MAX_ITERATIONS = 40;
+	MAX_ITERATIONS = 60;
 	MAX_ITERATIONS_FOR_MC = 15;
 	NUM_MONTE_CARLO_SAMPLING = 300;
 
@@ -392,7 +392,7 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 				glm::mat4 mat;
 				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.875, 0.0));
 				glutils::drawQuad(w, h * 0.25, 
-					textureScale(x, y + y * 0.75, 0.05),
+					textureScale(x, y + y + h * 0.75, 0.05),
 					textureScale(x + w, y + h * 0.75, 0.05),
 					textureScale(x + w, y + h, 0.05),
 					textureScale(x, y + h, 0.05),
@@ -605,6 +605,42 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y - 0.5, balcony_depth * 0.5));
 				glutils::drawBox(w, 1.0, balcony_depth, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
 			}
+
+			// バルコニーの手すり
+			{
+				glm::mat4 mat;
+				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.4, balcony_depth));
+				glutils::drawBox(w, 1.0, 1.0, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+			}
+
+			// バルコニーの左側手すり
+			{
+				glm::mat4 mat;
+				mat = glm::translate(mat, glm::vec3(x, y + h * 0.4, balcony_depth * 0.5));
+				glutils::drawBox(1.0, 1.0, balcony_depth, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+			}
+
+			// バルコニーの右側手すり
+			{
+				glm::mat4 mat;
+				mat = glm::translate(mat, glm::vec3(x + w, y + h * 0.4, balcony_depth * 0.5));
+				glutils::drawBox(1.0, 1.0, balcony_depth, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+			}
+
+			// バルコニーの左側の垂直棒
+			{
+				glm::mat4 mat;
+				mat = glm::translate(mat, glm::vec3(x, y + h * 0.2, balcony_depth));
+				glutils::drawBox(1.0, h * 0.4, 1.0, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+			}
+
+			// バルコニーの右側の垂直棒
+			{
+				glm::mat4 mat;
+				mat = glm::translate(mat, glm::vec3(x + w, y + h * 0.2, balcony_depth));
+				glutils::drawBox(1.0, h * 0.4, 1.0, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+			}
+
 		} else if (model[i].name == "Wall" || model[i].name == "W") {			
 			// 壁
 			{
@@ -614,7 +650,7 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 					textureScale(x, y, 0.05),
 					textureScale(x + w, y, 0.05),
 					textureScale(x + w, y + h, 0.05),
-					textureScale(x + w, y + h, 0.05),
+					textureScale(x, y + h, 0.05),
 					mat, wallVertices);
 			}
 		}
