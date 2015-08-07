@@ -20,9 +20,11 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	ui.actionPenColorWall->setCheckable(true);
 	ui.actionPenColorDoor->setCheckable(true);
 	ui.actionPenColorWindow->setCheckable(true);
+	ui.actionPenColorBalcony->setCheckable(true);
 	ui.actionPenColorWall->setActionGroup(groupPenColor);
 	ui.actionPenColorDoor->setActionGroup(groupPenColor);
 	ui.actionPenColorWindow->setActionGroup(groupPenColor);
+	ui.actionPenColorBalcony->setActionGroup(groupPenColor);
 	ui.actionPenColorWall->setChecked(true);
 
 	QActionGroup* groupPenWidth = new QActionGroup(this);
@@ -50,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	connect(ui.actionPenColorWall, SIGNAL(triggered()), this, SLOT(onPenColorUpdate()));
 	connect(ui.actionPenColorDoor, SIGNAL(triggered()), this, SLOT(onPenColorUpdate()));
 	connect(ui.actionPenColorWindow, SIGNAL(triggered()), this, SLOT(onPenColorUpdate()));
+	connect(ui.actionPenColorBalcony, SIGNAL(triggered()), this, SLOT(onPenColorUpdate()));
 	connect(ui.actionPenWidth20, SIGNAL(triggered()), this, SLOT(onPenWidthUpdate()));
 	connect(ui.actionPenWidth10, SIGNAL(triggered()), this, SLOT(onPenWidthUpdate()));
 	connect(ui.actionPenWidth5, SIGNAL(triggered()), this, SLOT(onPenWidthUpdate()));
@@ -206,8 +209,10 @@ void MainWindow::onPenColorUpdate() {
 		glWidget->pen.setType(Pen::TYPE_WALL);
 	} else if (ui.actionPenColorDoor->isChecked()) {
 		glWidget->pen.setType(Pen::TYPE_DOOR);
-	} else {
+	} else if (ui.actionPenColorWindow->isChecked()) {
 		glWidget->pen.setType(Pen::TYPE_WINDOW);
+	} else if (ui.actionPenColorBalcony->isChecked()) {
+		glWidget->pen.setType(Pen::TYPE_BALCONY);
 	}
 }
 

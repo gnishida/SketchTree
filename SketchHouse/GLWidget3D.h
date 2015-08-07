@@ -13,7 +13,7 @@
 
 class Pen : public QPen {
 public:
-	static enum { TYPE_WALL = 0, TYPE_DOOR, TYPE_WINDOW };
+	static enum { TYPE_WALL = 0, TYPE_DOOR, TYPE_WINDOW, TYPE_BALCONY };
 
 public:
 	int type;

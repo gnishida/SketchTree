@@ -64,6 +64,7 @@
      <addaction name="actionPenColorWall"/>
      <addaction name="actionPenColorDoor"/>
      <addaction name="actionPenColorWindow"/>
+     <addaction name="actionPenColorBalcony"/>
     </widget>
     <widget class="QMenu" name="menuWidth">
      <property name="title">
@@ -237,6 +238,11 @@
   <action name="actionOptions">
    <property name="text">
     <string>Options</string>
+   </property>
+  </action>
+  <action name="actionPenColorBalcony">
+   <property name="text">
+    <string>Balcony</string>
    </property>
   </action>
  </widget>

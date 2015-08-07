@@ -15,7 +15,7 @@ using namespace std;
 
 namespace parametriclsystem {
 
-const int NUM_LAYERS = 3;
+const int NUM_LAYERS = 4;
 const int GRID_SIZE = 100;
 
 //const int MAX_ITERATIONS = 20;
@@ -155,5 +155,9 @@ private:
 };
 
 float deg2rad(float deg);
+
+inline glm::vec3 textureScale(double x, double y, double scale) {
+	return glm::vec3(x * scale, y * scale, 0);
+}
 
 }

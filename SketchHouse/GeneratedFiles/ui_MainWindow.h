@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created: Fri Aug 7 12:53:10 2015
+** Created: Fri Aug 7 16:36:43 2015
 **      by: Qt User Interface Compiler version 4.8.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -47,6 +47,7 @@ public:
     QAction *actionSaveCamera;
     QAction *actionResetCamera;
     QAction *actionOptions;
+    QAction *actionPenColorBalcony;
     QWidget *centralWidget;
     QMenuBar *menuBar;
     QMenu *menuFile;
@@ -112,6 +113,8 @@ public:
         actionResetCamera->setObjectName(QString::fromUtf8("actionResetCamera"));
         actionOptions = new QAction(MainWindowClass);
         actionOptions->setObjectName(QString::fromUtf8("actionOptions"));
+        actionPenColorBalcony = new QAction(MainWindowClass);
+        actionPenColorBalcony->setObjectName(QString::fromUtf8("actionPenColorBalcony"));
         centralWidget = new QWidget(MainWindowClass);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         MainWindowClass->setCentralWidget(centralWidget);
@@ -165,6 +168,7 @@ public:
         menuColor->addAction(actionPenColorWall);
         menuColor->addAction(actionPenColorDoor);
         menuColor->addAction(actionPenColorWindow);
+        menuColor->addAction(actionPenColorBalcony);
         menuWidth->addAction(actionPenWidth20);
         menuWidth->addAction(actionPenWidth10);
         menuWidth->addAction(actionPenWidth5);
@@ -204,6 +208,7 @@ public:
         actionSaveCamera->setText(QApplication::translate("MainWindowClass", "Save Camera", 0, QApplication::UnicodeUTF8));
         actionResetCamera->setText(QApplication::translate("MainWindowClass", "Reset Camera", 0, QApplication::UnicodeUTF8));
         actionOptions->setText(QApplication::translate("MainWindowClass", "Options", 0, QApplication::UnicodeUTF8));
+        actionPenColorBalcony->setText(QApplication::translate("MainWindowClass", "Balcony", 0, QApplication::UnicodeUTF8));
         menuFile->setTitle(QApplication::translate("MainWindowClass", "&File", 0, QApplication::UnicodeUTF8));
         menuL_System->setTitle(QApplication::translate("MainWindowClass", "&L-System", 0, QApplication::UnicodeUTF8));
         menuMode->setTitle(QApplication::translate("MainWindowClass", "&Mode", 0, QApplication::UnicodeUTF8));

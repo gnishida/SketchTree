@@ -18,6 +18,8 @@ void Pen::setType(int type) {
 		this->setColor(QColor(255, 0, 0, 255));
 	} else if (type == TYPE_WINDOW) {
 		this->setColor(QColor(0, 0, 255, 255));
+	} else if (type == TYPE_BALCONY) {
+		this->setColor(QColor(0, 255, 0, 255));
 	}
 }
 
