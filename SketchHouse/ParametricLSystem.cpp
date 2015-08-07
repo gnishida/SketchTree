@@ -48,7 +48,7 @@ String Literal::operator+(const Literal& l) const {
 }
 
 int Literal::type() {
-	if (name == "Door" || name == "Window" || name == "Wall") {
+	if (name == "Door" || name == "Window" || name == "Wall" || name == "Balcony") {
 		return TYPE_TERMINAL;
 	} else {
 		return TYPE_NONTERMINAL;
@@ -376,7 +376,8 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 	std::vector<Vertex> wallVertices;
 
 	const double door_depth = 20.0;
-	const double window_depth = 4.0;
+	const double window_depth = 3.0;
+	const double balcony_depth = 5.0;
 
 	for (int i = 0; i < model.length(); ++i) {
 		if (!model[i].param_defined) continue;
@@ -390,12 +391,11 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 			{
 				glm::mat4 mat;
 				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.875, 0.0));
-				//glutils::drawQuad(w, h * 0.25, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
 				glutils::drawQuad(w, h * 0.25, 
-					glm::vec3(x * 0.05, (y + h * 0.75) * 0.05, 0.0), 
-					glm::vec3((x + w) * 0.05, (y + h * 0.75) * 0.05, 0.0),
-					glm::vec3((x + w) * 0.05, (y + h) * 0.05, 0.0),
-					glm::vec3(x * 0.05, (y + h) * 0.05, 0.0),
+					textureScale(x, y + y * 0.75, 0.05),
+					textureScale(x + w, y + h * 0.75, 0.05),
+					textureScale(x + w, y + h, 0.05),
+					textureScale(x, y + h, 0.05),
 					mat, wallVertices);
 			}
 
@@ -434,12 +434,11 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 			{
 				glm::mat4 mat;
 				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.875, 0.0));
-				//glutils::drawQuad(w, h * 0.25, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
 				glutils::drawQuad(w, h * 0.25, 
-					glm::vec3(x * 0.05, (y + h * 0.75) * 0.05, 0.8), 
-					glm::vec3((x + w) * 0.05, (y + h * 0.75) * 0.05, 0.8), 
-					glm::vec3((x + w) * 0.05, (y + h) * 0.05, 0.8), 
-					glm::vec3(x * 0.05, (y + h) * 0.05, 0.8), 
+					textureScale(x, y + h * 0.75, 0.05),
+					textureScale(x + w, y + h * 0.75, 0.05),
+					textureScale(x + w, y + h, 0.05),
+					textureScale(x, y + h, 0.05),
 					mat, wallVertices);
 			}
 
@@ -447,7 +446,6 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 			{
 				glm::mat4 mat;
 				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.105, 0.0));
-				//glutils::drawQuad(w, h * 0.21, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
 				glutils::drawQuad(w, h * 0.21, 
 					glm::vec3(x * 0.05, y * 0.05, 0.8), 
 					glm::vec3((x + w) * 0.05, y * 0.05, 0.8), 
@@ -525,17 +523,98 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.5, -window_depth));
 				glutils::drawQuad(w, h * 0.5, glm::vec3(1, 1, 1), mat, windowVertices);
 			}
+		} else if (model[i].name == "Balcony") {			
+			// 上の壁を描画
+			{
+				glm::mat4 mat;
+				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.9, 0.0));
+				glutils::drawQuad(w, h * 0.2, 
+					textureScale(x, y + h * 0.8, 0.05),
+					textureScale(x + w, y + h * 0.8, 0.05),
+					textureScale(x + w, y + h, 0.05),
+					textureScale(x, y + h, 0.05),
+					mat, wallVertices);
+			}
+			
+			// 左側の壁
+			{
+				glm::mat4 mat;
+				mat = glm::translate(mat, glm::vec3(x + w * 0.05, y + h * 0.4, 0.0));
+				glutils::drawQuad(w * 0.1, h * 0.8, 
+					textureScale(x, y, 0.05),
+					textureScale(x + w * 0.1, y, 0.05),
+					textureScale(x + w * 0.1, y + h * 0.8, 0.05),
+					textureScale(x, y + h * 0.8, 0.05),
+					mat, wallVertices);
+			}
+
+			// 右側の壁
+			{
+				glm::mat4 mat;
+				mat = glm::translate(mat, glm::vec3(x + w * 0.95, y + h * 0.4, 0.0));
+				glutils::drawQuad(w * 0.1, h * 0.8, 
+					textureScale(x + w * 0.9, y, 0.05),
+					textureScale(x + w, y, 0.05),
+					textureScale(x + w, y + h * 0.8, 0.05),
+					textureScale(x + w * 0.9, y + h * 0.8, 0.05),
+					mat, wallVertices);
+			}
+
+			// 左側の横壁
+			{
+				glm::mat4 mat;				
+				mat = glm::translate(mat, glm::vec3(x + w * 0.1, y + h * 0.4, -window_depth * 0.5));
+				mat = glm::rotate(mat, deg2rad(90), glm::vec3(0, 1, 0));
+				glutils::drawQuad(window_depth, h * 0.8, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+			}
+
+			// 右側の横壁
+			{
+				glm::mat4 mat;				
+				mat = glm::translate(mat, glm::vec3(x + w * 0.9, y + h * 0.4, -window_depth * 0.5));
+				mat = glm::rotate(mat, deg2rad(-90), glm::vec3(0, 1, 0));
+				glutils::drawQuad(window_depth, h * 0.8, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+			}
+
+			// 上側の横壁
+			{
+				glm::mat4 mat;				
+				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.8, -window_depth * 0.5));
+				mat = glm::rotate(mat, deg2rad(90), glm::vec3(1, 0, 0));
+				glutils::drawQuad(w * 0.8, window_depth, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+			}
+
+			// 下側の横壁
+			{
+				glm::mat4 mat;				
+				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y, -window_depth * 0.5));
+				mat = glm::rotate(mat, deg2rad(-90), glm::vec3(1, 0, 0));
+				glutils::drawQuad(w * 0.8, window_depth, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+			}
+
+			// 窓を描画
+			{
+				glm::mat4 mat;
+				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.4, -window_depth));
+				glutils::drawQuad(w * 0.8, h * 0.8, glm::vec3(1, 1, 1), mat, windowVertices);
+			}
+
+			// バルコニーの台
+			{
+				glm::mat4 mat;
+				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y - 0.5, balcony_depth * 0.5));
+				glutils::drawBox(w, 1.0, balcony_depth, glm::vec3(0.8, 0.8, 0.8), mat, vertices);
+			}
 		} else if (model[i].name == "Wall" || model[i].name == "W") {			
 			// 壁
 			{
 				glm::mat4 mat;
 				mat = glm::translate(mat, glm::vec3(x + w * 0.5, y + h * 0.5, 0.0));
-				//glutils::drawQuad(w, h, glm::vec3(0.8, 0.8, 0.8), mat, wallVertices);
-				glutils::drawQuad(w, h, 
-					glm::vec3(x * 0.05, y * 0.05, 0.0),
-					glm::vec3((x + w) * 0.05, y * 0.05, 0.0),
-					glm::vec3((x + w) * 0.05, (y + h) * 0.05, 0.0),
-					glm::vec3(x * 0.05, (y + h) * 0.05, 0.0),
+				glutils::drawQuad(w, h,
+					textureScale(x, y, 0.05),
+					textureScale(x + w, y, 0.05),
+					textureScale(x + w, y + h, 0.05),
+					textureScale(x + w, y + h, 0.05),
 					mat, wallVertices);
 			}
 		}
@@ -648,6 +727,47 @@ inline void ParametricLSystem::computeIndicator(const String& model, const glm::
 				int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
 				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
 				cv::rectangle(indicator[2], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
+			}
+		} else if (model[i].name == "Balcony") {
+			// 壁を描画
+			{
+				glm::vec4 p1(x, y, 0, 1);
+				glm::vec4 p2(x + w, y + h, 0, 1);
+				p1 = mvpMat * p1;
+				p2 = mvpMat * p2;
+				int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+				int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
+				int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
+				cv::rectangle(indicator[0], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
+				//cv::line(indicator[0], cv::Point(p1.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p1.y + grid_size * 0.5), cv::Scalar(1), 10);
+				//cv::line(indicator[0], cv::Point(p1.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Point(p2.x + grid_size * 0.5, p2.y + grid_size * 0.5), cv::Scalar(1), 10);
+			}
+
+			// 窓を描画
+			{
+				glm::vec4 p1 = glm::vec4(x + w * 0.1, y, 0, 1);
+				glm::vec4 p2 = glm::vec4(x + w * 0.9, y + h * 0.8, 0, 1);
+				p1 = mvpMat * p1;
+				p2 = mvpMat * p2;
+				int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+				int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
+				int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
+				cv::rectangle(indicator[2], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
+			}
+
+			// バルコニーを描画
+			{
+				glm::vec4 p1 = glm::vec4(x, y, 0, 1);
+				glm::vec4 p2 = glm::vec4(x + w, y + h * 0.4, 0, 1);
+				p1 = mvpMat * p1;
+				p2 = mvpMat * p2;
+				int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+				int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
+				int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+				int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
+				cv::rectangle(indicator[3], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), -1);
 			}
 		} else if (model[i].name == "Wall" || model[i].name == "W") {			
 			// 壁を描画
@@ -1000,11 +1120,16 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 				if (model[i].param_value3 * (1.0 - k - l) < 10.0) continue;
 
 				String rule = Literal("W", 0, model[i].param_value1, model[i].param_value2, model[i].param_value3 * k, model[i].param_value4)
-					+ Literal("Window", 0, model[i].param_value1 + model[i].param_value3 * k, model[i].param_value2, model[i].param_value3 * l, model[i].param_value4)
+					+ Literal("Win", 0, model[i].param_value1 + model[i].param_value3 * k, model[i].param_value2, model[i].param_value3 * l, model[i].param_value4)
 					+ Literal("W", 0, model[i].param_value1 + model[i].param_value3 * (k + l), model[i].param_value2, model[i].param_value3 * (1.0 - k - l), model[i].param_value4);
 				actions.push_back(Action(actions.size(), rule));
 			}
 		}
+	} else if (model[i].name == "Win") {
+		String rule = Literal("Window", 0, model[i].param_value1, model[i].param_value2, model[i].param_value3, model[i].param_value4);
+		actions.push_back(Action(actions.size(), rule));
+		rule = Literal("Balcony", 0, model[i].param_value1, model[i].param_value2, model[i].param_value3, model[i].param_value4);
+		actions.push_back(Action(actions.size(), rule));
 	}
 
 	return actions;
