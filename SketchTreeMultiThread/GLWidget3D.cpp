@@ -141,7 +141,7 @@ void GLWidget3D::initializeGL() {
 	qglClearColor(QColor(224, 224, 224));
 
 	std::vector<Vertex> vertices;
-	glutils::drawAxes(1, 40, glm::mat4(), vertices);
+	glutils::drawAxes(1, 10, glm::mat4(), vertices);
 	renderManager.addObject("axis", "", vertices);
 
 	// sketch imageを初期化
