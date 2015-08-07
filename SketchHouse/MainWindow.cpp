@@ -159,9 +159,13 @@ void MainWindow::onGreedyInverse() {
 		// clamp
 		cv::threshold(target[i], target[i], 0.0, 1.0, cv::THRESH_BINARY);
 
+		/////// デバッグ ///////
+		/*{
 		char filename[256];
 		sprintf(filename, "target%d.png", i);
 		ml::mat_save(filename, target[i]);
+		}*/
+		/////// デバッグ ///////
 	}
 
 	// ターゲットに近いモデルを生成する

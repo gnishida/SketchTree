@@ -307,6 +307,11 @@ Node* Node::bestChild() {
 }
 
 ParametricLSystem::ParametricLSystem(const String& axiom) {
+	MAX_ITERATIONS = 500;//1000;
+	MAX_ITERATIONS_FOR_MC = 10;
+	NUM_MONTE_CARLO_SAMPLING = 100;
+	MASK_RADIUS_RATIO = 0.11;
+
 	this->axiom = axiom;
 
 	initActionsTemplate();
@@ -681,7 +686,7 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 		*/
 		/////// デバッグ ///////
 
-		//cout << l << ": " << "Best score=" << sc << endl;
+		cout << l << ": " << "Best score=" << sc << endl;
 
 		// これ以上、derivationできなら、終了
 		if (model.cursor < 0) break;
