@@ -425,7 +425,7 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 			double radius2 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * (model[i].param_values[1] + model[i].param_values[0]));
 			
 			// 線を描画する
-			glutils::drawCylinder(radius1, radius2, length, glm::vec3(0.9, 0.3, 0.3), glm::rotate(modelMat, deg2rad(-90), glm::vec3(1, 0, 0)), vertices);
+			glutils::drawCylinderY(radius1, radius2, length, glm::vec3(0.9, 0.3, 0.3), modelMat, vertices);
 
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
 		} else if (model[i].name == "C") {
