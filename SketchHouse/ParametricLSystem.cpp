@@ -322,7 +322,7 @@ ParametricLSystem::ParametricLSystem(const String& axiom) {
 
 	this->axiom = axiom;
 
-	timer.validate(true);
+	timer.validate(false);
 }
 
 /**
@@ -670,11 +670,7 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
  * @param indicator [OUT]	indicator
  */
 inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, std::vector<cv::Mat>& indicator) {
-	computeIndicator(model, mvpMat, glm::mat4(), cv::Rect(0, 0, GRID_SIZE, GRID_SIZE), indicator);
-}
-
-inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator) {
-	computeIndicator(model, mvpMat, glm::mat4(), roi, indicator);
+	computeIndicator(model, glm::mat4(), cv::Rect(0, 0, GRID_SIZE, GRID_SIZE), indicator);
 }
 
 /**
@@ -685,15 +681,13 @@ inline void ParametricLSystem::computeIndicator(const String& model, const glm::
  * @param baseModelMat		モデルのベース変換行列
  * @param indicator [OUT]	indicator
  */
-inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator) {
+inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator) {
 	indicator.resize(NUM_LAYERS);
 	for (int i = 0; i < NUM_LAYERS; ++i) {
 		indicator[i] = cv::Mat::zeros(roi.height, roi.width, CV_32F);
 	}
 
 	std::list<glm::mat4> stack;
-
-	glm::mat4 modelMat = baseModelMat;
 
 	int undefined = 0;
 	for (int i = 0; i < model.length(); ++i) {
@@ -960,7 +954,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		// indicatorを計算する
 		timer.start("compute_indicator");
 		std::vector<cv::Mat> indicator;
-		computeIndicator(result_model, mvpMat, glm::mat4(), crip_roi, indicator);
+		computeIndicator(result_model, mvpMat, crip_roi, indicator);
 		for (int i = 0; i < NUM_LAYERS; ++i) {
 			indicator[i] += baseIndicator[i];
 
