@@ -322,7 +322,7 @@ ParametricLSystem::ParametricLSystem(const String& axiom) {
 
 	this->axiom = axiom;
 
-	timer.validate(false);
+	timer.validate(true);
 }
 
 /**

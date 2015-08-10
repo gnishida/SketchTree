@@ -315,7 +315,7 @@ ParametricLSystem::ParametricLSystem(const String& axiom) {
 	this->axiom = axiom;
 
 	initActionsTemplate();
-	timer.validate(false);
+	timer.validate(true);
 }
 
 void ParametricLSystem::initActionsTemplate() {
@@ -551,12 +551,8 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
  * @param mvpMat			カメラ視点への射影行列
  * @param indicator [OUT]	indicator
  */
-inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, std::vector<cv::Mat>& indicator) {
-	computeIndicator(model, mvpMat, glm::mat4(), cv::Rect(0, 0, GRID_SIZE, GRID_SIZE), indicator);
-}
-
-inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator) {
-	computeIndicator(model, mvpMat, glm::mat4(), roi, indicator);
+inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& baseModelMat, std::vector<cv::Mat>& indicator) {
+	computeIndicator(model, baseModelMat, cv::Rect(0, 0, GRID_SIZE, GRID_SIZE), indicator);
 }
 
 /**
@@ -567,7 +563,7 @@ inline void ParametricLSystem::computeIndicator(const String& model, const glm::
  * @param baseModelMat		モデルのベース変換行列
  * @param indicator [OUT]	indicator
  */
-inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& mvpMat, const glm::mat4& baseModelMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator) {
+inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& baseModelMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator) {
 	indicator.resize(NUM_LAYERS);
 	for (int i = 0; i < NUM_LAYERS; ++i) {
 		indicator[i] = cv::Mat::zeros(roi.height, roi.width, CV_32F);
@@ -620,8 +616,8 @@ inline void ParametricLSystem::computeIndicator(const String& model, const glm::
 			// 線を描画する代わりに、indicatorを更新する
 			glm::vec4 p1(0, 0, 0, 1);
 			glm::vec4 p2(0, length, 0, 1);
-			p1 = mvpMat * modelMat * p1;
-			p2 = mvpMat * modelMat * p2;
+			p1 = modelMat * p1;
+			p2 = modelMat * p2;
 			int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
 			int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
 			int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
@@ -639,9 +635,9 @@ inline void ParametricLSystem::computeIndicator(const String& model, const glm::
 			glm::vec4 p1(0, length, 0, 1);
 			glm::vec4 p2(radius, length, 0, 1);
 			glm::vec4 p3(0, length * 2.0, 0, 1);
-			p1 = mvpMat * modelMat * p1;
-			p2 = mvpMat * modelMat * p2;
-			p3 = mvpMat * modelMat * p3;
+			p1 = modelMat * p1;
+			p2 = modelMat * p2;
+			p3 = modelMat * p3;
 			double u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
 			double v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
 			double u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
@@ -652,8 +648,8 @@ inline void ParametricLSystem::computeIndicator(const String& model, const glm::
 			int r2 = sqrt((u3 - u1) * (u3 - u1) + (v3 - v1) * (v3 - v1));
 			float angle = atan2(v2 - v1, u2 - u1) / M_PI * 180.0;
 
-			cv::ellipse(indicator[1], cv::Point(u1, v1), cv::Size(r1, r2), angle, 0, 360, cv::Scalar(1), -1);
-			//cv::line(indicator[1], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), 3);
+			//cv::ellipse(indicator[1], cv::Point(u1, v1), cv::Size(r1, r2), angle, 0, 360, cv::Scalar(1), -1);
+			cv::rectangle(indicator[1], cv::Point(u1-r1, v1-r2), cv::Point(u1+r1, v1+r2), cv::Scalar(1), -1);
 		}
 	}
 }
@@ -719,6 +715,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 	// 現在の座標を計算
 	glm::mat4 baseModelMat;
 	glm::vec2 curPt = computeCurrentPoint(current_model, mvpMat, baseModelMat);
+	baseModelMat = mvpMat * baseModelMat;
 
 	// cripping領域を計算
 	cv::Rect crip_roi(curPt.x - MASK_RADIUS_RATIO * GRID_SIZE, curPt.y - MASK_RADIUS_RATIO * GRID_SIZE, curPt.x + MASK_RADIUS_RATIO * GRID_SIZE, curPt.y + MASK_RADIUS_RATIO * GRID_SIZE);
@@ -789,7 +786,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		// indicatorを計算する
 		timer.start("compute_indicator");
 		std::vector<cv::Mat> indicator;
-		computeIndicator(result_model, mvpMat, baseModelMat, crip_roi, indicator);
+		computeIndicator(result_model, baseModelMat, crip_roi, indicator);
 		for (int i = 0; i < NUM_LAYERS; ++i) {
 			indicator[i] += baseIndicator[i];
 
