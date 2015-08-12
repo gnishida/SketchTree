@@ -5,6 +5,8 @@
 #include "MLUtils.h"
 #include "GLUtils.h"
 #include <list>
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
 
 #define SQR(x)	((x) * (x))
 
@@ -307,6 +309,7 @@ Node* Node::bestChild() {
 }
 
 ParametricLSystem::ParametricLSystem(const String& axiom) {
+	N_THREADS = 1;
 	MAX_ITERATIONS = 500;//1000;
 	MAX_ITERATIONS_FOR_MC = 10;
 	NUM_MONTE_CARLO_SAMPLING = 100;
@@ -666,7 +669,7 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 	String model = axiom;
 
 	for (int l = 0; l < MAX_ITERATIONS; ++l) {
-		model = UCT(model, target, mvpMat, l);
+		model = MultiUCT(model, target, mvpMat, l);
 
 		/*std::vector<cv::Mat> indicator;
 		computeIndicator(model, mvpMat, indicator);
@@ -696,6 +699,28 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 	return model;
 }
 
+String ParametricLSystem::MultiUCT(const String& current_model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step) {
+	std::vector<boost::thread> th(N_THREADS);
+	std::vector<std::pair<String, double> > best_options(N_THREADS);
+
+	for (int i = 0; i < N_THREADS; ++i) {
+		th[i] = boost::thread(&ParametricLSystem::UCT, this, current_model, target, mvpMat, i, derivation_step, &best_options[i]);
+	}
+
+	double best_score = -std::numeric_limits<double>::max();
+	String best_model;
+	for (int i = 0; i < N_THREADS; ++i) {
+		th[i].join();
+
+		if (best_options[i].second > best_score) {
+			best_model = best_options[i].first;
+			best_score = best_options[i].second;
+		}
+	}
+
+	return best_model;
+}
+
 /**
  * 指定されたmodelからUCTをスタートし、最善のoptionを返却する。
  *
@@ -704,10 +729,17 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
  * @param mvpMat			model/view/projection行列
  * @return					最善のoption
  */
-String ParametricLSystem::UCT(const String& current_model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step) {
+void ParametricLSystem::UCT(const String& current_model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int rand_seed, int derivation_step, std::pair<String, double>* best_option) {
 	// これ以上、derivationできなら、終了
 	int index = current_model.cursor;
-	if (index < 0) return current_model;
+	if (index < 0) {
+		best_option->first = current_model;
+		best_option->second = 0;
+		return;
+	}
+
+	// 乱数初期化
+	ml::initRand(rand_seed);
 
 	// 現在のカーソルのdepthを取得
 	int depth = current_model[current_model.cursor].depth;
@@ -864,8 +896,10 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 	*/
 	////// デバッグ //////
 
-	String next_model = current_model;
-	next_model.rewrite(root_node->bestChild()->action);
+	best_option->first = current_model;
+	Node* best_child = root_node->bestChild();
+	best_option->first.rewrite(best_child->action);
+	best_option->second = best_child->best_score;
 
 	/////// デバッグ ///////
 	/*
@@ -886,8 +920,6 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 	timer.start("release_memory");
 	releaseNodeMemory(root_node);
 	timer.end("release_memory");
-
-	return next_model;
 }
 
 /**

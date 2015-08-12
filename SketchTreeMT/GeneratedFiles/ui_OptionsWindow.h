@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'OptionsWindow.ui'
 **
-** Created: Wed Aug 12 08:18:39 2015
+** Created: Wed Aug 12 08:48:26 2015
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -41,15 +41,17 @@ public:
     QLineEdit *lineEditNumMonteCarloSamplings;
     QLabel *label_5;
     QLineEdit *lineEditMaskRadiusRatio;
+    QLineEdit *lineEditNThreads;
+    QLabel *label_4;
 
     void setupUi(QDialog *Dialog)
     {
         if (Dialog->objectName().isEmpty())
             Dialog->setObjectName(QString::fromUtf8("Dialog"));
-        Dialog->resize(279, 156);
+        Dialog->resize(279, 190);
         layoutWidget = new QWidget(Dialog);
         layoutWidget->setObjectName(QString::fromUtf8("layoutWidget"));
-        layoutWidget->setGeometry(QRect(20, 110, 241, 33));
+        layoutWidget->setGeometry(QRect(20, 130, 241, 33));
         hboxLayout = new QHBoxLayout(layoutWidget);
         hboxLayout->setSpacing(6);
         hboxLayout->setObjectName(QString::fromUtf8("hboxLayout"));
@@ -70,28 +72,34 @@ public:
 
         lineEditMaxIterations = new QLineEdit(Dialog);
         lineEditMaxIterations->setObjectName(QString::fromUtf8("lineEditMaxIterations"));
-        lineEditMaxIterations->setGeometry(QRect(190, 20, 71, 20));
+        lineEditMaxIterations->setGeometry(QRect(190, 40, 71, 20));
         label = new QLabel(Dialog);
         label->setObjectName(QString::fromUtf8("label"));
-        label->setGeometry(QRect(20, 20, 91, 16));
+        label->setGeometry(QRect(20, 40, 91, 16));
         label_2 = new QLabel(Dialog);
         label_2->setObjectName(QString::fromUtf8("label_2"));
-        label_2->setGeometry(QRect(20, 40, 161, 16));
+        label_2->setGeometry(QRect(20, 60, 161, 16));
         lineEditMaxIterationsForMCSampling = new QLineEdit(Dialog);
         lineEditMaxIterationsForMCSampling->setObjectName(QString::fromUtf8("lineEditMaxIterationsForMCSampling"));
-        lineEditMaxIterationsForMCSampling->setGeometry(QRect(190, 40, 71, 20));
+        lineEditMaxIterationsForMCSampling->setGeometry(QRect(190, 60, 71, 20));
         label_3 = new QLabel(Dialog);
         label_3->setObjectName(QString::fromUtf8("label_3"));
-        label_3->setGeometry(QRect(20, 60, 161, 16));
+        label_3->setGeometry(QRect(20, 80, 161, 16));
         lineEditNumMonteCarloSamplings = new QLineEdit(Dialog);
         lineEditNumMonteCarloSamplings->setObjectName(QString::fromUtf8("lineEditNumMonteCarloSamplings"));
-        lineEditNumMonteCarloSamplings->setGeometry(QRect(190, 60, 71, 20));
+        lineEditNumMonteCarloSamplings->setGeometry(QRect(190, 80, 71, 20));
         label_5 = new QLabel(Dialog);
         label_5->setObjectName(QString::fromUtf8("label_5"));
-        label_5->setGeometry(QRect(20, 80, 161, 16));
+        label_5->setGeometry(QRect(20, 100, 161, 16));
         lineEditMaskRadiusRatio = new QLineEdit(Dialog);
         lineEditMaskRadiusRatio->setObjectName(QString::fromUtf8("lineEditMaskRadiusRatio"));
-        lineEditMaskRadiusRatio->setGeometry(QRect(190, 80, 71, 20));
+        lineEditMaskRadiusRatio->setGeometry(QRect(190, 100, 71, 20));
+        lineEditNThreads = new QLineEdit(Dialog);
+        lineEditNThreads->setObjectName(QString::fromUtf8("lineEditNThreads"));
+        lineEditNThreads->setGeometry(QRect(190, 20, 71, 20));
+        label_4 = new QLabel(Dialog);
+        label_4->setObjectName(QString::fromUtf8("label_4"));
+        label_4->setGeometry(QRect(20, 20, 91, 16));
 
         retranslateUi(Dialog);
         QObject::connect(okButton, SIGNAL(clicked()), Dialog, SLOT(accept()));
@@ -109,6 +117,7 @@ public:
         label_2->setText(QApplication::translate("OptionsWindow", "Max Iterations for MC Sampling:", 0, QApplication::UnicodeUTF8));
         label_3->setText(QApplication::translate("OptionsWindow", "# of Monte Carlo Samplings:", 0, QApplication::UnicodeUTF8));
         label_5->setText(QApplication::translate("OptionsWindow", "Mask Radius Ratio:", 0, QApplication::UnicodeUTF8));
+        label_4->setText(QApplication::translate("OptionsWindow", "Num Threads:", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };

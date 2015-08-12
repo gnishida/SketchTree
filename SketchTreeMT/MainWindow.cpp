@@ -2,6 +2,7 @@
 #include "MLUtils.h"
 #include <QFileDialog>
 #include <QDate>
+#include "OptionsWindow.h"
 #include <time.h>
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flags) {
@@ -49,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	connect(ui.actionPenWidth20, SIGNAL(triggered()), this, SLOT(onPenWidthUpdate()));
 	connect(ui.actionPenWidth10, SIGNAL(triggered()), this, SLOT(onPenWidthUpdate()));
 	connect(ui.actionPenWidth5, SIGNAL(triggered()), this, SLOT(onPenWidthUpdate()));
+	connect(ui.actionOptions, SIGNAL(triggered()), this, SLOT(onOptions()));
 
 	glWidget = new GLWidget3D(this);
 	setCentralWidget(glWidget);
@@ -171,7 +173,7 @@ void MainWindow::onGreedyInverse() {
 	glWidget->model = glWidget->lsystem.inverse(target, glWidget->camera.mvpMatrix);
 	time_t end = clock();
 
-	cout << glWidget->model << endl;
+	//cout << glWidget->model << endl;
 
 	cout << fixed << "Elapsed: " << (double)(end - start) / CLOCKS_PER_SEC  << " [sec]" << endl;
 
@@ -213,4 +215,20 @@ void MainWindow::onPenWidthUpdate() {
 	} else {
 		glWidget->pen.setWidth(5);
 	}
+}
+
+void MainWindow::onOptions() {
+	OptionsWindow dlg(this);
+	dlg.ui.lineEditNThreads->setText(QString::number(glWidget->lsystem.N_THREADS));
+	dlg.ui.lineEditMaxIterations->setText(QString::number(glWidget->lsystem.MAX_ITERATIONS));
+	dlg.ui.lineEditMaxIterationsForMCSampling->setText(QString::number(glWidget->lsystem.MAX_ITERATIONS_FOR_MC));
+	dlg.ui.lineEditNumMonteCarloSamplings->setText(QString::number(glWidget->lsystem.NUM_MONTE_CARLO_SAMPLING));
+	dlg.ui.lineEditMaskRadiusRatio->setText(QString::number(glWidget->lsystem.MASK_RADIUS_RATIO));
+	if (dlg.exec() != QDialog::Accepted) return;
+
+	glWidget->lsystem.N_THREADS = dlg.ui.lineEditNThreads->text().toInt();
+	glWidget->lsystem.MAX_ITERATIONS = dlg.ui.lineEditMaxIterations->text().toInt();
+	glWidget->lsystem.MAX_ITERATIONS_FOR_MC = dlg.ui.lineEditMaxIterationsForMCSampling->text().toInt();
+	glWidget->lsystem.NUM_MONTE_CARLO_SAMPLING = dlg.ui.lineEditNumMonteCarloSamplings->text().toInt();
+	glWidget->lsystem.MASK_RADIUS_RATIO = dlg.ui.lineEditMaskRadiusRatio->text().toDouble();
 }
