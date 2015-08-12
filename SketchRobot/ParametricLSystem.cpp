@@ -414,13 +414,14 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 			double radius = model[i].param_value2;
 			
 			// 線を描画する
-			glutils::drawCylinderY(radius, radius, length, glm::vec3(1, 1, 1), modelMat, vertices);
+			//glutils::drawCylinderY(radius, radius, length, glm::vec3(1, 1, 1), modelMat, vertices);
+			glutils::drawEllipsoid(radius, length * 0.5, radius, glm::vec3(0.5, 0.5, 1), glm::translate(modelMat, glm::vec3(0, length * 0.5, 0)), vertices);
 			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
 		} else if (model[i].name == "S") {
 			double radius = model[i].param_value1;
 			
 			// 円を描画する
-			glutils::drawSphere(radius, glm::vec3(1, 1, 1), modelMat, vertices);
+			glutils::drawSphere(radius, glm::vec3(0.5, 0.5, 1), modelMat, vertices);
 		}
 	}
 	
@@ -828,7 +829,7 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 			+ Literal("[", 0, true)
 			+ Literal("f", 0, 27.0)
 			+ Literal("-", 0, 90.0)
-			+ Literal("F", 0, 19, 3.0)
+			+ Literal("F", 0, 16, 3.0)	// 鎖骨
 			+ Literal("[", 0, true)
 			+ Literal("S", 0, 5.4)
 			+ Literal("]", 0, true)
@@ -844,7 +845,7 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 			+ Literal("[", 0, true)
 			+ Literal("f", 0, 27.0)
 			+ Literal("+", 0, 90.0)
-			+ Literal("F", 0, 19, 3.0)
+			+ Literal("F", 0, 16, 3.0)	// 鎖骨
 			+ Literal("[", 0, true)
 			+ Literal("S", 0, 5.4)
 			+ Literal("]", 0, true)
@@ -869,6 +870,8 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 			+ Literal("F", 0, 32.0, 3.0)
 			+ Literal("^", 0)	// ひざ関節
 			+ Literal("F", 0, 32.0, 3.0)
+			+ Literal("&", 0, 90.0)	// 足首
+			+ Literal("F", 0, 12.0, 3.0)
 			+ Literal("]", 0, true)
 			// 右足
 			+ Literal("[", 0, true)
@@ -879,6 +882,8 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 			+ Literal("F", 0, 32.0, 3.0)
 			+ Literal("^", 0)	// ひざ関節
 			+ Literal("F", 0, 32.0, 3.0)
+			+ Literal("&", 0, 90.0)	// 足首
+			+ Literal("F", 0, 12.0, 3.0)
 			+ Literal("]", 0, true)
 			;
 		actions.push_back(Action(0, rule));
