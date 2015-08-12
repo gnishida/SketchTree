@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created: Wed Aug 12 11:54:30 2015
+** Created: Wed Aug 12 13:04:19 2015
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -28,13 +28,33 @@ class Ui_MainWindowClass
 {
 public:
     QAction *actionExit;
-    QAction *actionRandomGeneration;
     QAction *actionGreedyInverse;
     QAction *actionSaveImage;
+    QAction *actionModeSketch;
+    QAction *actionMode3DView;
+    QAction *actionRandomGeneration_2;
+    QAction *actionRandomGeneration;
+    QAction *actionLoadSketch;
+    QAction *actionSaveSketch;
+    QAction *actionNewSketch;
+    QAction *actionPenColorBody;
+    QAction *actionPenColorLeaf;
+    QAction *actionPenWidth20;
+    QAction *actionPenWidth10;
+    QAction *actionPenWidth5;
+    QAction *actionLoadCamera;
+    QAction *actionSaveCamera;
+    QAction *actionResetCamera;
+    QAction *actionOptions;
     QWidget *centralWidget;
     QMenuBar *menuBar;
     QMenu *menuFile;
     QMenu *menuL_System;
+    QMenu *menuMode;
+    QMenu *menuPen;
+    QMenu *menuColor;
+    QMenu *menuWidth;
+    QMenu *menuOptions;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
 
@@ -42,15 +62,53 @@ public:
     {
         if (MainWindowClass->objectName().isEmpty())
             MainWindowClass->setObjectName(QString::fromUtf8("MainWindowClass"));
-        MainWindowClass->resize(600, 400);
+        MainWindowClass->resize(600, 600);
         actionExit = new QAction(MainWindowClass);
         actionExit->setObjectName(QString::fromUtf8("actionExit"));
-        actionRandomGeneration = new QAction(MainWindowClass);
-        actionRandomGeneration->setObjectName(QString::fromUtf8("actionRandomGeneration"));
         actionGreedyInverse = new QAction(MainWindowClass);
         actionGreedyInverse->setObjectName(QString::fromUtf8("actionGreedyInverse"));
         actionSaveImage = new QAction(MainWindowClass);
         actionSaveImage->setObjectName(QString::fromUtf8("actionSaveImage"));
+        actionModeSketch = new QAction(MainWindowClass);
+        actionModeSketch->setObjectName(QString::fromUtf8("actionModeSketch"));
+        actionModeSketch->setCheckable(true);
+        actionModeSketch->setChecked(true);
+        actionMode3DView = new QAction(MainWindowClass);
+        actionMode3DView->setObjectName(QString::fromUtf8("actionMode3DView"));
+        actionMode3DView->setCheckable(true);
+        actionRandomGeneration_2 = new QAction(MainWindowClass);
+        actionRandomGeneration_2->setObjectName(QString::fromUtf8("actionRandomGeneration_2"));
+        actionRandomGeneration = new QAction(MainWindowClass);
+        actionRandomGeneration->setObjectName(QString::fromUtf8("actionRandomGeneration"));
+        actionLoadSketch = new QAction(MainWindowClass);
+        actionLoadSketch->setObjectName(QString::fromUtf8("actionLoadSketch"));
+        actionSaveSketch = new QAction(MainWindowClass);
+        actionSaveSketch->setObjectName(QString::fromUtf8("actionSaveSketch"));
+        actionNewSketch = new QAction(MainWindowClass);
+        actionNewSketch->setObjectName(QString::fromUtf8("actionNewSketch"));
+        actionPenColorBody = new QAction(MainWindowClass);
+        actionPenColorBody->setObjectName(QString::fromUtf8("actionPenColorBody"));
+        actionPenColorBody->setCheckable(true);
+        actionPenColorLeaf = new QAction(MainWindowClass);
+        actionPenColorLeaf->setObjectName(QString::fromUtf8("actionPenColorLeaf"));
+        actionPenColorLeaf->setCheckable(true);
+        actionPenWidth20 = new QAction(MainWindowClass);
+        actionPenWidth20->setObjectName(QString::fromUtf8("actionPenWidth20"));
+        actionPenWidth20->setCheckable(true);
+        actionPenWidth10 = new QAction(MainWindowClass);
+        actionPenWidth10->setObjectName(QString::fromUtf8("actionPenWidth10"));
+        actionPenWidth10->setCheckable(true);
+        actionPenWidth5 = new QAction(MainWindowClass);
+        actionPenWidth5->setObjectName(QString::fromUtf8("actionPenWidth5"));
+        actionPenWidth5->setCheckable(true);
+        actionLoadCamera = new QAction(MainWindowClass);
+        actionLoadCamera->setObjectName(QString::fromUtf8("actionLoadCamera"));
+        actionSaveCamera = new QAction(MainWindowClass);
+        actionSaveCamera->setObjectName(QString::fromUtf8("actionSaveCamera"));
+        actionResetCamera = new QAction(MainWindowClass);
+        actionResetCamera->setObjectName(QString::fromUtf8("actionResetCamera"));
+        actionOptions = new QAction(MainWindowClass);
+        actionOptions->setObjectName(QString::fromUtf8("actionOptions"));
         centralWidget = new QWidget(MainWindowClass);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         MainWindowClass->setCentralWidget(centralWidget);
@@ -61,6 +119,16 @@ public:
         menuFile->setObjectName(QString::fromUtf8("menuFile"));
         menuL_System = new QMenu(menuBar);
         menuL_System->setObjectName(QString::fromUtf8("menuL_System"));
+        menuMode = new QMenu(menuBar);
+        menuMode->setObjectName(QString::fromUtf8("menuMode"));
+        menuPen = new QMenu(menuBar);
+        menuPen->setObjectName(QString::fromUtf8("menuPen"));
+        menuColor = new QMenu(menuPen);
+        menuColor->setObjectName(QString::fromUtf8("menuColor"));
+        menuWidth = new QMenu(menuPen);
+        menuWidth->setObjectName(QString::fromUtf8("menuWidth"));
+        menuOptions = new QMenu(menuBar);
+        menuOptions->setObjectName(QString::fromUtf8("menuOptions"));
         MainWindowClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindowClass);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -71,11 +139,31 @@ public:
 
         menuBar->addAction(menuFile->menuAction());
         menuBar->addAction(menuL_System->menuAction());
+        menuBar->addAction(menuMode->menuAction());
+        menuBar->addAction(menuPen->menuAction());
+        menuBar->addAction(menuOptions->menuAction());
+        menuFile->addAction(actionNewSketch);
+        menuFile->addAction(actionLoadSketch);
+        menuFile->addAction(actionSaveSketch);
+        menuFile->addSeparator();
         menuFile->addAction(actionSaveImage);
+        menuFile->addSeparator();
+        menuFile->addAction(actionLoadCamera);
+        menuFile->addAction(actionSaveCamera);
+        menuFile->addAction(actionResetCamera);
         menuFile->addSeparator();
         menuFile->addAction(actionExit);
         menuL_System->addAction(actionRandomGeneration);
         menuL_System->addAction(actionGreedyInverse);
+        menuMode->addAction(actionModeSketch);
+        menuMode->addAction(actionMode3DView);
+        menuPen->addAction(menuColor->menuAction());
+        menuPen->addAction(menuWidth->menuAction());
+        menuColor->addAction(actionPenColorBody);
+        menuWidth->addAction(actionPenWidth20);
+        menuWidth->addAction(actionPenWidth10);
+        menuWidth->addAction(actionPenWidth5);
+        menuOptions->addAction(actionOptions);
 
         retranslateUi(MainWindowClass);
 
@@ -84,13 +172,39 @@ public:
 
     void retranslateUi(QMainWindow *MainWindowClass)
     {
-        MainWindowClass->setWindowTitle(QApplication::translate("MainWindowClass", "MainWindow", 0, QApplication::UnicodeUTF8));
-        actionExit->setText(QApplication::translate("MainWindowClass", "Exit", 0, QApplication::UnicodeUTF8));
-        actionRandomGeneration->setText(QApplication::translate("MainWindowClass", "Random Generation", 0, QApplication::UnicodeUTF8));
-        actionGreedyInverse->setText(QApplication::translate("MainWindowClass", "Greedy Inverse", 0, QApplication::UnicodeUTF8));
+        MainWindowClass->setWindowTitle(QApplication::translate("MainWindowClass", "Sketch Application", 0, QApplication::UnicodeUTF8));
+        actionExit->setText(QApplication::translate("MainWindowClass", "&Exit", 0, QApplication::UnicodeUTF8));
+        actionExit->setShortcut(QApplication::translate("MainWindowClass", "Ctrl+Q", 0, QApplication::UnicodeUTF8));
+        actionGreedyInverse->setText(QApplication::translate("MainWindowClass", "&Greedy Inverse", 0, QApplication::UnicodeUTF8));
+        actionGreedyInverse->setShortcut(QApplication::translate("MainWindowClass", "Ctrl+I", 0, QApplication::UnicodeUTF8));
         actionSaveImage->setText(QApplication::translate("MainWindowClass", "Save Image", 0, QApplication::UnicodeUTF8));
-        menuFile->setTitle(QApplication::translate("MainWindowClass", "File", 0, QApplication::UnicodeUTF8));
-        menuL_System->setTitle(QApplication::translate("MainWindowClass", "L-System", 0, QApplication::UnicodeUTF8));
+        actionModeSketch->setText(QApplication::translate("MainWindowClass", "Sketch", 0, QApplication::UnicodeUTF8));
+        actionMode3DView->setText(QApplication::translate("MainWindowClass", "3D View", 0, QApplication::UnicodeUTF8));
+        actionRandomGeneration_2->setText(QApplication::translate("MainWindowClass", "Random Generation", 0, QApplication::UnicodeUTF8));
+        actionRandomGeneration->setText(QApplication::translate("MainWindowClass", "&Random Generation", 0, QApplication::UnicodeUTF8));
+        actionRandomGeneration->setShortcut(QApplication::translate("MainWindowClass", "Ctrl+R", 0, QApplication::UnicodeUTF8));
+        actionLoadSketch->setText(QApplication::translate("MainWindowClass", "&Load Sketch", 0, QApplication::UnicodeUTF8));
+        actionLoadSketch->setShortcut(QApplication::translate("MainWindowClass", "Ctrl+O", 0, QApplication::UnicodeUTF8));
+        actionSaveSketch->setText(QApplication::translate("MainWindowClass", "&Save Sketch", 0, QApplication::UnicodeUTF8));
+        actionSaveSketch->setShortcut(QApplication::translate("MainWindowClass", "Ctrl+S", 0, QApplication::UnicodeUTF8));
+        actionNewSketch->setText(QApplication::translate("MainWindowClass", "&New Sketch", 0, QApplication::UnicodeUTF8));
+        actionNewSketch->setShortcut(QApplication::translate("MainWindowClass", "Ctrl+N", 0, QApplication::UnicodeUTF8));
+        actionPenColorBody->setText(QApplication::translate("MainWindowClass", "Body", 0, QApplication::UnicodeUTF8));
+        actionPenColorLeaf->setText(QApplication::translate("MainWindowClass", "Leaf", 0, QApplication::UnicodeUTF8));
+        actionPenWidth20->setText(QApplication::translate("MainWindowClass", "20", 0, QApplication::UnicodeUTF8));
+        actionPenWidth10->setText(QApplication::translate("MainWindowClass", "10", 0, QApplication::UnicodeUTF8));
+        actionPenWidth5->setText(QApplication::translate("MainWindowClass", "5", 0, QApplication::UnicodeUTF8));
+        actionLoadCamera->setText(QApplication::translate("MainWindowClass", "Load Camera", 0, QApplication::UnicodeUTF8));
+        actionSaveCamera->setText(QApplication::translate("MainWindowClass", "Save Camera", 0, QApplication::UnicodeUTF8));
+        actionResetCamera->setText(QApplication::translate("MainWindowClass", "Reset Camera", 0, QApplication::UnicodeUTF8));
+        actionOptions->setText(QApplication::translate("MainWindowClass", "Options", 0, QApplication::UnicodeUTF8));
+        menuFile->setTitle(QApplication::translate("MainWindowClass", "&File", 0, QApplication::UnicodeUTF8));
+        menuL_System->setTitle(QApplication::translate("MainWindowClass", "&L-System", 0, QApplication::UnicodeUTF8));
+        menuMode->setTitle(QApplication::translate("MainWindowClass", "&Mode", 0, QApplication::UnicodeUTF8));
+        menuPen->setTitle(QApplication::translate("MainWindowClass", "&Pen", 0, QApplication::UnicodeUTF8));
+        menuColor->setTitle(QApplication::translate("MainWindowClass", "&Color", 0, QApplication::UnicodeUTF8));
+        menuWidth->setTitle(QApplication::translate("MainWindowClass", "&Width", 0, QApplication::UnicodeUTF8));
+        menuOptions->setTitle(QApplication::translate("MainWindowClass", "Window", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };

@@ -24,17 +24,17 @@
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
     <Filter Include="Generated Files\Debug">
-      <UniqueIdentifier>{611d9c1b-c531-4ece-9564-a7813a16427a}</UniqueIdentifier>
+      <UniqueIdentifier>{4540de05-cb22-496a-9d28-3bbe2374942f}</UniqueIdentifier>
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
     <Filter Include="Generated Files\Release">
-      <UniqueIdentifier>{67a30821-9800-4c9e-84b6-70ed1522a086}</UniqueIdentifier>
+      <UniqueIdentifier>{fe013c77-88e8-44f7-9983-e3e932ff6d79}</UniqueIdentifier>
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
     <Filter Include="Source Files\codebase">
-      <UniqueIdentifier>{1239dc39-f01d-4751-814b-b77456f1f101}</UniqueIdentifier>
+      <UniqueIdentifier>{dc909124-fff8-4da9-934f-fcd3be540ae5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -59,10 +59,22 @@
     <ClCompile Include="GLWidget3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ParametricLSystem.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_GLWidget3D.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_GLWidget3D.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="OptionsWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ShadowMapping.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_OptionsWindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_OptionsWindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="ParametricLSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\codebase\GLUtils.cpp">
@@ -71,7 +83,16 @@
     <ClCompile Include="..\..\codebase\MLUtils.cpp">
       <Filter>Source Files\codebase</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\codebase\MyTimer.cpp">
+      <Filter>Source Files\codebase</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\codebase\RenderManager.cpp">
+      <Filter>Source Files\codebase</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\codebase\Shader.cpp">
+      <Filter>Source Files\codebase</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\codebase\ShadowMapping.cpp">
       <Filter>Source Files\codebase</Filter>
     </ClCompile>
   </ItemGroup>
@@ -85,22 +106,28 @@
     <CustomBuild Include="MainWindow.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="OptionsWindow.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="GLWidget3D.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="OptionsWindow.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_MainWindow.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="GeneratedFiles\ui_OptionsWindow.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="GLWidget3D.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ParametricLSystem.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ShadowMapping.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\codebase\GLUtils.h">
       <Filter>Source Files\codebase</Filter>
@@ -108,7 +135,19 @@
     <ClInclude Include="..\..\codebase\MLUtils.h">
       <Filter>Source Files\codebase</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\codebase\MyTimer.h">
+      <Filter>Source Files\codebase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\codebase\RenderManager.h">
+      <Filter>Source Files\codebase</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\codebase\Shader.h">
+      <Filter>Source Files\codebase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\codebase\ShadowMapping.h">
+      <Filter>Source Files\codebase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\codebase\Vertex.h">
       <Filter>Source Files\codebase</Filter>
     </ClInclude>
   </ItemGroup>

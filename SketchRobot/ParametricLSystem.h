@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "RenderManager.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -8,20 +9,24 @@
 #include <vector>
 #include <map>
 #include "Vertex.h"
+#include "MyTimer.h"
 
 using namespace std;
 
 namespace parametriclsystem {
 
-class State {
-public:
-	double diameter;
-	glm::mat4 modelMat;
-	glm::vec3 color;
+const int NUM_LAYERS = 1;
+const int GRID_SIZE = 100;
 
-public:
-	State() : diameter(0.0), color(0, 0.7, 0) {};
-};
+//const int MAX_ITERATIONS = 1000;//500;
+//const int MAX_ITERATIONS_FOR_MC = 10;
+//const int NUM_MONTE_CARLO_SAMPLING = 100;
+const double PARAM_EXPLORATION = 0.3;
+const double PARAM_EXPLORATION_VARIANCE = 0.1;
+const double LENGTH_ATTENUATION = 0.9;
+const double INITIAL_SIZE = 6.0;
+const double SIZE_ATTENUATION = 0.02;
+//const double MASK_RADIUS_RATIO = 0.11;
 
 class String;
 
@@ -32,28 +37,26 @@ public:
 public:
 	string name;
 	int depth;
-	std::vector<double> param_values;
+	double param_value1;
+	double param_value2;
 	bool param_defined;
 
 public:
-	Literal() {}
+	Literal() : depth(0), param_value1(0.0), param_value2(0.0), param_defined(false) {}
 	Literal(const string& name, int depth, bool param_defined = false);
 	Literal(const string& name, int depth, double param_value);
 	Literal(const string& name, int depth, double param_value1, double param_value2);
-	Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3);
-	Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3, double param_value4);
-	Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3, double param_value4, double param_value5);
-	Literal(const string& name, int depth, const std::vector<double>& param_values);
-	
+
 	String operator+(const Literal& l) const;
 	int type();
 };
+
+class Action;
 
 class String {
 public:
 	vector<Literal> str;
 	int cursor;				// expandするリテラルの位置
-	//priority_queue<int, vector<int>, greater<int> > queue;
 
 public:
 	String();
@@ -69,10 +72,10 @@ public:
 	void setValue(double value);
 	void replace(const String& str);
 
-	void setExpand();
-	void resetExpand();
 	String getExpand() const;
 	void nextCursor(int depth);
+
+	void rewrite(const Action& action);
 };
 
 ostream& operator<<(ostream& os, const String& dt);
@@ -86,17 +89,14 @@ public:
 
 public:
 	int type;		// 0 -- rule / 1 -- value
-	int index;		// モデルの何文字目の変数に対するactionか？
-	int action_index;	// actionsの中の何番目のactionか？
+	int index;	// actionsの中の何番目のactionか？
 	String rule;
 	double value;
 
 public:
 	Action() {}
-	Action(int action_index, int index, const String& rule);
-	Action(int action_index, int index, double value);
-
-	String apply(const String& model);
+	Action(int index, const String& rule);
+	Action(int index, double value);
 };
 
 ostream& operator<<(ostream& os, const Action& a);
@@ -124,40 +124,39 @@ public:
 	Node* addChild(const String& model, const Action& action);
 	void setActions(std::vector<Action>& actions);
 	Action randomlySelectAction();
-	void removeAction(int index);
-	Node* getChild(int index);
 	Node* UCTSelectChild();
 	Node* bestChild();
 };
 
-
 class ParametricLSystem {
 public:
-	int grid_size;
-	int indicator_data_type;
-	float scale;
-	int num_nodes;
+	int MAX_ITERATIONS;
+	int MAX_ITERATIONS_FOR_MC;
+	int NUM_MONTE_CARLO_SAMPLING;
+	double MASK_RADIUS_RATIO;
 
 	String axiom;
-	map<char, vector<string> > rules;
+	map<string, vector<Action> > actions_template;
+	MyTimer timer;
 
 public:
-	ParametricLSystem(int grid_size, float scale, const String& axiom);
+	ParametricLSystem(const String& axiom);
+	void initActionsTemplate();
 	String derive(int random_seed);
-	String derive(const String& start_model, int max_iterations, std::vector<int>& derivation_history);
-	void draw(const String& model, std::vector<Vertex>& vertices);
-	void computeIndicator(const String& model, float scale, const glm::mat4& baseModelMat, cv::Mat& indicator);
-	String inverse(const cv::Mat& target);
-	String UCT(const String& model, const cv::Mat& target, int derivation_step);
-	double score(const cv::Mat& indicator, const cv::Mat& target, const cv::Mat& mask);
+	String derive(const String& start_model, int max_iterations);
+	void draw(const String& model, RenderManager* renderManager);
+	void computeIndicator(const String& model, const glm::mat4& baseModelMat, std::vector<cv::Mat>& indicator);
+	void computeIndicator(const String& model, const glm::mat4& baseModelMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator);
+	String inverse(const std::vector<cv::Mat>& target, const glm::mat4& mvpMat);
+	String UCT(const String& current_model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step);
+	double score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target);
 
 private:
 	std::vector<Action> getActions(const String& model);
-	glm::vec2 computeCurrentPoint(const String& model, float scale, glm::mat4& modelMmat);
+	glm::vec2 computeCurrentPoint(const String& model, const glm::mat4& mvpMat, glm::mat4& modelMmat);
 	void releaseNodeMemory(Node* node);
 };
 
 float deg2rad(float deg);
-vector<string> split(const string& str, char delim);
 
 }

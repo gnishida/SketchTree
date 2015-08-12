@@ -1,41 +1,62 @@
-#pragma once
+#ifndef GLWIDGET_H
+#define GLWIDGET_H
 
-#include <glew.h>
-#include "Shader.h"
-#include "Vertex.h"
+#include "RenderManager.h"
+#include <QPen>
 #include <QGLWidget>
-#include <QMouseEvent>
-#include "Camera.h"
-#include "ShadowMapping.h"
+#include <QtGui>
 #include "ParametricLSystem.h"
+#include "Camera.h"
 
-class MainWindow;
+class Pen : public QPen {
+public:
+	static enum { TYPE_BODY = 0 };
+
+public:
+	int type;
+
+public:
+	Pen();
+
+	void setType(int type);
+};
 
 class GLWidget3D : public QGLWidget {
-public:
-	MainWindow* mainWin;
-	Camera camera;
-	GLuint vao;
-	GLuint program;
-	std::vector<Vertex> vertices;
-	glm::vec3 light_dir;
+	Q_OBJECT
 
-	ShadowMapping shadow;
+public:
+	static enum { MODE_SKETCH = 0, MODE_3DVIEW };
+
+public:
+	Camera camera;
+	glm::vec3 light_dir;
+	glm::mat4 light_mvpMatrix;
+	RenderManager renderManager;
 
 	parametriclsystem::ParametricLSystem lsystem;
 	parametriclsystem::String model;
 
+	int mode;	// 0 -- sketch / 1 -- 3D view
+	bool dragging;
+	QPoint lastPoint;
+	QImage sketch[parametriclsystem::NUM_LAYERS];
+	Pen pen;
+
 public:
-	GLWidget3D(MainWindow *parent);
+	GLWidget3D(QWidget *parent = 0);
+
 	void drawScene(int drawMode);
-	void createVAO();
+	void drawLineTo(const QPoint &endPoint);
+	void drawCircle(const QPoint &point);
+	void resizeSketch(int width, int height);
 
 protected:
-	void initializeGL();
 	void resizeGL(int width, int height);
-	void paintGL();    
-	void mousePressEvent(QMouseEvent *e);
-	void mouseMoveEvent(QMouseEvent *e);
+	void mousePressEvent(QMouseEvent *event);
+	void mouseMoveEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *e);
+	void initializeGL();
+	void paintEvent(QPaintEvent *event);
 };
 
+#endif

@@ -8,20 +8,6 @@
 
 #define SQR(x)	((x) * (x))
 
-
-#define MAX_ITERATIONS						200//1400//200
-#define MAX_ITERATIONS_FOR_MC				25//15
-#define NUM_MONTE_CARLO_SAMPLING			100//100
-
-#define PARAM_EXPLORATION					0.3 //1
-#define PARAM_EXPLORATION_VARIANCE			0.1//10
-
-#define LENGTH_ATTENUATION					0.95
-#define SIZE_ATTENUATION					0.034 //0.04
-#define MASK_RADIUS							300//36
-
-//#define DEBUG		1
-
 namespace parametriclsystem {
 
 const double M_PI = 3.141592653592;
@@ -29,58 +15,24 @@ const double M_PI = 3.141592653592;
 Literal::Literal(const string& name, int depth, bool param_defined) {
 	this->name = name;
 	this->depth = depth;
+	this->param_value1 = 0.0;
+	this->param_value2 = 0.0;
 	this->param_defined = param_defined;
 }
 
 Literal::Literal(const string& name, int depth, double param_value) {
 	this->name = name;
 	this->depth = depth;
-	this->param_values.push_back(param_value);
+	this->param_value1 = param_value;
+	this->param_value2 = 0.0;
 	this->param_defined = true;
 }
 
 Literal::Literal(const string& name, int depth, double param_value1, double param_value2) {
 	this->name = name;
 	this->depth = depth;
-	this->param_values.push_back(param_value1);
-	this->param_values.push_back(param_value2);
-	this->param_defined = true;
-}
-
-Literal::Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3) {
-	this->name = name;
-	this->depth = depth;
-	this->param_values.push_back(param_value1);
-	this->param_values.push_back(param_value2);
-	this->param_values.push_back(param_value3);
-	this->param_defined = true;
-}
-
-Literal::Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3, double param_value4) {
-	this->name = name;
-	this->depth = depth;
-	this->param_values.push_back(param_value1);
-	this->param_values.push_back(param_value2);
-	this->param_values.push_back(param_value3);
-	this->param_values.push_back(param_value4);
-	this->param_defined = true;
-}
-
-Literal::Literal(const string& name, int depth, double param_value1, double param_value2, double param_value3, double param_value4, double param_value5) {
-	this->name = name;
-	this->depth = depth;
-	this->param_values.push_back(param_value1);
-	this->param_values.push_back(param_value2);
-	this->param_values.push_back(param_value3);
-	this->param_values.push_back(param_value4);
-	this->param_values.push_back(param_value5);
-	this->param_defined = true;
-}
-
-Literal::Literal(const string& name, int depth, const std::vector<double>& param_values) {
-	this->name = name;
-	this->depth = depth;
-	this->param_values = param_values;
+	this->param_value1 = param_value1;
+	this->param_value2 = param_value2;
 	this->param_defined = true;
 }
 
@@ -138,7 +90,7 @@ String String::operator+(const String& str) const {
 }
 
 void String::setValue(double value) {
-	str[cursor].param_values.push_back(value);
+	str[cursor].param_value1 = value;
 	str[cursor].param_defined = true;
 
 	cursor++;
@@ -152,6 +104,11 @@ void String::replace(const String& str) {
 
 	this->str.erase(this->str.begin() + cursor);
 	this->str.insert(this->str.begin() + cursor, str.str.begin(), str.str.end());
+
+	// depthの設定
+	for (int i = 0; i < str.length(); ++i) {
+		this->str[cursor + i].depth = depth + 1;
+	}
 
 	// 次のリテラルを探す
 	nextCursor(depth);
@@ -208,6 +165,14 @@ void String::nextCursor(int depth) {
 	cursor = -1;
 }
 
+void String::rewrite(const Action& action) {
+	if (action.type == Action::ACTION_RULE) {
+		replace(action.rule);
+	} else {
+		setValue(action.value);
+	}
+}
+
 ostream& operator<<(ostream& os, const String& str) {
 	os << setprecision(1);
 	for (int i = 0; i < str.length(); ++i) {
@@ -217,36 +182,16 @@ ostream& operator<<(ostream& os, const String& str) {
     return os;
 }
 
-Action::Action(int action_index, int index, const String& rule) {
+Action::Action(int index, const String& rule) {
 	this->type = ACTION_RULE;
-	this->action_index = action_index;
 	this->index = index;
 	this->rule = rule;
 }
 
-Action::Action(int action_index, int index, double value) {
+Action::Action(int index, double value) {
 	this->type = ACTION_VALUE;
-	this->action_index = action_index;
 	this->index = index;
 	this->value = value;
-}
-
-/**
- * 指定されたモデルに、このアクションを適用する。
- *
- * @param model					モデル
- * @return						action適用した後のモデル
- */
-String Action::apply(const String& model) {
-	String new_model = model;
-
-	if (type == ACTION_RULE) {
-		new_model.replace(rule);
-	} else {
-		new_model.setValue(value);
-	}
-
-	return new_model;
 }
 
 ostream& operator<<(ostream& os, const Action& a) {
@@ -314,28 +259,6 @@ Action Node::randomlySelectAction() {
 }
 
 /**
- * untriedActionsの中で、指定されたindex値を持つ要素を削除する。
- */
-void Node::removeAction(int index) {
-	for (int i = 0; i < untriedActions.size(); ++i) {
-		if (untriedActions[i] == index) {
-			untriedActions.erase(untriedActions.begin() + i);
-			return;
-		}
-	}
-}
-
-/**
- * childrenの中で、指定されたindex値を持つ子ノードを返却する。
- */
-Node* Node::getChild(int index) {
-	for (int i = 0; i < children.size(); ++i) {
-		if (children[i]->action.action_index == index) return children[i];
-	}
-	return NULL;
-}
-
-/**
  * UCTアルゴリズムに従い、子ノードを1つ選択する。
  */
 Node* Node::UCTSelectChild() {
@@ -383,10 +306,19 @@ Node* Node::bestChild() {
 	return best_child;
 }
 
-ParametricLSystem::ParametricLSystem(int grid_size, float scale, const String& axiom) {
-	this->grid_size = grid_size;
-	this->scale = scale;
+ParametricLSystem::ParametricLSystem(const String& axiom) {
+	MAX_ITERATIONS = 200;//1000;
+	MAX_ITERATIONS_FOR_MC = 25;
+	NUM_MONTE_CARLO_SAMPLING = 100;
+	MASK_RADIUS_RATIO = 2;
+
 	this->axiom = axiom;
+
+	initActionsTemplate();
+	timer.validate(false);
+}
+
+void ParametricLSystem::initActionsTemplate() {
 }
 
 /**
@@ -396,12 +328,10 @@ ParametricLSystem::ParametricLSystem(int grid_size, float scale, const String& a
  * @return					生成されたモデル
  */
 String ParametricLSystem::derive(int random_seed) {
-	std::vector<int> derivation_history;
-
 	String result_model;
 	ml::initRand(random_seed);
 	while (true) {
-		result_model = derive(axiom, MAX_ITERATIONS, derivation_history);
+		result_model = derive(axiom, MAX_ITERATIONS);
 		if (result_model.length() > 0) break;
 	}
 
@@ -417,89 +347,108 @@ String ParametricLSystem::derive(int random_seed) {
  * @param indicator [OUT]		生成されたモデルのindicator
  * @return						生成されたモデル
  */
-String ParametricLSystem::derive(const String& start_model, int max_iterations, std::vector<int>& derivation_history) {
+String ParametricLSystem::derive(const String& start_model, int max_iterations) {
 	String model = start_model;
 
 	for (int iter = 0; iter < max_iterations; ++iter) {
+		timer.start("get_actions");
 		std::vector<Action> actions = getActions(model);
+		timer.end("get_actions");
 		if (actions.size() == 0) break;
-
-
+		
+		timer.start("action_apply");
 		int index = ml::genRand(0, actions.size());
-		derivation_history.push_back(index);
-		model = actions[index].apply(model);
+		model.rewrite(actions[index]);
+		timer.end("action_apply");
 	}
 
 	return model;
 }
 
-void ParametricLSystem::draw(const String& model, std::vector<Vertex>& vertices) {
-	vertices.clear();
+void ParametricLSystem::draw(const String& model, RenderManager* renderManager) {
+	std::vector<Vertex> vertices;
 
 	glm::mat4 modelMat;
 
-
 	std::list<glm::mat4> stack;
 
+	int undefined = 0;
 	for (int i = 0; i < model.length(); ++i) {
+		if (undefined == 0 && !model[i].param_defined) {
+			undefined = 1;
+			continue;
+		}
+
 		if (model[i].name == "[") {
 			stack.push_back(modelMat);
+			if (undefined > 0) undefined++;
 		} else if (model[i].name == "]") {
 			if (!stack.empty()) {
 				modelMat = stack.back();
 				stack.pop_back();
+				if (undefined > 0) undefined--;
 			}
-		} else if (model[i].name == "+" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "-" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "#" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "\\" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "/" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "&" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "^" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "f" && model[i].param_defined) {
-			modelMat = glm::translate(modelMat, glm::vec3(0, 0, model[i].param_values[0] * scale));
-		} else if (model[i].name == "F" && model[i].param_defined) {
-			double length = model[i].param_values[0] * scale;
-			double radius = model[i].param_values[1] * scale;
+		} else if (undefined > 0) {
+			continue;
+		} else if (model[i].name == "+") {
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 0, 1));
+		} else if (model[i].name == "-") {
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 0, 1));
+		} else if (model[i].name == "#") {
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 0, 1));
+		} else if (model[i].name == "\\") {
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 1, 0));
+		} else if (model[i].name == "/") {
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 1, 0));
+		} else if (model[i].name == "&") {
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(1, 0, 0));
+		} else if (model[i].name == "^") {
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(1, 0, 0));
+		} else if (model[i].name == "f") {
+			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_value1, 0));
+		} else if (model[i].name == "F") {
+			double length = model[i].param_value1;
+			double radius = model[i].param_value2;
 			
-			glm::vec4 p(0, 0, 0, 1);
-			p = modelMat * p;
 			// 線を描画する
-			std::vector<Vertex> new_vertices;
-			glutils::drawCylinderZ(radius, radius, length, glm::vec3(1, 1, 1), modelMat, vertices);
-
-			modelMat = glm::translate(modelMat, glm::vec3(0, 0, length));
-		} else if (model[i].name == "S" && model[i].param_defined) {
-			double radius = model[i].param_values[0] * scale;
+			glutils::drawCylinderY(radius, radius, length, glm::vec3(1, 1, 1), modelMat, vertices);
+			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
+		} else if (model[i].name == "S") {
+			double radius = model[i].param_value1;
 			
-			glm::vec4 p(0, 0, 0, 1);
-			p = modelMat * p;
-			// 線を描画する
-			std::vector<Vertex> new_vertices;
+			// 円を描画する
 			glutils::drawSphere(radius, glm::vec3(1, 1, 1), modelMat, vertices);
 		}
 	}
-	this->axiom = axiom;
+	
+	renderManager->removeObject("object");
+	renderManager->addObject("object", "", vertices);
 }
 
 /**
  * 指定された文字列に基づいてモデルを生成し、indicatorを計算して返却する。
  * 
- * @param rule				モデルを表す文字列
- * @param scale				grid_size * scaleのサイズでindicatorを計算する
+ * @param model				モデルを表す文字列
+ * @param mvpMat			カメラ視点への射影行列
  * @param indicator [OUT]	indicator
  */
-void ParametricLSystem::computeIndicator(const String& model, float scale, const glm::mat4& baseModelMat, cv::Mat& indicator) {
-	int size = grid_size * scale;
+inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& baseModelMat, std::vector<cv::Mat>& indicator) {
+	computeIndicator(model, baseModelMat, cv::Rect(0, 0, GRID_SIZE, GRID_SIZE), indicator);
+}
 
-	indicator = cv::Mat::zeros(size, size, CV_32F);
+/**
+ * 指定された文字列に基づいてモデルを生成し、indicatorを計算して返却する。
+ * 
+ * @param model				モデルを表す文字列
+ * @param mvpMat			カメラ視点への射影行列
+ * @param baseModelMat		モデルのベース変換行列
+ * @param indicator [OUT]	indicator
+ */
+inline void ParametricLSystem::computeIndicator(const String& model, const glm::mat4& baseModelMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator) {
+	indicator.resize(NUM_LAYERS);
+	for (int i = 0; i < NUM_LAYERS; ++i) {
+		indicator[i] = cv::Mat::zeros(roi.height, roi.width, CV_32F);
+	}
 
 	std::list<glm::mat4> stack;
 
@@ -523,50 +472,54 @@ void ParametricLSystem::computeIndicator(const String& model, float scale, const
 			}
 		} else if (undefined > 0) {
 			continue;
-		} else if (model[i].name == "+" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "-" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "#" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "\\" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "/" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "&" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "^" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "f" && model[i].param_defined) {
-			modelMat = glm::translate(modelMat, glm::vec3(0, 0, model[i].param_values[0] * scale));
-		} else if (model[i].name == "F" && model[i].param_defined) {
-			double length = model[i].param_values[0] * scale;
-			double radius = model[i].param_values[1] * 2.0 * scale;
+		} else if (model[i].name == "+") {
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 0, 1));
+		} else if (model[i].name == "-") {
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 0, 1));
+		} else if (model[i].name == "#") {
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 0, 1));
+		} else if (model[i].name == "\\") {
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 1, 0));
+		} else if (model[i].name == "/") {
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 1, 0));
+		} else if (model[i].name == "&") {
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(1, 0, 0));
+		} else if (model[i].name == "^") {
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(1, 0, 0));
+		} else if (model[i].name == "f") {
+			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_value1, 0));
+		} else if (model[i].name == "F") {
+			double length = model[i].param_value1;
+			double radius = model[i].param_value2;
 
 			// 線を描画する代わりに、indicatorを更新する
 			glm::vec4 p1(0, 0, 0, 1);
-			glm::vec4 p2(0, 0, length, 1);
+			glm::vec4 p2(0, length, 0, 1);
 			p1 = modelMat * p1;
 			p2 = modelMat * p2;
-			int u1 = p1.x + size * 0.5;
-			int v1 = p1.z + size * 0.5;
-			int u2 = p2.x + size * 0.5;
-			int v2 = p2.z + size * 0.5;
+			int u1 = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+			int v1 = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
+			int u2 = (p2.x / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+			int v2 = (p2.y / p2.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
 
-			int thickness = max(1.0, radius);
-			cv::line(indicator, cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), thickness);
+			int thickness = max(1, (int)radius);
 
-			modelMat = glm::translate(modelMat, glm::vec3(0, 0, length));
-		} else if (model[i].name == "S" && model[i].param_defined) {
-			double radius = model[i].param_values[0] * scale;
+			cv::line(indicator[0], cv::Point(u1, v1), cv::Point(u2, v2), cv::Scalar(1), thickness);
 
-			// 線を描画する代わりに、indicatorを更新する
+			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
+		} else if (model[i].name == "S") {
+			double radius = model[i].param_value1;
+
+			// 描画する代わりに、indicatorを更新する
 			glm::vec4 p1(0, 0, 0, 1);
 			p1 = modelMat * p1;
-			int u1 = p1.x + size * 0.5;
-			int v1 = p1.z + size * 0.5;
 
-			cv::circle(indicator, cv::Point(u1, v1), radius, cv::Scalar(1), -1);
+			int u = (p1.x / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.x;
+			int v = (p1.y / p1.w + 1.0) * GRID_SIZE * 0.5 - roi.y;
+
+			int r = max(1, (int)radius);
+
+			cv::circle(indicator[0], cv::Point(u, v), r, cv::Scalar(1), -1);
 		}
 	}
 }
@@ -578,41 +531,37 @@ void ParametricLSystem::computeIndicator(const String& model, float scale, const
  * @param indicator [OUT]	生成されたモデルのindicator
  * @return					生成されたモデル
  */
-String ParametricLSystem::inverse(const cv::Mat& target) {
+String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm::mat4& mvpMat) {
 	// UCTを使って探索木を構築していく
 	String model = axiom;
 
 	for (int l = 0; l < MAX_ITERATIONS; ++l) {
-		model = UCT(model, target, l);
+		model = UCT(model, target, mvpMat, l);
 
-		cv::Mat indicator;
-		computeIndicator(model, scale, glm::mat4(), indicator);
-		double sc = score(indicator, target, cv::Mat::ones(target.size(), CV_8U));
-
+		std::vector<cv::Mat> indicator;
+		computeIndicator(model, mvpMat, indicator);
+		double sc = score(indicator, target);
+		
 		/////// デバッグ ///////
 		/*
 		char filename[256];
-		sprintf(filename, "indicator_%d.png", l);
-		computeIndicator(model, 4, glm::mat4(), indicator);
+		sprintf(filename, "images/indicator_%d.png", l);
+		computeIndicator(model, mvpMat, indicator);
 
-		cv::Mat target2;
-		cv::resize(target, target2, cv::Size(400, 400));
-
-		ml::mat_save(filename, indicator + target2 * 0.4);
+		ml::mat_save(filename, indicator[0] + target[0] * 0.4);
 		*/
 		/////// デバッグ ///////
 
-		//cout << l << ": " << "Best score=" << sc << " : " << model << endl;
-		cout << l << ": " << "Best score=" << sc << " : " << endl;
+		cout << l << ": " << "Best score=" << sc << endl;
 
 		// これ以上、derivationできなら、終了
 		if (model.cursor < 0) break;
 	}
 
 	// スコア表示
-	cv::Mat indicator;
-	computeIndicator(model, scale, glm::mat4(), indicator);
-	cout << score(indicator, target, cv::Mat::ones(target.size(), CV_8U)) << endl;
+	std::vector<cv::Mat> indicator;
+	computeIndicator(model, mvpMat, indicator);
+	cout << score(indicator, target) << endl;
 	
 	return model;
 }
@@ -620,89 +569,121 @@ String ParametricLSystem::inverse(const cv::Mat& target) {
 /**
  * 指定されたmodelからUCTをスタートし、最善のoptionを返却する。
  *
- * @param model		モデル
- * @param target	ターゲット
- * @return			最善のoption
+ * @param current_model		モデル
+ * @param target			ターゲット
+ * @param mvpMat			model/view/projection行列
+ * @return					最善のoption
  */
-String ParametricLSystem::UCT(const String& current_model, const cv::Mat& target, int derivation_step) {
+String ParametricLSystem::UCT(const String& current_model, const std::vector<cv::Mat>& target, const glm::mat4& mvpMat, int derivation_step) {
 	// これ以上、derivationできなら、終了
 	int index = current_model.cursor;
 	if (index < 0) return current_model;
-
-	// expandするリテラルを取得する
-	String model = current_model.getExpand();
 
 	// 現在のカーソルのdepthを取得
 	int depth = current_model[current_model.cursor].depth;
 
 	// 現在の座標を計算
 	glm::mat4 baseModelMat;
-	glm::vec2 curPt = computeCurrentPoint(current_model, scale, baseModelMat);
+	glm::vec2 curPt = computeCurrentPoint(current_model, mvpMat, baseModelMat);
+	baseModelMat = mvpMat * baseModelMat;
 
-	// マスク画像を作成
-	cv::Mat mask = ml::create_mask(target.rows, target.cols, CV_8U, cv::Point(curPt.x, curPt.y), MASK_RADIUS);
+	// cripping領域を計算
+	cv::Rect crip_roi(curPt.x - MASK_RADIUS_RATIO * GRID_SIZE, curPt.y - MASK_RADIUS_RATIO * GRID_SIZE, curPt.x + MASK_RADIUS_RATIO * GRID_SIZE, curPt.y + MASK_RADIUS_RATIO * GRID_SIZE);
+	if (crip_roi.x < 0) crip_roi.x = 0;
+	if (crip_roi.y < 0) crip_roi.y = 0;
+	if (crip_roi.width >= GRID_SIZE) crip_roi.width = GRID_SIZE - 1;
+	if (crip_roi.height >= GRID_SIZE) crip_roi.height = GRID_SIZE - 1;
+	crip_roi.width -= crip_roi.x - 1;
+	crip_roi.height -= crip_roi.y - 1;
 	
-	// ルートノードを作成
-	Node* current_node = new Node(model);
-	current_node->setActions(getActions(model));
+	// targetから現在の座標周辺を切り取る
+	std::vector<cv::Mat> cripped_target(target.size());
+	{
+		for (int i = 0; i < target.size(); ++i) {
+			cripped_target[i] = target[i](crip_roi);
+		}
+	}
 
 	// ベースとなるindicatorを計算
-	cv::Mat baseIndicator;
-	computeIndicator(current_model, scale, glm::mat4(), baseIndicator);
+	std::vector<cv::Mat> baseIndicator;
+	computeIndicator(current_model, mvpMat, crip_roi, baseIndicator);
+	/*
+	for (int i = 0; i < NUM_LAYERS; ++i) {
+		char filename[256];
+		sprintf(filename, "images/base_indicator_%d.png", i);
+		ml::mat_save(filename, baseIndicator[i] * 0.7 + cripped_target[i] * 0.3);
+	}
+	*/
+
+	// expandするリテラルを取得する
+	String root_model = current_model.getExpand();
+
+	// ルートノードを作成
+	Node* root_node = new Node(root_model);
+	root_node->setActions(getActions(root_model));
 
 	for (int iter = 0; iter < NUM_MONTE_CARLO_SAMPLING; ++iter) {
 		// もしノードがリーフノードなら、終了
-		if (current_node->untriedActions.size() == 0 && current_node->children.size() == 0) break;
+		if (root_node->untriedActions.size() == 0 && root_node->children.size() == 0) break;
 
 		// 現在のノードのスコアが確定したら、終了
-		if (current_node->fixed) break;
+		if (root_node->fixed) break;
 
-		Node* node = current_node;
+		Node* node = root_node;
 
 		// 探索木のリーフノードを選択
+		timer.start("UCT_select");
 		while (node->untriedActions.size() == 0 && node->children.size() > 0) {
 			node = node->UCTSelectChild();
 		}
-
+		timer.end("UCT_select");
+		
 		// 子ノードがまだ全てexpandされていない時は、1つランダムにexpand
+		timer.start("UCT_expand");
 		if (node->untriedActions.size() > 0) {// && node->children.size() <= ml::log((double)iter * 0.01 + 1, 1.4)) {
 			Action action = node->randomlySelectAction();
-			String child_model = action.apply(node->model);
+			String child_model = node->model;
+			child_model.rewrite(action);
 						
 			node = node->addChild(child_model, action);
 			node->setActions(getActions(child_model));
-			num_nodes++;
 		}
+		timer.end("UCT_expand");
 
 		// ランダムにderiveする
-		std::vector<int> derivation_history;
-		String result_model = derive(node->model, MAX_ITERATIONS_FOR_MC, derivation_history);
+		String result_model = derive(node->model, MAX_ITERATIONS_FOR_MC);
 
 		// indicatorを計算する
-		cv::Mat indicator;
-		computeIndicator(result_model, scale, baseModelMat, indicator);
-		indicator += baseIndicator;
+		timer.start("compute_indicator");
+		std::vector<cv::Mat> indicator;
+		computeIndicator(result_model, baseModelMat, crip_roi, indicator);
+		for (int i = 0; i < NUM_LAYERS; ++i) {
+			indicator[i] += baseIndicator[i];
+
+			// clamp
+			cv::threshold(indicator[i], indicator[i], 0.0, 1.0, cv::THRESH_BINARY);
+		}
+		timer.end("compute_indicator");
 
 		// スコアを計算する
-		double sc = score(indicator, target, mask);
+		timer.start("compute_score");
+		double sc = score(indicator, cripped_target);
 		node->best_score = sc;
-
+		timer.end("compute_score");
 
 		/////// デバッグ ///////
-		/*if (derivation_step == 5) {
-		char filename[256];
-		sprintf(filename, "images/indicator_%lf_%d_%d_%lf.png", result_model[0].param_values[0], derivation_step, iter, sc);
-		cv::Mat img = indicator + target * 0.4;
-		img = ml::mat_mask(img, mask, 0.7);
+		/*{
+			for (int i = 0; i < NUM_LAYERS; ++i) {
+				char filename[256];
+				sprintf(filename, "images/indicator_%d_%d_%d_%lf.png", derivation_step, iter, i, sc);
+				cv::Mat img = indicator[i] * 0.7 + cripped_target[i] * 0.3;
 
-		ml::mat_save(filename, img);
+				ml::mat_save(filename, img);
 
-		cout << "   " << filename << " : " << result_model << endl;
-		}
-		*/
+				cout << "   " << filename << " : " << result_model << endl;
+			}
+		}*/
 		/////// デバッグ ///////
-
-
 
 		// リーフノードなら、スコアを確定する
 		if (node->untriedActions.size() == 0 && node->children.size() == 0) {
@@ -710,14 +691,13 @@ String ParametricLSystem::UCT(const String& current_model, const cv::Mat& target
 		}
 
 		// スコアをbackpropagateする
-		bool updated = false;
+		timer.start("UCT_backpropagate");
 		Node* leaf = node;
 		while (node != NULL) {
 			node->visits++;
 			node->scores.push_back(sc);
 			if (sc > node->best_score) {
 				node->best_score = sc;
-				updated = true;
 			}
 
 			// 子ノードが全て展開済みで、且つ、スコア確定済みなら、このノードのスコアも確定とする
@@ -734,9 +714,8 @@ String ParametricLSystem::UCT(const String& current_model, const cv::Mat& target
 
 			node = node->parent;
 		}
+		timer.end("UCT_backpropagate");
 	}
-
-
 
 	////// デバッグ //////
 	/*
@@ -755,17 +734,13 @@ String ParametricLSystem::UCT(const String& current_model, const cv::Mat& target
 	*/
 	////// デバッグ //////
 
-
-	Action best_action = current_node->bestChild()->action;
-	cout << "Best action: " << best_action << endl;
-	String best_model = best_action.apply(current_model);
-
-
+	String next_model = current_model;
+	next_model.rewrite(root_node->bestChild()->action);
 
 	/////// デバッグ ///////
 	/*
 	char filename[256];
-	computeIndicator(best_model, 4, glm::mat4(), bestIndicator);
+	computeIndicator(best_model, 4, bestIndicator);
 	sprintf(filename, "images/indicator_%d.png", derivation_step);
 
 	cv::Mat target2;
@@ -777,12 +752,12 @@ String ParametricLSystem::UCT(const String& current_model, const cv::Mat& target
 	*/
 	/////// デバッグ ///////
 
-
-
 	// 探索木のメモリを解放する
-	releaseNodeMemory(current_node);
-	
-	return best_model;
+	timer.start("release_memory");
+	releaseNodeMemory(root_node);
+	timer.end("release_memory");
+
+	return next_model;
 }
 
 /**
@@ -790,19 +765,23 @@ String ParametricLSystem::UCT(const String& current_model, const cv::Mat& target
  *
  * @param indicator		indicator
  * @param target		ターゲットindicator
- * @return				距離
+ * @param mask			マスク
+ * @return				スコア
  */
-double ParametricLSystem::score(const cv::Mat& indicator, const cv::Mat& target, const cv::Mat& mask) {
-	cv::Mat result;
-	cv::subtract(indicator, target, result, mask);
-	double count = ml::mat_squared_sum(result);
+inline double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, const std::vector<cv::Mat>& target) {
+	double count = 0;
+	double total = 0;
 
-	cv::Mat result2;
-	cv::subtract(target, cv::Mat::zeros(target.size(), target.type()), result2, mask);
-	double base = ml::mat_squared_sum(result2);
+	for (int i = 0; i < indicator.size(); ++i) {
+		cv::Mat result;
+		cv::subtract(indicator[i], target[i], result);
+		count += cv::countNonZero(result);
 
-	if (base > 0.0) {
-		return 1.0 - count / base;
+		total += cv::countNonZero(target[i]);
+	}
+
+	if (total > 0.0) {
+		return 1.0 - count / total;
 	} else {
 		if (count > 0.0) {
 			return -1.0;
@@ -833,114 +812,127 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 			Literal("\\", model[i].depth + 1)
 			// 胴体と頭
 			+ Literal("[", model[i].depth + 1, true)
-			+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.3, model[i].param_values[0] * 0.15)
+			+ Literal("F", model[i].depth + 1, 32.4, 3.0)
 			+ Literal("\\", model[i].depth + 1)
-			+ Literal("f", model[i].depth + 1, model[i].param_values[0] * 0.1)
-			+ Literal("S", model[i].depth + 1, model[i].param_values[0] * 0.1)
+			+ Literal("f", model[i].depth + 1, 10.8)
+			+ Literal("S", model[i].depth + 1, 10.8)
 			+ Literal("]", model[i].depth + 1, true)
 			// 左腕
 			+ Literal("[", model[i].depth + 1, true)
-			+ Literal("f", model[i].depth + 1, model[i].param_values[0] * 0.25)
-			+ Literal("+", model[i].depth + 1, 90.0)
-			+ Literal("f", model[i].depth + 1, model[i].param_values[0] * 0.15)
-			+ Literal("\\", model[i].depth + 1)
+			+ Literal("f", model[i].depth + 1, 27.0)
+			+ Literal("-", model[i].depth + 1, 90.0)
+			+ Literal("F", model[i].depth + 1, 16.2, 3.0)
+			+ Literal("/", model[i].depth + 1)
 			+ Literal("[", model[i].depth + 1, true)
-			+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.1, model[i].param_values[0] * 0.05)
+			+ Literal("f", model[i].depth + 1, 5.4)
+			+ Literal("S", model[i].depth + 1, 5.4)
 			+ Literal("]", model[i].depth + 1, true)
-			+ Literal("f", model[i].depth + 1, model[i].param_values[0] * 0.05)
-			+ Literal("+", model[i].depth + 1, 90.0)
-			+ Literal("f", model[i].depth + 1, model[i].param_values[0] * 0.05)
-			+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.18, model[i].param_values[0] * 0.05)
-			+ Literal("&", model[i].depth + 1)
-			+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.18, model[i].param_values[0] * 0.05)
+			+ Literal("f", model[i].depth + 1, 5.4)
+			+ Literal("-", model[i].depth + 1, 90.0)
+			+ Literal("f", model[i].depth + 1, 5.4)
+			+ Literal("F", model[i].depth + 1, 19.44, 3.0)
+			+ Literal("&", model[i].depth + 1)	// ひじ関節
+			+ Literal("F", model[i].depth + 1, 19.44, 3.0)
 			+ Literal("]", model[i].depth + 1, true)
 			// 右腕
 			+ Literal("[", model[i].depth + 1, true)
-			+ Literal("f", model[i].depth + 1, model[i].param_values[0] * 0.25)
-			+ Literal("-", model[i].depth + 1, 90.0)
-			+ Literal("f", model[i].depth + 1, model[i].param_values[0] * 0.15)
+			+ Literal("f", model[i].depth + 1, 27.0)
+			+ Literal("+", model[i].depth + 1, 90.0)
+			+ Literal("F", model[i].depth + 1, 16.2, 3.0)
 			+ Literal("\\", model[i].depth + 1)
 			+ Literal("[", model[i].depth + 1, true)
-			+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.1, model[i].param_values[0] * 0.05)
+			+ Literal("f", model[i].depth + 1, 5.4)
+			+ Literal("S", model[i].depth + 1, 5.4)
 			+ Literal("]", model[i].depth + 1, true)
-			+ Literal("f", model[i].depth + 1, model[i].param_values[0] * 0.05)
-			+ Literal("-", model[i].depth + 1, 90.0)
-			+ Literal("f", model[i].depth + 1, model[i].param_values[0] * 0.05)
-			+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.18, model[i].param_values[0] * 0.05)
-			+ Literal("&", model[i].depth + 1)
-			+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.18, model[i].param_values[0] * 0.05)
+			+ Literal("f", model[i].depth + 1, 5.4)
+			+ Literal("+", model[i].depth + 1, 90.0)
+			+ Literal("f", model[i].depth + 1, 5.4)
+			+ Literal("F", model[i].depth + 1, 19.44, 3.0)
+			+ Literal("&", model[i].depth + 1)	// ひじ関節
+			+ Literal("F", model[i].depth + 1, 19.44, 3.0)
 			+ Literal("]", model[i].depth + 1, true)
 			// 腰
 			+ Literal("+", model[i].depth + 1, 180.0)
 			+ Literal("\\", model[i].depth + 1)
-			+ Literal("F", model[i].depth + 1, model[i].param_values[0] * 0.1, model[i].param_values[0] * 0.15);
-		actions.push_back(Action(0, i, rule));
+			+ Literal("F", model[i].depth + 1, 10.8, 3.0);
+		actions.push_back(Action(0, rule));
 	} else if (model[i].name == "-" || model[i].name == "+") {
 		int count = 0;
 		for (int k = 0; k <= 80; k += 20, ++count) {
 			if (k == 0) continue;
-			actions.push_back(Action(count, i, k));
+			actions.push_back(Action(count, k));
 		}
 	} else if (model[i].name == "#") {
 		int count = 0;
 		for (int k = -20; k <= 20; k += 10, ++count) {
-			actions.push_back(Action(count, i, k));
+			actions.push_back(Action(count, k));
 		}
-	} else if (model[i].name == "\\") {
+	} else if (model[i].name == "\\" || model[i].name == "/") {
 		int count = 0;
-		for (int k = -60; k <= 60; k += 10, ++count) {
-			actions.push_back(Action(count, i, k));
+		for (int k = -60; k <= 150; k += 10, ++count) {
+			actions.push_back(Action(count, k));
 		}
 	} else if (model[i].name == "&" || model[i].name == "^") {
 		int count = 0;
-		for (int k = 0; k <= 90; k+= 20, ++count) {
-			actions.push_back(Action(count, i, k));
+		for (int k = 0; k <= 150; k+= 20, ++count) {
+			actions.push_back(Action(count, k));
 		}
 	}
 
 	return actions;
 }
 
-glm::vec2 ParametricLSystem::computeCurrentPoint(const String& model, float scale, glm::mat4& modelMat) {
-	int size = grid_size * scale;
-
+/**
+ * 現在の座標を計算して返却する。
+ */
+glm::vec2 ParametricLSystem::computeCurrentPoint(const String& model, const glm::mat4& mvpMat, glm::mat4& modelMat) {
 	std::list<glm::mat4> stack;
 
+	int undefined = 0;
 	for (int i = 0; i < model.cursor; ++i) {
+		if (undefined == 0 && !model[i].param_defined) {
+			undefined = 1;
+			continue;
+		}
+
 		if (model[i].name == "[") {
 			stack.push_back(modelMat);
+			if (undefined > 0) undefined++;
 		} else if (model[i].name == "]") {
-			modelMat = stack.back();
-			stack.pop_back();
-		} else if (model[i].name == "+" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "-" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "#" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "\\" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "/" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "&" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_values[0]), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "^" && model[i].param_defined) {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_values[0]), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "f" && model[i].param_defined) {
-			double length = model[i].param_values[0] * scale;
-			modelMat = glm::translate(modelMat, glm::vec3(0, 0, length));
-		} else if (model[i].name == "F" && model[i].param_defined) {
-			double length = model[i].param_values[0] * scale;
-			modelMat = glm::translate(modelMat, glm::vec3(0, 0, length));
-		} else if (model[i].name == "X") {
-		} else {
+			if (!stack.empty()) {
+				modelMat = stack.back();
+				stack.pop_back();
+				if (undefined > 0) undefined--;
+			}
+		} else if (undefined > 0) {
+			continue;
+		} else if (model[i].name == "+") {
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 0, 1));
+		} else if (model[i].name == "-") {
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 0, 1));
+		} else if (model[i].name == "#") {
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 0, 1));
+		} else if (model[i].name == "\\") {
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 1, 0));
+		} else if (model[i].name == "/") {
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 1, 0));
+		} else if (model[i].name == "&") {
+			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(1, 0, 0));
+		} else if (model[i].name == "^") {
+			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(1, 0, 0));
+		} else if (model[i].name == "f") {
+			double length = model[i].param_value1;
+			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
+		} else if (model[i].name == "F") {
+			double length = model[i].param_value1;
+			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
 		}
 	}
 
 	glm::vec4 p(0, 0, 0, 1);
-	p = modelMat * p;
+	p = mvpMat * modelMat * p;
 
-	return glm::vec2(p.x + grid_size * 0.5, p.z);
+	return glm::vec2((p.x / p.w + 1.0) * GRID_SIZE * 0.5, (p.y / p.w + 1.0) * GRID_SIZE * 0.5);
 }
 
 /**
@@ -952,7 +944,6 @@ void ParametricLSystem::releaseNodeMemory(Node* node) {
 	for (int i = 0; i < node->children.size(); ++i) {
 		if (node->children[i] != NULL) {
 			releaseNodeMemory(node->children[i]);
-			num_nodes--;
 		}
 	}
 	delete node;
@@ -961,17 +952,6 @@ void ParametricLSystem::releaseNodeMemory(Node* node) {
 
 float deg2rad(float deg) {
 	return deg * M_PI / 180.0;
-}
-
-std::vector<std::string> split(const string& str, char delim) {
-	std::vector<std::string> res;
-	size_t current = 0, found;
-	while ((found = str.find_first_of(delim, current)) != string::npos) {
-		res.push_back(string(str, current, found - current));
-		current = found + 1;
-	}
-	res.push_back(string(str, current, str.size() - current));
-	return res;
 }
 
 }

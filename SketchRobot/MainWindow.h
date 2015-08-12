@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "glew.h"
 #include <QtGui/QMainWindow>
 #include "ui_MainWindow.h"
 #include "GLWidget3D.h"
@@ -16,10 +17,19 @@ public:
 	MainWindow(QWidget *parent = 0, Qt::WFlags flags = 0);
 
 public slots:
+	void onNewSketch();
+	void onLoadSketch();
+	void onSaveSketch();
 	void onSaveImage();
+	void onLoadCamera();
+	void onSaveCamera();
+	void onResetCamera();
 	void onRandomGeneration();
 	void onGreedyInverse();
-
+	void onModeUpdate();
+	void onPenColorUpdate();
+	void onPenWidthUpdate();
+	void onOptions();
 };
 
 #endif // MAINWINDOW_H
