@@ -177,6 +177,9 @@ ostream& operator<<(ostream& os, const String& str) {
 	os << setprecision(1);
 	for (int i = 0; i < str.length(); ++i) {
 		os << str[i].name;
+		if (str[i].param_defined) {
+			os << fixed << "(" << str[i].param_value1 << ")";
+		}
 	}
 
     return os;
@@ -307,9 +310,9 @@ Node* Node::bestChild() {
 }
 
 ParametricLSystem::ParametricLSystem(const String& axiom) {
-	MAX_ITERATIONS = 200;//1000;
+	MAX_ITERATIONS = 200;
 	MAX_ITERATIONS_FOR_MC = 25;
-	NUM_MONTE_CARLO_SAMPLING = 100;
+	NUM_MONTE_CARLO_SAMPLING = 300;
 	MASK_RADIUS_RATIO = 2;
 
 	this->axiom = axiom;
@@ -532,6 +535,8 @@ inline void ParametricLSystem::computeIndicator(const String& model, const glm::
  * @return					生成されたモデル
  */
 String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm::mat4& mvpMat) {
+	ml::initRand(0);
+
 	// UCTを使って探索木を構築していく
 	String model = axiom;
 
@@ -557,6 +562,8 @@ String ParametricLSystem::inverse(const std::vector<cv::Mat>& target, const glm:
 		// これ以上、derivationできなら、終了
 		if (model.cursor < 0) break;
 	}
+
+	cout << model << endl;
 
 	// スコア表示
 	std::vector<cv::Mat> indicator;
@@ -821,16 +828,13 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 			+ Literal("[", 0, true)
 			+ Literal("f", 0, 27.0)
 			+ Literal("-", 0, 90.0)
-			+ Literal("F", 0, 16.2, 3.0)
+			+ Literal("F", 0, 19, 3.0)
 			+ Literal("[", 0, true)
-			+ Literal("f", 0, 5.4)
 			+ Literal("S", 0, 5.4)
 			+ Literal("]", 0, true)
-			+ Literal("f", 0, 5.4)
 			+ Literal("-", 0, 90.0)
 			+ Literal("&2", 0)	// 肩
-			+ Literal("f", 0, 5.4)
-			+ Literal("F", 0, 20.0, 2.6)
+			+ Literal("F", 0, 25.0, 2.6)
 			+ Literal("&", 0)	// ひじ関節
 			+ Literal("F", 0, 20.0, 2.6)
 			+ Literal("f", 0, 3.0)
@@ -840,16 +844,13 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 			+ Literal("[", 0, true)
 			+ Literal("f", 0, 27.0)
 			+ Literal("+", 0, 90.0)
-			+ Literal("F", 0, 16.2, 3.0)
+			+ Literal("F", 0, 19, 3.0)
 			+ Literal("[", 0, true)
-			+ Literal("f", 0, 5.4)
 			+ Literal("S", 0, 5.4)
 			+ Literal("]", 0, true)
-			+ Literal("f", 0, 5.4)
 			+ Literal("+", 0, 90.0)
 			+ Literal("&2", 0)	// 肩
-			+ Literal("f", 0, 5.4)
-			+ Literal("F", 0, 20.0, 2.6)
+			+ Literal("F", 0, 25.0, 2.6)
 			+ Literal("&", 0)	// ひじ関節
 			+ Literal("F", 0, 20.0, 2.6)
 			+ Literal("f", 0, 3.0)
@@ -951,7 +952,7 @@ glm::vec2 ParametricLSystem::computeCurrentPoint(const String& model, const glm:
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 1, 0));
 		} else if (model[i].name == "/") {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "&") {
+		} else if (model[i].name == "&" || model[i].name == "&2") {
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(1, 0, 0));
 		} else if (model[i].name == "^") {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(1, 0, 0));

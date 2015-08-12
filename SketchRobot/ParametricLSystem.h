@@ -16,7 +16,7 @@ using namespace std;
 namespace parametriclsystem {
 
 const int NUM_LAYERS = 1;
-const int GRID_SIZE = 100;
+const int GRID_SIZE = 300;
 
 //const int MAX_ITERATIONS = 1000;//500;
 //const int MAX_ITERATIONS_FOR_MC = 10;
