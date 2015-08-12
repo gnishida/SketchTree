@@ -814,25 +814,25 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 			+ Literal("[", 0, true)
 			+ Literal("F", 0, 32.4, 3.0)
 			+ Literal("\\", 0)
-			+ Literal("f", 0, 10.8)
-			+ Literal("S", 0, 10.8)
+			+ Literal("F", 0, 10.0, 3.0)
+			+ Literal("S", 0, 8.0)
 			+ Literal("]", 0, true)
 			// 左腕
 			+ Literal("[", 0, true)
 			+ Literal("f", 0, 27.0)
 			+ Literal("-", 0, 90.0)
 			+ Literal("F", 0, 16.2, 3.0)
-			+ Literal("/", 0)
 			+ Literal("[", 0, true)
 			+ Literal("f", 0, 5.4)
 			+ Literal("S", 0, 5.4)
 			+ Literal("]", 0, true)
 			+ Literal("f", 0, 5.4)
 			+ Literal("-", 0, 90.0)
+			+ Literal("&2", 0)	// 肩
 			+ Literal("f", 0, 5.4)
-			+ Literal("F", 0, 18.0, 3.0)
+			+ Literal("F", 0, 20.0, 2.6)
 			+ Literal("&", 0)	// ひじ関節
-			+ Literal("F", 0, 18.0, 3.0)
+			+ Literal("F", 0, 20.0, 2.6)
 			+ Literal("f", 0, 3.0)
 			+ Literal("S", 0, 3.0)
 			+ Literal("]", 0, true)
@@ -841,17 +841,17 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 			+ Literal("f", 0, 27.0)
 			+ Literal("+", 0, 90.0)
 			+ Literal("F", 0, 16.2, 3.0)
-			+ Literal("\\", 0)
 			+ Literal("[", 0, true)
 			+ Literal("f", 0, 5.4)
 			+ Literal("S", 0, 5.4)
 			+ Literal("]", 0, true)
 			+ Literal("f", 0, 5.4)
 			+ Literal("+", 0, 90.0)
+			+ Literal("&2", 0)	// 肩
 			+ Literal("f", 0, 5.4)
-			+ Literal("F", 0, 18.0, 3.0)
+			+ Literal("F", 0, 20.0, 2.6)
 			+ Literal("&", 0)	// ひじ関節
-			+ Literal("F", 0, 18.0, 3.0)
+			+ Literal("F", 0, 20.0, 2.6)
 			+ Literal("f", 0, 3.0)
 			+ Literal("S", 0, 3.0)
 			+ Literal("]", 0, true)
@@ -904,7 +904,7 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 		}
 	} else if (model[i].name == "&2") {
 		int count = 0;
-		for (int k = -40; k <= 150; k+= 20, ++count) {
+		for (int k = -40; k <= 170; k+= 20, ++count) {
 			actions.push_back(Action(count, k));
 		}
 	} else if (model[i].name == "^") {
