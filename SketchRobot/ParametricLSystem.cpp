@@ -42,7 +42,7 @@ String Literal::operator+(const Literal& l) const {
 }
 
 int Literal::type() {
-	if (name == "F" || name == "f" || name == "S" || name == "[" || name == "]" || name == "+" || name == "-" || name == "\\" || name == "/" || name == "&" || name == "^" || name == "#") {
+	if (name == "F" || name == "f" || name == "S" || name == "[" || name == "]" || name == "+" || name == "-" || name == "\\" || name == "/" || name == "&" || name == "&2" || name == "^" || name == "#") {
 		return TYPE_TERMINAL;
 	} else {
 		return TYPE_NONTERMINAL;
@@ -400,7 +400,7 @@ void ParametricLSystem::draw(const String& model, RenderManager* renderManager) 
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 1, 0));
 		} else if (model[i].name == "/") {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "&") {
+		} else if (model[i].name == "&" || model[i].name == "&2") {
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(1, 0, 0));
 		} else if (model[i].name == "^") {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(1, 0, 0));
@@ -482,7 +482,7 @@ inline void ParametricLSystem::computeIndicator(const String& model, const glm::
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 1, 0));
 		} else if (model[i].name == "/") {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "&") {
+		} else if (model[i].name == "&" || model[i].name == "&2") {
 			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(1, 0, 0));
 		} else if (model[i].name == "^") {
 			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(1, 0, 0));
@@ -809,52 +809,77 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 
 	if (model[i].name == "X") {
 		String rule = 
-			Literal("\\", model[i].depth + 1)
+			Literal("\\", 0)
 			// 胴体と頭
-			+ Literal("[", model[i].depth + 1, true)
-			+ Literal("F", model[i].depth + 1, 32.4, 3.0)
-			+ Literal("\\", model[i].depth + 1)
-			+ Literal("f", model[i].depth + 1, 10.8)
-			+ Literal("S", model[i].depth + 1, 10.8)
-			+ Literal("]", model[i].depth + 1, true)
+			+ Literal("[", 0, true)
+			+ Literal("F", 0, 32.4, 3.0)
+			+ Literal("\\", 0)
+			+ Literal("f", 0, 10.8)
+			+ Literal("S", 0, 10.8)
+			+ Literal("]", 0, true)
 			// 左腕
-			+ Literal("[", model[i].depth + 1, true)
-			+ Literal("f", model[i].depth + 1, 27.0)
-			+ Literal("-", model[i].depth + 1, 90.0)
-			+ Literal("F", model[i].depth + 1, 16.2, 3.0)
-			+ Literal("/", model[i].depth + 1)
-			+ Literal("[", model[i].depth + 1, true)
-			+ Literal("f", model[i].depth + 1, 5.4)
-			+ Literal("S", model[i].depth + 1, 5.4)
-			+ Literal("]", model[i].depth + 1, true)
-			+ Literal("f", model[i].depth + 1, 5.4)
-			+ Literal("-", model[i].depth + 1, 90.0)
-			+ Literal("f", model[i].depth + 1, 5.4)
-			+ Literal("F", model[i].depth + 1, 19.44, 3.0)
-			+ Literal("&", model[i].depth + 1)	// ひじ関節
-			+ Literal("F", model[i].depth + 1, 19.44, 3.0)
-			+ Literal("]", model[i].depth + 1, true)
+			+ Literal("[", 0, true)
+			+ Literal("f", 0, 27.0)
+			+ Literal("-", 0, 90.0)
+			+ Literal("F", 0, 16.2, 3.0)
+			+ Literal("/", 0)
+			+ Literal("[", 0, true)
+			+ Literal("f", 0, 5.4)
+			+ Literal("S", 0, 5.4)
+			+ Literal("]", 0, true)
+			+ Literal("f", 0, 5.4)
+			+ Literal("-", 0, 90.0)
+			+ Literal("f", 0, 5.4)
+			+ Literal("F", 0, 18.0, 3.0)
+			+ Literal("&", 0)	// ひじ関節
+			+ Literal("F", 0, 18.0, 3.0)
+			+ Literal("f", 0, 3.0)
+			+ Literal("S", 0, 3.0)
+			+ Literal("]", 0, true)
 			// 右腕
-			+ Literal("[", model[i].depth + 1, true)
-			+ Literal("f", model[i].depth + 1, 27.0)
-			+ Literal("+", model[i].depth + 1, 90.0)
-			+ Literal("F", model[i].depth + 1, 16.2, 3.0)
-			+ Literal("\\", model[i].depth + 1)
-			+ Literal("[", model[i].depth + 1, true)
-			+ Literal("f", model[i].depth + 1, 5.4)
-			+ Literal("S", model[i].depth + 1, 5.4)
-			+ Literal("]", model[i].depth + 1, true)
-			+ Literal("f", model[i].depth + 1, 5.4)
-			+ Literal("+", model[i].depth + 1, 90.0)
-			+ Literal("f", model[i].depth + 1, 5.4)
-			+ Literal("F", model[i].depth + 1, 19.44, 3.0)
-			+ Literal("&", model[i].depth + 1)	// ひじ関節
-			+ Literal("F", model[i].depth + 1, 19.44, 3.0)
-			+ Literal("]", model[i].depth + 1, true)
+			+ Literal("[", 0, true)
+			+ Literal("f", 0, 27.0)
+			+ Literal("+", 0, 90.0)
+			+ Literal("F", 0, 16.2, 3.0)
+			+ Literal("\\", 0)
+			+ Literal("[", 0, true)
+			+ Literal("f", 0, 5.4)
+			+ Literal("S", 0, 5.4)
+			+ Literal("]", 0, true)
+			+ Literal("f", 0, 5.4)
+			+ Literal("+", 0, 90.0)
+			+ Literal("f", 0, 5.4)
+			+ Literal("F", 0, 18.0, 3.0)
+			+ Literal("&", 0)	// ひじ関節
+			+ Literal("F", 0, 18.0, 3.0)
+			+ Literal("f", 0, 3.0)
+			+ Literal("S", 0, 3.0)
+			+ Literal("]", 0, true)
 			// 腰
-			+ Literal("+", model[i].depth + 1, 180.0)
-			+ Literal("\\", model[i].depth + 1)
-			+ Literal("F", model[i].depth + 1, 10.8, 3.0);
+			+ Literal("+", 0, 180.0)
+			+ Literal("\\", 0, 0.0)	// とりあえず、腰の回転をなしとする
+			+ Literal("F", 0, 10.8, 3.0)
+			// 左足
+			+ Literal("[", 0, true)
+			+ Literal("+", 0, 90.0)
+			+ Literal("F", 0, 16.2, 3.0)
+			+ Literal("-", 0, 90.0)
+			+ Literal("&2", 0)
+			+ Literal("F", 0, 32.0, 3.0)
+			+ Literal("^", 0)	// ひざ関節
+			+ Literal("F", 0, 32.0, 3.0)
+			+ Literal("]", 0, true)
+			// 右足
+			+ Literal("[", 0, true)
+			+ Literal("-", 0, 90.0)
+			+ Literal("F", 0, 16.2, 3.0)
+			+ Literal("+", 0, 90.0)
+			+ Literal("&2", 0)
+			+ Literal("F", 0, 32.0, 3.0)
+			+ Literal("^", 0)	// ひざ関節
+			+ Literal("F", 0, 32.0, 3.0)
+			+ Literal("]", 0, true)
+			;
 		actions.push_back(Action(0, rule));
 	} else if (model[i].name == "-" || model[i].name == "+") {
 		int count = 0;
@@ -872,7 +897,17 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 		for (int k = -60; k <= 150; k += 10, ++count) {
 			actions.push_back(Action(count, k));
 		}
-	} else if (model[i].name == "&" || model[i].name == "^") {
+	} else if (model[i].name == "&") {
+		int count = 0;
+		for (int k = 0; k <= 150; k+= 20, ++count) {
+			actions.push_back(Action(count, k));
+		}
+	} else if (model[i].name == "&2") {
+		int count = 0;
+		for (int k = -40; k <= 150; k+= 20, ++count) {
+			actions.push_back(Action(count, k));
+		}
+	} else if (model[i].name == "^") {
 		int count = 0;
 		for (int k = 0; k <= 150; k+= 20, ++count) {
 			actions.push_back(Action(count, k));
