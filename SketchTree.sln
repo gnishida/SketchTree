@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SketchTreeMT", "SketchTreeM
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SketchRobot", "SketchRobot\SketchRobot.vcxproj", "{4AC906DD-97E0-4493-A0D1-631DC4196012}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SketchTree2", "SketchTree2\SketchTree2.vcxproj", "{30470F7A-697D-49CC-9D89-D37223FDDDA9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -51,7 +53,14 @@ Global
 		{4AC906DD-97E0-4493-A0D1-631DC4196012}.Release|Win32.ActiveCfg = Release|Win32
 		{4AC906DD-97E0-4493-A0D1-631DC4196012}.Release|Win32.Build.0 = Release|Win32
 		{4AC906DD-97E0-4493-A0D1-631DC4196012}.Release|x64.ActiveCfg = Release|x64
-		{4AC906DD-97E0-4493-A0D1-631DC4196012}.Release|x64.Build.0 = Release|x64
+		{30470F7A-697D-49CC-9D89-D37223FDDDA9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{30470F7A-697D-49CC-9D89-D37223FDDDA9}.Debug|Win32.Build.0 = Debug|Win32
+		{30470F7A-697D-49CC-9D89-D37223FDDDA9}.Debug|x64.ActiveCfg = Debug|x64
+		{30470F7A-697D-49CC-9D89-D37223FDDDA9}.Debug|x64.Build.0 = Debug|x64
+		{30470F7A-697D-49CC-9D89-D37223FDDDA9}.Release|Win32.ActiveCfg = Release|Win32
+		{30470F7A-697D-49CC-9D89-D37223FDDDA9}.Release|Win32.Build.0 = Release|Win32
+		{30470F7A-697D-49CC-9D89-D37223FDDDA9}.Release|x64.ActiveCfg = Release|x64
+		{30470F7A-697D-49CC-9D89-D37223FDDDA9}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
