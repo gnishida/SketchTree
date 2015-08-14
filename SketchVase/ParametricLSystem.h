@@ -9,7 +9,6 @@
 #include <vector>
 #include <map>
 #include "Vertex.h"
-#include "MyTimer.h"
 
 using namespace std;
 
@@ -137,11 +136,9 @@ public:
 
 	String axiom;
 	map<string, vector<Action> > actions_template;
-	MyTimer timer;
 
 public:
 	ParametricLSystem(const String& axiom);
-	void initActionsTemplate();
 	String derive(int random_seed);
 	String derive(const String& start_model, int max_iterations);
 	void draw(const String& model, RenderManager* renderManager);

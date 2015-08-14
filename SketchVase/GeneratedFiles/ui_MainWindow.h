@@ -1,8 +1,8 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created: Fri Aug 14 08:20:54 2015
-**      by: Qt User Interface Compiler version 4.8.1
+** Created: Fri Aug 14 15:46:15 2015
+**      by: Qt User Interface Compiler version 4.8.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -54,7 +54,6 @@ public:
     QMenu *menuPen;
     QMenu *menuColor;
     QMenu *menuWidth;
-    QMenu *menuOptions;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
 
@@ -127,8 +126,6 @@ public:
         menuColor->setObjectName(QString::fromUtf8("menuColor"));
         menuWidth = new QMenu(menuPen);
         menuWidth->setObjectName(QString::fromUtf8("menuWidth"));
-        menuOptions = new QMenu(menuBar);
-        menuOptions->setObjectName(QString::fromUtf8("menuOptions"));
         MainWindowClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindowClass);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -141,7 +138,6 @@ public:
         menuBar->addAction(menuL_System->menuAction());
         menuBar->addAction(menuMode->menuAction());
         menuBar->addAction(menuPen->menuAction());
-        menuBar->addAction(menuOptions->menuAction());
         menuFile->addAction(actionNewSketch);
         menuFile->addAction(actionLoadSketch);
         menuFile->addAction(actionSaveSketch);
@@ -164,7 +160,6 @@ public:
         menuWidth->addAction(actionPenWidth20);
         menuWidth->addAction(actionPenWidth10);
         menuWidth->addAction(actionPenWidth5);
-        menuOptions->addAction(actionOptions);
 
         retranslateUi(MainWindowClass);
 
@@ -205,7 +200,6 @@ public:
         menuPen->setTitle(QApplication::translate("MainWindowClass", "&Pen", 0, QApplication::UnicodeUTF8));
         menuColor->setTitle(QApplication::translate("MainWindowClass", "&Color", 0, QApplication::UnicodeUTF8));
         menuWidth->setTitle(QApplication::translate("MainWindowClass", "&Width", 0, QApplication::UnicodeUTF8));
-        menuOptions->setTitle(QApplication::translate("MainWindowClass", "Window", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };

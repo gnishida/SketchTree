@@ -313,12 +313,6 @@ ParametricLSystem::ParametricLSystem(const String& axiom) {
 	MASK_RADIUS_RATIO = 0.11;
 
 	this->axiom = axiom;
-
-	initActionsTemplate();
-	timer.validate(false);
-}
-
-void ParametricLSystem::initActionsTemplate() {
 }
 
 /**
@@ -351,15 +345,11 @@ String ParametricLSystem::derive(const String& start_model, int max_iterations) 
 	String model = start_model;
 
 	for (int iter = 0; iter < max_iterations; ++iter) {
-		timer.start("get_actions");
 		std::vector<Action> actions = getActions(model);
-		timer.end("get_actions");
 		if (actions.size() == 0) break;
 		
-		timer.start("action_apply");
 		int index = ml::genRand(0, actions.size());
 		model.rewrite(actions[index]);
-		timer.end("action_apply");
 	}
 
 	return model;
@@ -648,14 +638,11 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		Node* node = root_node;
 
 		// 探索木のリーフノードを選択
-		timer.start("UCT_select");
 		while (node->untriedActions.size() == 0 && node->children.size() > 0) {
 			node = node->UCTSelectChild();
 		}
-		timer.end("UCT_select");
 		
 		// 子ノードがまだ全てexpandされていない時は、1つランダムにexpand
-		timer.start("UCT_expand");
 		if (node->untriedActions.size() > 0) {// && node->children.size() <= ml::log((double)iter * 0.01 + 1, 1.4)) {
 			Action action = node->randomlySelectAction();
 			String child_model = node->model;
@@ -664,13 +651,11 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 			node = node->addChild(child_model, action);
 			node->setActions(getActions(child_model));
 		}
-		timer.end("UCT_expand");
 
 		// ランダムにderiveする
 		String result_model = derive(node->model, MAX_ITERATIONS_FOR_MC);
 
 		// indicatorを計算する
-		timer.start("compute_indicator");
 		std::vector<cv::Mat> indicator;
 		computeIndicator(result_model, baseModelMat, crip_roi, indicator);
 		for (int i = 0; i < NUM_LAYERS; ++i) {
@@ -679,13 +664,10 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 			// clamp
 			cv::threshold(indicator[i], indicator[i], 0.0, 1.0, cv::THRESH_BINARY);
 		}
-		timer.end("compute_indicator");
 
 		// スコアを計算する
-		timer.start("compute_score");
 		double sc = score(indicator, cripped_target);
 		node->best_score = sc;
-		timer.end("compute_score");
 
 		/////// デバッグ ///////
 		/*{
@@ -707,7 +689,6 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 		}
 
 		// スコアをbackpropagateする
-		timer.start("UCT_backpropagate");
 		Node* leaf = node;
 		while (node != NULL) {
 			node->visits++;
@@ -730,7 +711,6 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 
 			node = node->parent;
 		}
-		timer.end("UCT_backpropagate");
 	}
 
 	////// デバッグ //////
@@ -769,9 +749,7 @@ String ParametricLSystem::UCT(const String& current_model, const std::vector<cv:
 	/////// デバッグ ///////
 
 	// 探索木のメモリを解放する
-	timer.start("release_memory");
 	releaseNodeMemory(root_node);
-	timer.end("release_memory");
 
 	return next_model;
 }
@@ -790,8 +768,7 @@ inline double ParametricLSystem::score(const std::vector<cv::Mat>& indicator, co
 
 	for (int i = 0; i < indicator.size(); ++i) {
 		cv::Mat result;
-		//cv::subtract(indicator[i], target[i], result);
-		cv::threshold(indicator[i] - target[i], result, -1.0, 0.0, cv::THRESH_BINARY);
+		cv::subtract(indicator[i], target[i], result);
 		count += cv::countNonZero(result);
 
 		total += cv::countNonZero(target[i]);
@@ -825,29 +802,17 @@ std::vector<Action> ParametricLSystem::getActions(const String& model) {
 	if (i == -1) return actions;
 
 	if (model[i].name == "X") {
-		{
-			String rule = Literal("F", 0, model[i].param_value1, model[i].param_value2)
-				+ Literal("+", 0)
-				+ Literal("X", 0, model[i].param_value1 * LENGTH_ATTENUATION, model[i].param_value2 + model[i].param_value1);
-			actions.push_back(Action(0, rule));
-		}
-	} else if (model[i].name == "Y") {
+		String rule = Literal("Box", 0, 30.0, 100.0);
+		actions.push_back(Action(0, rule));
+	} else if (model[i].name == "Box") {
+
+		return actions_template["Y"];
 	} else if (model[i].name == "-" || model[i].name == "+") {
-		int count = 0;
-		for (int k = -80; k <= 80; k += 20) {
-			if (k == 0) continue;
-			actions.push_back(Action(count++, k));
-		}
+		return actions_template[model[i].name];
 	} else if (model[i].name == "#") {
-		int count = 0;
-		for (int k = -30; k <= 30; k += 10, ++count) {
-			actions.push_back(Action(count, k));
-		}
+		return actions_template["#"];
 	} else if (model[i].name == "\\") {
-		int count = 0;
-		for (int k = 10; k <= 50; k += 10, ++count) {
-			actions.push_back(Action(count, k));
-		}
+		return actions_template["\\"];
 	}
 
 	return actions;

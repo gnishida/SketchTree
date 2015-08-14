@@ -75,17 +75,10 @@
     <addaction name="menuColor"/>
     <addaction name="menuWidth"/>
    </widget>
-   <widget class="QMenu" name="menuOptions">
-    <property name="title">
-     <string>Window</string>
-    </property>
-    <addaction name="actionOptions"/>
-   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuL_System"/>
    <addaction name="menuMode"/>
    <addaction name="menuPen"/>
-   <addaction name="menuOptions"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">

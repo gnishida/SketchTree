@@ -140,6 +140,8 @@ void GLWidget3D::initializeGL() {
 	// set the clear color for the screen
 	qglClearColor(QColor(224, 224, 224));
 
+	camera.loadCameraPose("default.cam");
+
 	std::vector<Vertex> vertices;
 	glutils::drawAxes(1, 10, glm::mat4(), vertices);
 	renderManager.addObject("axis", "", vertices);

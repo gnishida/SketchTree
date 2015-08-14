@@ -29,7 +29,6 @@ public slots:
 	void onModeUpdate();
 	void onPenColorUpdate();
 	void onPenWidthUpdate();
-	void onOptions();
 };
 
 #endif // MAINWINDOW_H

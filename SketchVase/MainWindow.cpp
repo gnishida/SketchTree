@@ -2,7 +2,6 @@
 #include "MLUtils.h"
 #include <QFileDialog>
 #include <QDate>
-#include "OptionsWindow.h"
 #include <time.h>
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flags) {
@@ -50,7 +49,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	connect(ui.actionPenWidth20, SIGNAL(triggered()), this, SLOT(onPenWidthUpdate()));
 	connect(ui.actionPenWidth10, SIGNAL(triggered()), this, SLOT(onPenWidthUpdate()));
 	connect(ui.actionPenWidth5, SIGNAL(triggered()), this, SLOT(onPenWidthUpdate()));
-	connect(ui.actionOptions, SIGNAL(triggered()), this, SLOT(onOptions()));
 
 	glWidget = new GLWidget3D(this);
 	setCentralWidget(glWidget);
@@ -217,16 +215,3 @@ void MainWindow::onPenWidthUpdate() {
 	}
 }
 
-void MainWindow::onOptions() {
-	OptionsWindow dlg(this);
-	dlg.ui.lineEditMaxIterations->setText(QString::number(glWidget->lsystem.MAX_ITERATIONS));
-	dlg.ui.lineEditMaxIterationsForMCSampling->setText(QString::number(glWidget->lsystem.MAX_ITERATIONS_FOR_MC));
-	dlg.ui.lineEditNumMonteCarloSamplings->setText(QString::number(glWidget->lsystem.NUM_MONTE_CARLO_SAMPLING));
-	dlg.ui.lineEditMaskRadiusRatio->setText(QString::number(glWidget->lsystem.MASK_RADIUS_RATIO));
-	if (dlg.exec() != QDialog::Accepted) return;
-
-	glWidget->lsystem.MAX_ITERATIONS = dlg.ui.lineEditMaxIterations->text().toInt();
-	glWidget->lsystem.MAX_ITERATIONS_FOR_MC = dlg.ui.lineEditMaxIterationsForMCSampling->text().toInt();
-	glWidget->lsystem.NUM_MONTE_CARLO_SAMPLING = dlg.ui.lineEditNumMonteCarloSamplings->text().toInt();
-	glWidget->lsystem.MASK_RADIUS_RATIO = dlg.ui.lineEditMaskRadiusRatio->text().toDouble();
-}
