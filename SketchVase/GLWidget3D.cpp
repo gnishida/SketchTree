@@ -144,6 +144,13 @@ void GLWidget3D::initializeGL() {
 
 	std::vector<Vertex> vertices;
 	glutils::drawAxes(1, 10, glm::mat4(), vertices);
+	/*
+	std::vector<glm::vec3> points;
+	points.push_back(glm::vec3(0, 0, 0));
+	points.push_back(glm::vec3(0, 30, 0));
+	points.push_back(glm::vec3(10, 40, 0));
+	glutils::drawTube(points, 5, glm::vec3(1,1,1), vertices);
+	*/
 	renderManager.addObject("axis", "", vertices);
 
 	// sketch imageを初期化

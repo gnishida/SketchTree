@@ -358,66 +358,55 @@ String ParametricLSystem::derive(const String& start_model, int max_iterations) 
 void ParametricLSystem::draw(const String& model, RenderManager* renderManager) {
 	std::vector<Vertex> vertices;
 
+	drawCurvedCylinder(renderManager);
+	drawBendedCylinder(renderManager);
+}
+
+/**
+ * 花瓶の全体像を描く。LOD=1に相当かな？
+ * パラメータは、Z軸方向に100分割し、それぞれで円の形(X座標の最小、最大)を定義。
+ * つまり、パラメータは、2x100=200個。
+ */
+void ParametricLSystem::drawCurvedCylinder(RenderManager* renderManager) {
+	std::vector<Vertex> vertices;
+
 	glm::mat4 modelMat;
 
-	std::list<glm::mat4> stack;
+	for (int z = 0; z < 100; ++z) {
+		float r1 = 20.0f + 10.0f * sinf((float)z / 100.0 * M_PI * 2.0);
+		float r2 = 20.0f + 10.0f * sinf((float)(z + 1) / 100.0 * M_PI * 2.0);
 
-	int undefined = 0;
-	for (int i = 0; i < model.length(); ++i) {
-		if (undefined == 0 && !model[i].param_defined) {
-			undefined = 1;
-			continue;
-		}
-
-		if (model[i].name == "[") {
-			stack.push_back(modelMat);
-			if (undefined > 0) undefined++;
-		} else if (model[i].name == "]") {
-			if (!stack.empty()) {
-				modelMat = stack.back();
-				stack.pop_back();
-				if (undefined > 0) undefined--;
-			}
-		} else if (undefined > 0) {
-			continue;
-		} else if (model[i].name == "+") {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "-") {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "#") {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 0, 1));
-		} else if (model[i].name == "\\") {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "/") {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(0, 1, 0));
-		} else if (model[i].name == "&") {
-			modelMat = glm::rotate(modelMat, deg2rad(model[i].param_value1), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "^") {
-			modelMat = glm::rotate(modelMat, deg2rad(-model[i].param_value1), glm::vec3(1, 0, 0));
-		} else if (model[i].name == "f") {
-			modelMat = glm::translate(modelMat, glm::vec3(0, model[i].param_value1, 0));
-		} else if (model[i].name == "F") {
-			double length = model[i].param_value1;
-			double radius1 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * model[i].param_value2);
-			double radius2 = INITIAL_SIZE * exp(-SIZE_ATTENUATION * (model[i].param_value2 + model[i].param_value1));
-			
-			// 線を描画する
-			glutils::drawCylinderY(radius1, radius2, length, glm::vec3(0.9, 0.3, 0.3), modelMat, vertices);
-			modelMat = glm::translate(modelMat, glm::vec3(0, length, 0));
-			glutils::drawSphere(radius2, glm::vec3(0.9, 0.3, 0.3), modelMat, vertices);
-		} else if (model[i].name == "C") {
-			double length = model[i].param_value1;
-			double radius = model[i].param_value2;
-			
-			glm::mat4 mat = glm::translate(modelMat, glm::vec3(0, length, 0));
-
-			// 円を描画する
-			glutils::drawCircle(radius, length, glm::vec3(0.3, 1, 0.3), mat, vertices);
-		}
+		glutils::drawCylinderY(r1, r2, 1.0, glm::vec3(1, 1, 1), modelMat, vertices, 24);
+		modelMat = glm::translate(modelMat, glm::vec3(0, 1, 0));
 	}
-	
-	renderManager->removeObject("object");
-	renderManager->addObject("object", "", vertices);
+
+	renderManager->removeObject("curved_cylinder");
+	renderManager->addObject("curved_cylinder", "", vertices);
+}
+
+void ParametricLSystem::drawBendedCylinder(RenderManager* renderManager) {
+	std::vector<Vertex> vertices;
+
+	float y1 = 33.3f;
+	float y2 = 66.6f;
+
+	// Y座標に基づき、X、Z座標を計算
+	glm::vec3 p1(20.0f + 10.0f * sinf((float)y1 / 100.0 * M_PI * 2.0), y1, 0);
+	glm::vec3 p2(20.0f + 10.0f * sinf((float)y2 / 100.0 * M_PI * 2.0), y2, 0);
+
+	glm::vec3 c = (p1 + p2) * 0.5f;
+	float r = glm::length(p1 - c);
+
+	std::vector<glm::vec3> points;
+	for (int k = 0; k <= 20; ++k) {
+		float theta = (float)k / 20 * M_PI * 2.0f;
+
+		points.push_back(glm::vec3(c.x + cosf(theta) * r, c.y + sinf(theta) * r, c.z));
+	}
+
+	glutils::drawTube(points, 4.0f, glm::vec3(1, 1, 1), vertices);
+	renderManager->removeObject("bended_cylinder");
+	renderManager->addObject("bended_cylinder", "", vertices);
 }
 
 /**

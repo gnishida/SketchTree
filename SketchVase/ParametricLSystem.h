@@ -142,6 +142,8 @@ public:
 	String derive(int random_seed);
 	String derive(const String& start_model, int max_iterations);
 	void draw(const String& model, RenderManager* renderManager);
+	void drawCurvedCylinder(RenderManager* renderManager);
+	void drawBendedCylinder(RenderManager* renderManager);
 	void computeIndicator(const String& model, const glm::mat4& baseModelMat, std::vector<cv::Mat>& indicator);
 	void computeIndicator(const String& model, const glm::mat4& baseModelMat, const cv::Rect& roi, std::vector<cv::Mat>& indicator);
 	String inverse(const std::vector<cv::Mat>& target, const glm::mat4& mvpMat);
