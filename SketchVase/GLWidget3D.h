@@ -26,6 +26,7 @@ class GLWidget3D : public QGLWidget {
 
 public:
 	static enum { MODE_SKETCH = 0, MODE_3DVIEW };
+	static enum { RENDERING_NO_WIREFRAME = 0, RENDERING_WIREFRAME };
 
 public:
 	Camera camera;
@@ -41,6 +42,7 @@ public:
 	QPoint lastPoint;
 	QImage sketch[parametriclsystem::NUM_LAYERS];
 	Pen pen;
+	int renderingMode;	// 0 -- no wireframe / 1 -- add wireframe
 
 public:
 	GLWidget3D(QWidget *parent = 0);

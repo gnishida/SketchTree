@@ -75,10 +75,18 @@
     <addaction name="menuColor"/>
     <addaction name="menuWidth"/>
    </widget>
+   <widget class="QMenu" name="menuRendering">
+    <property name="title">
+     <string>Rendering</string>
+    </property>
+    <addaction name="actionRenderingNoWireframe"/>
+    <addaction name="actionRenderingWireframe"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuL_System"/>
    <addaction name="menuMode"/>
    <addaction name="menuPen"/>
+   <addaction name="menuRendering"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -224,6 +232,22 @@
   <action name="actionOptions">
    <property name="text">
     <string>Options</string>
+   </property>
+  </action>
+  <action name="actionRenderingNoWireframe">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>No wireframe</string>
+   </property>
+  </action>
+  <action name="actionRenderingWireframe">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Wireframe</string>
    </property>
   </action>
  </widget>

@@ -1,8 +1,8 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created: Sat Aug 15 10:35:13 2015
-**      by: Qt User Interface Compiler version 4.8.1
+** Created: Tue Aug 18 12:16:05 2015
+**      by: Qt User Interface Compiler version 4.8.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -46,6 +46,8 @@ public:
     QAction *actionSaveCamera;
     QAction *actionResetCamera;
     QAction *actionOptions;
+    QAction *actionRenderingNoWireframe;
+    QAction *actionRenderingWireframe;
     QWidget *centralWidget;
     QMenuBar *menuBar;
     QMenu *menuFile;
@@ -54,6 +56,7 @@ public:
     QMenu *menuPen;
     QMenu *menuColor;
     QMenu *menuWidth;
+    QMenu *menuRendering;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
 
@@ -108,6 +111,12 @@ public:
         actionResetCamera->setObjectName(QString::fromUtf8("actionResetCamera"));
         actionOptions = new QAction(MainWindowClass);
         actionOptions->setObjectName(QString::fromUtf8("actionOptions"));
+        actionRenderingNoWireframe = new QAction(MainWindowClass);
+        actionRenderingNoWireframe->setObjectName(QString::fromUtf8("actionRenderingNoWireframe"));
+        actionRenderingNoWireframe->setCheckable(true);
+        actionRenderingWireframe = new QAction(MainWindowClass);
+        actionRenderingWireframe->setObjectName(QString::fromUtf8("actionRenderingWireframe"));
+        actionRenderingWireframe->setCheckable(true);
         centralWidget = new QWidget(MainWindowClass);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         MainWindowClass->setCentralWidget(centralWidget);
@@ -126,6 +135,8 @@ public:
         menuColor->setObjectName(QString::fromUtf8("menuColor"));
         menuWidth = new QMenu(menuPen);
         menuWidth->setObjectName(QString::fromUtf8("menuWidth"));
+        menuRendering = new QMenu(menuBar);
+        menuRendering->setObjectName(QString::fromUtf8("menuRendering"));
         MainWindowClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindowClass);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -138,6 +149,7 @@ public:
         menuBar->addAction(menuL_System->menuAction());
         menuBar->addAction(menuMode->menuAction());
         menuBar->addAction(menuPen->menuAction());
+        menuBar->addAction(menuRendering->menuAction());
         menuFile->addAction(actionNewSketch);
         menuFile->addAction(actionLoadSketch);
         menuFile->addAction(actionSaveSketch);
@@ -160,6 +172,8 @@ public:
         menuWidth->addAction(actionPenWidth20);
         menuWidth->addAction(actionPenWidth10);
         menuWidth->addAction(actionPenWidth5);
+        menuRendering->addAction(actionRenderingNoWireframe);
+        menuRendering->addAction(actionRenderingWireframe);
 
         retranslateUi(MainWindowClass);
 
@@ -194,12 +208,15 @@ public:
         actionSaveCamera->setText(QApplication::translate("MainWindowClass", "Save Camera", 0, QApplication::UnicodeUTF8));
         actionResetCamera->setText(QApplication::translate("MainWindowClass", "Reset Camera", 0, QApplication::UnicodeUTF8));
         actionOptions->setText(QApplication::translate("MainWindowClass", "Options", 0, QApplication::UnicodeUTF8));
+        actionRenderingNoWireframe->setText(QApplication::translate("MainWindowClass", "No wireframe", 0, QApplication::UnicodeUTF8));
+        actionRenderingWireframe->setText(QApplication::translate("MainWindowClass", "Wireframe", 0, QApplication::UnicodeUTF8));
         menuFile->setTitle(QApplication::translate("MainWindowClass", "&File", 0, QApplication::UnicodeUTF8));
         menuL_System->setTitle(QApplication::translate("MainWindowClass", "&L-System", 0, QApplication::UnicodeUTF8));
         menuMode->setTitle(QApplication::translate("MainWindowClass", "&Mode", 0, QApplication::UnicodeUTF8));
         menuPen->setTitle(QApplication::translate("MainWindowClass", "&Pen", 0, QApplication::UnicodeUTF8));
         menuColor->setTitle(QApplication::translate("MainWindowClass", "&Color", 0, QApplication::UnicodeUTF8));
         menuWidth->setTitle(QApplication::translate("MainWindowClass", "&Width", 0, QApplication::UnicodeUTF8));
+        menuRendering->setTitle(QApplication::translate("MainWindowClass", "Rendering", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };

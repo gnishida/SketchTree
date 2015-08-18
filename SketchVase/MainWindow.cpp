@@ -31,6 +31,13 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	ui.actionPenWidth5->setActionGroup(groupPenWidth);
 	ui.actionPenWidth20->setChecked(true);
 
+	QActionGroup* groupRendering = new QActionGroup(this);
+	ui.actionRenderingNoWireframe->setCheckable(true);
+	ui.actionRenderingWireframe->setCheckable(true);
+	ui.actionRenderingNoWireframe->setActionGroup(groupRendering);
+	ui.actionRenderingWireframe->setActionGroup(groupRendering);
+	ui.actionRenderingWireframe->setChecked(true);
+
 	// メニューハンドラ
 	connect(ui.actionNewSketch, SIGNAL(triggered()), this, SLOT(onNewSketch()));
 	connect(ui.actionLoadSketch, SIGNAL(triggered()), this, SLOT(onLoadSketch()));
@@ -49,6 +56,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	connect(ui.actionPenWidth20, SIGNAL(triggered()), this, SLOT(onPenWidthUpdate()));
 	connect(ui.actionPenWidth10, SIGNAL(triggered()), this, SLOT(onPenWidthUpdate()));
 	connect(ui.actionPenWidth5, SIGNAL(triggered()), this, SLOT(onPenWidthUpdate()));
+	connect(ui.actionRenderingNoWireframe, SIGNAL(triggered()), this, SLOT(onRenderingUpdate()));
+	connect(ui.actionRenderingWireframe, SIGNAL(triggered()), this, SLOT(onRenderingUpdate()));
 
 	glWidget = new GLWidget3D(this);
 	setCentralWidget(glWidget);
@@ -215,3 +224,11 @@ void MainWindow::onPenWidthUpdate() {
 	}
 }
 
+void MainWindow::onRenderingUpdate() {
+	if (ui.actionRenderingNoWireframe->isChecked()) {
+		glWidget->renderingMode = GLWidget3D::RENDERING_NO_WIREFRAME;
+	} else {
+		glWidget->renderingMode = GLWidget3D::RENDERING_WIREFRAME;
+	}
+	glWidget->update();
+}

@@ -137,5 +137,8 @@
     <None Include="..\shaders\vertex.glsl">
       <Filter>Source Files\shaders</Filter>
     </None>
+    <None Include="..\shaders\geometry.glsl">
+      <Filter>Source Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

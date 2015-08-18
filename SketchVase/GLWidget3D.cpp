@@ -23,6 +23,7 @@ GLWidget3D::GLWidget3D(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers
 	mode = MODE_SKETCH;
 	dragging = false;
 	pen.setType(Pen::TYPE_BRANCH);
+	renderingMode = RENDERING_WIREFRAME;
 	
 	// これがないと、QPainterによって、OpenGLによる描画がクリアされてしまう
 	setAutoFillBackground(false);
@@ -47,7 +48,7 @@ void GLWidget3D::drawScene(int drawMode) {
 		glUniform1i(glGetUniformLocation(renderManager.program,"shadowState"), 2);
 	}
 
-	renderManager.renderAll();
+	renderManager.renderAll(renderingMode == RENDERING_WIREFRAME);
 }
 
 void GLWidget3D::drawLineTo(const QPoint &endPoint) {
@@ -131,7 +132,7 @@ void GLWidget3D::mouseMoveEvent(QMouseEvent *e) {
 }
 
 void GLWidget3D::initializeGL() {
-	renderManager.init(4096);
+	renderManager.init("../shaders/vertex.glsl", "../shaders/geometry.glsl", "../shaders/fragment.glsl", 4096);
 
 	// 光源位置をセット
 	// ShadowMappingは平行光源を使っている。この位置から原点方向を平行光源の方向とする。
