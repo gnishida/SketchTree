@@ -373,8 +373,13 @@ void ParametricLSystem::drawCurvedCylinder(RenderManager* renderManager) {
 	glm::mat4 modelMat;
 
 	for (int z = 0; z < 100; ++z) {
-		float r1 = 20.0f + 10.0f * sinf((float)z / 100.0 * M_PI * 2.0);
-		float r2 = 20.0f + 10.0f * sinf((float)(z + 1) / 100.0 * M_PI * 2.0);
+		float r1 = 20.0f + 10.0f * sinf((float)z / 110.0 * M_PI * 2.0);
+		float r2 = 20.0f + 10.0f * sinf((float)(z + 1) / 110.0 * M_PI * 2.0);
+
+		if (z >= 90) {
+			r1 *= 1.1f;
+			r2 *= 1.1f;
+		}
 
 		glutils::drawCylinderY(r1, r2, 1.0, glm::vec3(1, 1, 1), modelMat, vertices, 24);
 		modelMat = glm::translate(modelMat, glm::vec3(0, 1, 0));
@@ -397,14 +402,15 @@ void ParametricLSystem::drawBendedCylinder(RenderManager* renderManager) {
 	glm::vec3 c = (p1 + p2) * 0.5f;
 	float r = glm::length(p1 - c);
 
+	int slices = 40;
 	std::vector<glm::vec3> points;
-	for (int k = 0; k <= 20; ++k) {
-		float theta = (float)k / 20 * M_PI * 2.0f;
+	for (int k = 0; k <= slices; ++k) {
+		float theta = (float)k / slices * M_PI * 2.0f - M_PI;
 
 		points.push_back(glm::vec3(c.x + cosf(theta) * r, c.y + sinf(theta) * r, c.z));
 	}
 
-	glutils::drawTube(points, 4.0f, glm::vec3(1, 1, 1), vertices);
+	glutils::drawTube(points, 4.0f, glm::vec3(1, 1, 1), vertices, 24);
 	renderManager->removeObject("bended_cylinder");
 	renderManager->addObject("bended_cylinder", "", vertices);
 }
